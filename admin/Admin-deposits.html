@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Admin Deposits</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+    margin:0;
+    font-family:Arial;
+    background:#f5f7fb;
+}
+
+/* TOP BAR */
+.topbar{
+    background:linear-gradient(135deg,#0099ff,#0066ff);
+    color:white;
+    padding:15px;
+    text-align:center;
+    font-size:18px;
+    font-weight:bold;
+}
+
+/* CARD */
+.card{
+    background:white;
+    margin:12px;
+    padding:12px;
+    border-radius:12px;
+    box-shadow:0 3px 10px rgba(0,0,0,0.08);
+}
+
+/* TEXT */
+p{
+    margin:6px 0;
+    font-size:14px;
+}
+
+/* IMAGE */
+img{
+    width:100%;
+    max-width:280px;
+    border-radius:10px;
+    margin-top:10px;
+}
+
+/* BUTTONS */
+button{
+    padding:8px 10px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:13px;
+    margin:3px;
+}
+
+.approve{
+    background:#00c853;
+    color:white;
+}
+
+.reject{
+    background:#ff4d4d;
+    color:white;
+}
+
+/* BACK BUTTON */
+.bottom{
+    position:fixed;
+    bottom:0;
+    left:0;
+    right:0;
+    display:flex;
+}
+
+.bottom a{
+    flex:1;
+}
+
+.bottom button{
+    width:100%;
+    border-radius:0;
+    background:#0099ff;
+    color:white;
+    padding:12px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="topbar">
+Deposit Approval Panel
+</div>
+
+<div id="deposits"></div>
+
+<div class="bottom">
+<a href="dashboard.html">
+<button>⬅️ Admin Dashboard</button>
+</a>
+</div>
+
+<script>
+
+const API = location.hostname === "localhost"
+    ? "http://localhost:3000"
+    : "https://YOUR-RENDER-URL.onrender.com";
+
+function loadDeposits() {
+
+    fetch(`${API}/admin/deposits`)
+    .then(res => res.json())
+    .then(data => {
+
+        const container = document.getElementById("deposits");
+        container.innerHTML = "";
+
+        data.forEach(dep => {
+
+            container.innerHTML += `
+            <div class="card">
+                <p><b>Phone:</b> ${dep.phone}</p>
+                <p><b>Amount:</b> ₦${dep.amount}</p>
+                <p><b>Status:</b> ${dep.status}</p>
+
+                <img src="${API}/uploads/${dep.receipt}" />
+
+                <div style="margin-top:10px;">
+                    <button class="approve" onclick="approve(${dep.id})">Approve</button>
+                    <button class="reject" onclick="reject(${dep.id})">Reject</button>
+                </div>
+            </div>
+            `;
+        });
+
+    })
+    .catch(err => {
+        console.log("Load deposits error:", err);
+    });
+}
+
+function approve(id){
+    fetch(`${API}/admin/deposit/approve`, {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({id})
+    })
+    .then(()=>loadDeposits());
+}
+
+function reject(id){
+    fetch(`${API}/admin/deposit/reject`, {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({id})
+    })
+    .then(()=>loadDeposits());
+}
+
+loadDeposits();
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+    
+
+body {
+    margin: 0;
+    font-family: Arial;
+    background: #f5f7fb;
+}
+
+/* HEADER (like Opay) */
+.header {
+    background: linear-gradient(135deg, #0099ff, #0066cc);
+    color: white;
+    padding: 20px;
+    text-align: left;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* CONTAINER */
+.container {
+    padding: 15px;
+}
+
+/* GRID CARDS */
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.top-time {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    text-align: right;
+    background: rgba(255,255,255,0.85);
+    padding: 8px 12px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    z-index: 999;
+}
+
+.top-time #date {
+    font-size: 11px;
+    color: #555;
+}
+
+.top-time #time {
+    font-size: 16px;
+    font-weight: bold;
+    color: #0099ff;
+}
+
+/* CARDS */
+.card {
+    background:skyblue;
+    padding: 15px;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+}
+
+/* FULL WIDTH CARD */
+.full {
+    grid-column: span 2;
+}
+
+/* TITLES */
+.card h2 {
+    font-size: 14px;
+    margin: 0;
+    color: #666666;
+}
+
+.value {
+    font-size: 20px;
+    font-weight: bold;
+    margin-top: 8px;
+    color: #111;
+}
+
+/* RETURNS STYLE */
+.returns {
+    color: #00c853;
+}
+#totalInvested {
+    color: #d4af37; /* soft gold */
+    font-weight: 600;
+    font-size: 20px;
+}
+
+#balance {
+    color: #8b4513; /* brown */
+    font-weight: 600;
+    font-size: 20px;
+}
+
+
+/* BOTTOM NAV (Mobile App Style) */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background:skyblue;
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 0;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+}
+.about-btn{
+    position: fixed;
+    top: 10px;
+    right: 170px;
+    padding: 6px 10px;
+    font-size: 12px;
+    background: #0a84ff;
+    color: white;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: bold;
+    z-index: 9999;
+}
+
+
+.bottom-nav a {
+    text-decoration: none;
+    color: #333;
+    font-size: 12px;
+    text-align: center;
+}
+
+/* BUTTON STYLE */
+button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    background: #0099ff;
+    color: white;
+    font-size: 14px;
+}
+
+/* RESPONSIVE */
+@media(min-width: 768px) {
+    .grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+#bonusBox {
+    display: none;
+    position: fixed;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 160px;
+    background: #fff3cd;
+    padding: 10px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    z-index: 9999;
+    font-size: 12px;
+}
+
+@media (max-width: 480px) {
+    #bonusBox {
+        width: 130px;
+        right: 5px;
+        font-size: 11px;
+    }
+}
+
+
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<div class="header">
+    Welcome <span id="welcome"></span>
+</div>
+
+<div class="top-time">
+    <div id="date"></div>
+    <div id="time"></div>
+</div>
+
+<!-- MAIN -->
+<div class="container">
+
+    <div class="grid">
+
+        <div class="card">
+            <h2>Balance</h2>
+            <div class="value" id="balance">₦0</div>
+        </div>
+
+        <div class="card">
+            <h2>Returns</h2>
+            <div class="value returns" id="returns">₦0</div>
+        </div>
+
+        <div class="card full">
+            <h2>Total Invested</h2>
+            <div class="value" id="totalInvested">₦0</div>
+        </div>
+
+        <div class="card full">
+            <button onclick="window.location.href='deposit.html'">Deposit</button>
+        </div>
+
+        <div class="card full">
+            <button onclick="window.location.href='Withdraw.html'">Withdraw</button>
+        </div>
+
+    </div>
+    <div id="bonusBox">
+    <div style="font-weight:bold; margin-bottom:5px;">🎁 Bonus</div>
+
+    <input id="bonusCode"
+        placeholder="Enter code"
+        style="width:100%; padding:5px; font-size:11px;">
+
+    <button onclick="claimBonus()"
+        style="width:100%; margin-top:5px; font-size:11px;">
+        Accept
+    </button>
+</div>
+
+    
+<div style="background:#fff;padding:10px;margin:5px;border-radius:10px;">
+    <h3>Your Referral Link</h3>
+
+    <input id="refLink" readonly style="width:10%;padding:10px;" />
+
+    <button onclick="copyLink()" style="margin-top:5px;width:10%;padding:10px;background:#0099ff;color:white;border:none;">
+        Copy Link
+    </button>
+</div>
+
+ <a href="about.html" class="about-btn">About</a>
+ <a href="help.html"
+style="
+    position: fixed;
+    top: 10px;
+    left: 75%;
+    transform: translateX(-50%);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 14px;
+    background: #0a84ff;
+    color: white;
+    text-decoration: none;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    z-index: 9999;
+">
+    ❓ Help Center
+</a>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+    <a href="dashboard.html">🏠<br>Home</a>
+    <a href="deposit.html">💰<br>Deposit</a>
+    <a href="products.html">💸<br>Buy products</a>
+    <a href="Withdraw.html">💸<br>Withdraw</a>
+    <a href="interest-history.html">📊<br> View Interest History</a>
+    <a href="referral-history.html">📊<br> Referral History</a>
+    <a href="Transactions.html">💸<br>Transactions History</a>
+    <a href="login.html">Logout</a>
+</div>
+
+<script>
+const API = location.hostname === "localhost"
+    ? "http://localhost:3000"
+    : "https://YOUR-RENDER-URL.onrender.com";
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+    const user = JSON.parse(localStorage.getItem("user"));
+
+    if (!user || !user.phone) {
+        window.location.href = "login.html";
+        return;
+    }
+
+    document.getElementById("welcome").innerText = user.phone;
+
+    const balanceEl = document.getElementById("balance");
+
+    function loadBalance() {
+        fetch(`${API}/balance/${user.phone}`)
+        .then(res => res.json())
+        .then(data => {
+            balanceEl.innerText = "₦" + (data.balance || 0);
+        });
+    }
+
+    function loadReturns() {
+        fetch(`${API}/returns/${user.phone}`)
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById("returns").innerText =
+                "₦" + (data.returns || data.total || 0);
+        });
+    }
+
+    function loadInvested() {
+        fetch(`${API}/total-invested/${user.phone}`)
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById("totalInvested").innerText =
+                "₦" + (data.total || 0);
+        });
+    }
+
+    loadBalance();
+    loadReturns();
+    loadInvested();
+
+    if (typeof checkInvestment === "function") {
+        checkInvestment(user.phone);
+    }
+
+    setInterval(loadBalance, 3000);
+    setInterval(loadReturns, 5000);
+    setInterval(loadInvested, 5000);
+});
+</script>
+
+</script>
+//referral
+<script>
+const user = JSON.parse(localStorage.getItem("user"));
+
+if (!user || !user.phone) {
+    window.location.href = "login.html";
+}
+
+const referralCode = user.referral_code;
+
+const link = `${location.origin}/signup.html?ref=${referralCode}`;
+
+document.getElementById("refLink").value = link;
+
+function copyLink() {
+    const input = document.getElementById("refLink");
+    input.select();
+    document.execCommand("copy");
+    alert("Copied!");
+}
+</script>
+
+<script>
+function updateTime() {
+
+    const now = new Date();
+
+    const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+    const months = [
+        "January","February","March","April","May","June",
+        "July","August","September","October","November","December"
+    ];
+
+    const dayName = days[now.getDay()];
+    const day = now.getDate();
+    const month = months[now.getMonth()];
+    const year = now.getFullYear();
+
+    function suffix(d) {
+        if (d > 3 && d < 21) return "th";
+        switch (d % 10) {
+            case 1: return "st";
+            case 2: return "nd";
+            case 3: return "rd";
+            default: return "th";
+        }
+    }
+
+    let hours = now.getHours();
+    let minutes = now.getMinutes();
+    let ampm = hours >= 12 ? "pm" : "am";
+
+    hours = hours % 12 || 12;
+    minutes = minutes < 10 ? "0" + minutes : minutes;
+
+    document.getElementById("date").innerText =
+        `${dayName}, ${day}${suffix(day)} ${month}, ${year};
+
+        ${hours}:${minutes} ${ampm}`;
+}
+updateTime();
+setInterval(updateTime, 1000);
+</script>
+
+<script>
+// ================== CHECK INVESTMENT ==================
+async function checkInvestment(phone) {
+
+    try {
+        const res = await fetch(`${API}/user/has-active-investment/${phone}`);
+        const data = await res.json();
+
+        document.getElementById("bonusBox").style.display =
+            data.active ? "block" : "none";
+
+    } catch (err) {
+        console.log(err);
+    }
+}
+
+async function claimBonus() {
+
+    const code = document.getElementById("bonusCode").value;
+    const user = JSON.parse(localStorage.getItem("user"));
+
+    const res = await fetch(`${API}/claim-bonus`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            userId: user.id,
+            code
+        })
+    });
+
+    const msg = await res.text();
+    alert(msg);
+}
+    
+
+</script>
+
+</body>
+</html>
