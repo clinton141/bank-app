@@ -1,5 +1,5 @@
 const express = require("express");
-const mysql2 = require("mysql2");
+const mysql2 = require("mysql2");require("dotenv").config();
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const cron = require("node-cron");
@@ -156,11 +156,15 @@ app.use("/uploads",
 express.static("uploads"));
 
 // ================= DATABASE =================
-const db = mysql2.createConnection({
-    host: "localhost",
-    user: "root",
-    password: "chiboy9632.@",
-    database: "bank_app"
+const db = mysql.createPool(process.env.DATABASE_URL);
+
+db.getConnection((err, connection) => {
+    if (err) {
+        console.log("DB Connection Error:", err);
+    } else {
+        console.log("✅ TiDB Connected");
+        connection.release();
+    }
 });
 
 db.connect(err => {
