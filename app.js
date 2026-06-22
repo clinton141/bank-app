@@ -1,6 +1,4 @@
 const express = require("express");
-const mysql = require("mysql2");
-require("dotenv").config();
 
 const cors = require("cors");
 const bodyParser = require("body-parser");
@@ -10,7 +8,7 @@ const fs = require("fs");
 const path = require("path");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
-const db = require("./config/db");
+const db = require("./DB");
 
 const JWT_SECRET = process.env.JWT_SECRET || "mobile_wealth_secret_key_2026";
 
