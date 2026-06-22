@@ -156,22 +156,23 @@ app.use("/uploads",
 express.static("uploads"));
 
 // ================= DATABASE =================
-const db = mysql.createPool(process.env.DATABASE_URL);
+const mysql = require("mysql2");
+require("dotenv").config();
 
-db.getConnection((err, connection) => {
-    if (err) {
-        console.log("DB Connection Error:", err);
-    } else {
-        console.log("✅ TiDB Connected");
-        connection.release();
-    }
+const db = mysql.createPool({
+    uri: process.env.DATABASE_URL,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
 });
 
-db.connect(err => {
+// TEST CONNECTION
+db.getConnection((err, connection) => {
     if (err) {
-        console.log("DB Error:", err);
+        console.log("❌ DB Connection Error:", err.message);
     } else {
-        console.log("MySQL Connected");
+        console.log("✅ TiDB Connected Successfully");
+        connection.release();
     }
 });
 
