@@ -9,9 +9,9 @@ const path = require("path");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 
-const JWT_SECRET = "mobile_wealth_secret_key_2026";
-function verifyToken(req, res, next) {
+const JWT_SECRET = process.env.JWT_SECRET || "mobile_wealth_secret_key_2026";
 
+function verifyToken(req, res, next) {
     const authHeader = req.headers["authorization"];
 
     if (!authHeader) {
@@ -21,7 +21,6 @@ function verifyToken(req, res, next) {
     const token = authHeader.split(" ")[1];
 
     jwt.verify(token, JWT_SECRET, (err, decoded) => {
-
         if (err) {
             return res.status(401).send("Invalid token");
         }
@@ -37,10 +36,8 @@ app.use(cors());
 app.use(express.json());
 app.use(bodyParser.json());
 
-// ✅ STATIC FILES (FRONTEND)
+// STATIC FILES
 app.use(express.static(path.join(__dirname, "public")));
-
-//separate admin backend
 app.use("/admin", express.static(path.join(__dirname, "admin")));
 
 // ❌ BLOCK DIRECT ACCESS TO ADMIN DASHBOARD FILE
@@ -48,17 +45,16 @@ app.use("/admin", express.static(path.join(__dirname, "admin")));
     //return res.status(403).send("Access denied");
 //});
 
-// 🔥 FIX ADMIN SESSION (ONLY ONCE)
 global.adminLoggedIn = global.adminLoggedIn || false;
 
-// 🔐 LOGIN PAGE ROUTE
+// LOGIN PAGE ROUTE
 app.get("/admin/login.html", (req, res) => {
     return res.sendFile(
         path.join(__dirname, "admin", "login.html")
     );
 });
 
-// 🔐 ADMIN LOGIN ROUTE (IMPORTANT FIX)
+// ADMIN LOGIN ROUTE
 app.post("/admin/login", (req, res) => {
 
     const { phone, password } = req.body;
@@ -72,7 +68,7 @@ app.post("/admin/login", (req, res) => {
                 return res.status(500).send("DB error");
             }
 
-            if (!result.length) {
+            if (!result || result.length === 0) {
                 return res.status(401).send("Invalid admin login");
             }
 
@@ -86,7 +82,7 @@ app.post("/admin/login", (req, res) => {
     );
 });
 
-// 🔐 DASHBOARD ROUTE (PROTECTED)
+// ADMIN DASHBOARD ROUTE (PROTECTED)
 app.get("/admin/dashboard", (req, res) => {
 
     if (!global.adminLoggedIn) {
@@ -98,7 +94,7 @@ app.get("/admin/dashboard", (req, res) => {
     );
 });
 
-// 🔐 SUPPORT BOTH URL FORMATS
+// SUPPORT BOTH URL FORMATS
 app.get("/admin/dashboard.html", (req, res) => {
 
     if (!global.adminLoggedIn) {
@@ -109,7 +105,8 @@ app.get("/admin/dashboard.html", (req, res) => {
         path.join(__dirname, "admin", "dashboard.html")
     );
 });
-// ✅ HOME PAGE ROUTE
+
+// HOME ROUTE
 app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "index.html"));
 });
@@ -126,12 +123,10 @@ function generateReferralCode() {
 
     let code = "REF-";
 
-    // 3 random letters
     for (let i = 0; i < 3; i++) {
         code += letters[Math.floor(Math.random() * letters.length)];
     }
 
-    // 5 random numbers
     for (let i = 0; i < 5; i++) {
         code += numbers[Math.floor(Math.random() * numbers.length)];
     }
@@ -139,17 +134,12 @@ function generateReferralCode() {
     return code;
 }
 
-
-// =====================
 // CREATE UPLOADS FOLDER
-// =====================
 if (!fs.existsSync("uploads")) {
     fs.mkdirSync("uploads");
 }
 
-// =====================
 // MULTER CONFIG
-// =====================
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, "uploads/");
@@ -161,10 +151,9 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// =====================
 // SERVE UPLOADED FILES
-// =====================
-app.use("/uploads", express.static("uploads"));
+app.use("/uploads", 
+express.static("uploads"));
 
 // ================= DATABASE =================
 const db = mysql2.createConnection({
@@ -175,16 +164,22 @@ const db = mysql2.createConnection({
 });
 
 db.connect(err => {
-    if (err) console.log("DB Error:", err);
-    else console.log("MySQL Connected");
+    if (err) {
+        console.log("DB Error:", err);
+    } else {
+        console.log("MySQL Connected");
+    }
 });
-//check user status for locking
+
+// CHECK USER STATUS FOR LOCKING
 function checkUserStatus(phone, cb) {
     db.query(
         "SELECT status FROM users WHERE phone=?",
         [phone],
         (err, result) => {
-            if (err || !result.length) return cb(false);
+            if (err || !result || !result.length) {
+                return cb(false);
+            }
             cb(result[0].status === "active");
         }
     );
@@ -194,9 +189,7 @@ function checkUserStatus(phone, cb) {
 // runs every 12AM
 cron.schedule("0 0 * * *", () => {
 
-    
-
-    // 1. expire investments
+    // 1. EXPIRE INVESTMENTS
     db.query(
         "UPDATE investments SET status='expired' WHERE end_date <= NOW() AND status='active'",
         (err) => {
@@ -204,7 +197,7 @@ cron.schedule("0 0 * * *", () => {
         }
     );
 
-    // 2. get active investments grouped by phone
+    // 2. GET ACTIVE INVESTMENTS
     const sql = `
         SELECT phone, SUM(amount) AS total_amount
         FROM investments
@@ -219,38 +212,34 @@ cron.schedule("0 0 * * *", () => {
             return;
         }
 
-        if (!results.length) {
+        if (!results || results.length === 0) {
             console.log("⚠️ No active investments found");
             return;
         }
 
         results.forEach(row => {
 
-            const interest = Number(row.total_amount) * 0.10;
+            const totalAmount = Number(row.total_amount || 0);
+            const interest = totalAmount * 0.10;
 
-            // 1. UPDATE USER TOTAL RETURNS
+            // UPDATE USER RETURNS
             db.query(
                 `UPDATE users 
                  SET total_returns = total_returns + ? 
                  WHERE phone=?`,
                 [interest, row.phone],
                 (err2) => {
-                    if (err2) {
-                        console.log("Update error:", err2);
-                    }
+                    if (err2) console.log("Update error:", err2);
                 }
             );
 
-            // 2. SAVE INTEREST HISTORY (THIS FIXES YOUR ISSUE)
+            // SAVE INTEREST HISTORY
             db.query(
                 `INSERT INTO interest_history (phone, amount, interest)
                  VALUES (?, ?, ?)`,
-                [row.phone, row.total_amount, interest],
+                [row.phone, totalAmount, interest],
                 (err3) => {
-                    if (err3) {
-                        console.log("History save error:", err3);
-                    
-                    }
+                    if (err3) console.log("History save error:", err3);
                 }
             );
 
@@ -266,74 +255,80 @@ app.post("/signup", (req, res) => {
 
     const { phone, password, referredBy } = req.body;
 
-    // 1. Validate phone
-    if (!/^\d{11}$/.test(phone)) {
-        return res.status(400).send("Phone must be 11 digits");
+    // VALIDATE PHONE
+    if (!phone || !/^\d{11}$/.test(phone)) {
+        return res.status(400).json({ error: "Phone must be 11 digits" });
     }
 
-    // 2. Check if user exists
-    db.query("SELECT * FROM users WHERE phone=?", [phone], (err, result) => {
+    if (!password) {
+        return res.status(400).json({ error: "Password is required" });
+    }
 
-        if (err) return res.status(500).send("DB error");
+    // CHECK USER EXISTS
+    db.query(
+        "SELECT id FROM users WHERE phone=?",
+        [phone],
+        (err, result) => {
 
-        if (result.length > 0) {
-            return res.status(400).send("User already exists");
-        }
+            if (err) return res.status(500).json({ error: "DB error" });
 
-        // 3. Generate UNIQUE referral code (USE YOUR FUNCTION)
-        const referralCode = generateReferralCode();
+            if (result && result.length > 0) {
+                return res.status(400).json({ error: "User already exists" });
+            }
 
-        // 4. Validate referral code (simple + safe)
-        if (referredBy) {
+            const referralCode = generateReferralCode();
 
-            db.query(
-                "SELECT id FROM users WHERE referral_code=?",
-                [referredBy],
-                (err2, refUser) => {
+            function insertUser(validRef) {
 
-                    // if invalid referral → ignore it
-                    const validRef = (!err2 && refUser.length > 0)
-                        ? referredBy
-                        : null;
+                db.query(
+                    `INSERT INTO users 
+                    (phone, password, balance, withdrawable_balance, total_invested, total_returns, status, role, referral_code, referred_by)
+                    VALUES (?, ?, 0, 0, 0, 0, 'active', 'user', ?, ?)`,
+                    [phone, password, referralCode, validRef],
+                    (err3) => {
 
-                    insertUser(validRef);
-                }
-            );
-
-        } else {
-            insertUser(null);
-        }
-
-        // 5. Insert user function
-        function insertUser(validRef) {
-
-            db.query(
-                `INSERT INTO users 
-                (phone, password, balance, withdrawable_balance, total_invested, total_returns, status, role, referral_code, referred_by)
-                VALUES (?, ?, 0, 0, 0, 0, 'active', 'user', ?, ?)`,
-                [phone, password, referralCode, validRef],
-
-                (err3) => {
-
-                    if (err3) {
-                        console.log(err3);
-                        return res.status(500).send("Signup failed");
-                    }
-
-                    db.query(
-                        "SELECT * FROM users WHERE phone=?",
-                        [phone],
-                        (err4, users) => {
-
-                            if (err4) return res.status(500).send("DB error");
-
-                            res.json(users[0]);
+                        if (err3) {
+                            console.log("SIGNUP ERROR:", err3);
+                            return res.status(500).json({ error: "Signup failed" });
                         }
-                    );
-                }
-            );
+
+                        db.query(
+                            "SELECT id, phone, referral_code, balance FROM users WHERE phone=?",
+                            [phone],
+                            (err4, users) => {
+
+                                if (err4) {
+                                    return res.status(500).json({ error: "DB error" });
+                                }
+
+                                return res.json(users[0]);
+                            }
+                        );
+                    }
+                );
+            }
+
+            if (referredBy) {
+
+                db.query(
+                    "SELECT id FROM users WHERE referral_code=?",
+                    [referredBy],
+                    (err2, refUser) => {
+
+                        const validRef =
+                            (!err2 && refUser && refUser.length > 0)
+                                ? referredBy
+                                : null;
+
+                        insertUser(validRef);
+                    }
+                );
+
+            } else {
+                insertUser(null);
+            }
         }
-    });
+    );
 });
 //bank-details
 
@@ -342,6 +337,7 @@ app.post("/login", (req, res) => {
 
     const { phone, password } = req.body;
 
+    // VALIDATION
     if (!phone || !password) {
         return res.status(400).json({ message: "Phone and password required" });
     }
@@ -359,7 +355,7 @@ app.post("/login", (req, res) => {
                 return res.status(500).json({ message: "DB error" });
             }
 
-            if (!result.length) {
+            if (!result || result.length === 0) {
                 return res.status(401).json({ message: "Invalid login" });
             }
 
@@ -383,7 +379,7 @@ app.post("/login", (req, res) => {
                 { expiresIn: "7d" }
             );
 
-            res.json({
+            return res.json({
                 token,
                 user
             });
@@ -395,21 +391,19 @@ app.post("/reset-password", (req, res) => {
 
     const { phone, newPassword } = req.body;
 
-    // 1. Validate input
+    // VALIDATE INPUT
     if (!phone || !newPassword) {
-        return res.status(400).json("Phone and new password are required");
+        return res.status(400).json({ error: "Phone and new password are required" });
     }
 
-    // 2. Validate phone format (11 digits)
+    // VALIDATE PHONE FORMAT
     if (!/^\d{11}$/.test(phone)) {
-        return res.status(400).json({
-            error: "Phone must be exactly 11 digits"
-        });
+        return res.status(400).json({ error: "Phone must be exactly 11 digits" });
     }
 
-    // 3. Check if user exists first
+    // CHECK USER EXISTS
     db.query(
-        "SELECT * FROM users WHERE phone=?",
+        "SELECT id FROM users WHERE phone=?",
         [phone],
         (err, users) => {
 
@@ -417,21 +411,23 @@ app.post("/reset-password", (req, res) => {
                 return res.status(500).json({ error: "Database error" });
             }
 
-            if (!users.length) {
-                return res.status(404).json("User not found");
+            if (!users || users.length === 0) {
+                return res.status(404).json({ error: "User not found" });
             }
 
-            // 4. Update password only if user exists
+            // UPDATE PASSWORD
             db.query(
                 "UPDATE users SET password=? WHERE phone=?",
                 [newPassword, phone],
-                (err2, result) => {
+                (err2) => {
 
                     if (err2) {
-                        return res.status(500).json( "Update failed" );
+                        return res.status(500).json({ error: "Update failed" });
                     }
 
-                    res.json("Password reset successful, please login");
+                    return res.json({
+                        message: "Password reset successful, please login"
+                    });
                 }
             );
         }
@@ -446,17 +442,21 @@ app.get("/balance/:phone", (req, res) => {
         [req.params.phone],
         (err, result) => {
 
-            if (err) return res.status(500).json({ error: "DB error" });
+            if (err) {
+                return res.status(500).json({ error: "DB error" });
+            }
 
-            if (!result.length)
-                return res.json({ error: "User not found" });
+            if (!result || result.length === 0) {
+                return res.status(404).json({ error: "User not found" });
+            }
 
-            res.json({ balance: result[0].balance });
+            return res.json({
+                balance: result[0].balance || 0
+            });
         }
     );
 });
 
-// ================= DEPOSIT (FIXED SINGLE VERSION) =================
 app.post("/deposit", upload.single("receipt"), (req, res) => {
 
     const { phone, amount } = req.body;
@@ -464,12 +464,11 @@ app.post("/deposit", upload.single("receipt"), (req, res) => {
 
     const depositAmount = Number(amount);
 
-    // 1. Validate input
-    if (!phone || !depositAmount || !receipt) {
-        return res.status(400).send("Missing fields");
+    // VALIDATION
+    if (!phone || !depositAmount || depositAmount <= 0 || !receipt) {
+        return res.status(400).json({ error: "Missing or invalid fields" });
     }
 
-    // 2. Check if user exists first (IMPORTANT FIX)
     db.query(
         "SELECT id FROM users WHERE phone=?",
         [phone],
@@ -477,16 +476,15 @@ app.post("/deposit", upload.single("receipt"), (req, res) => {
 
             if (err) {
                 console.log(err);
-                return res.status(500).send("DB error");
+                return res.status(500).json({ error: "DB error" });
             }
 
-            if (users.length === 0) {
-                return res.status(404).send("User not found");
+            if (!users || users.length === 0) {
+                return res.status(404).json({ error: "User not found" });
             }
 
             const userId = users[0].id;
 
-            // 3. Insert deposit as pending
             db.query(
                 `INSERT INTO transactions 
                 (user_id, type, amount, status, receipt)
@@ -496,10 +494,12 @@ app.post("/deposit", upload.single("receipt"), (req, res) => {
 
                     if (err2) {
                         console.log(err2);
-                        return res.status(500).send("Deposit failed");
+                        return res.status(500).json({ error: "Deposit failed" });
                     }
 
-                    res.send ("Deposit sent for admin approval");
+                    return res.json({
+                        message: "Deposit sent for admin approval"
+                    });
                 }
             );
         }
@@ -522,17 +522,17 @@ app.get("/admin/deposits", (req, res) => {
     `;
 
     db.query(sql, (err, results) => {
-        if (err) return res.status(500).send("DB error");
-        res.json(results);
+        if (err) return res.status(500).json({ error: "DB error" });
+        return res.json(results || []);
     });
 });
-//Admin deposit approve
+
 app.post("/admin/deposit/approve", (req, res) => {
 
     const { id } = req.body;
 
     if (!id) {
-        return res.status(400).send("Missing deposit id");
+        return res.status(400).json({ error: "Missing deposit id" });
     }
 
     db.query(
@@ -540,77 +540,79 @@ app.post("/admin/deposit/approve", (req, res) => {
         [id],
         (err, trx) => {
 
-            if (err) return res.status(500).send("DB error");
-
-            if (!trx || trx.length === 0) {
-                return res.status(404).send("Transaction not found");
+            if (err) {
+                return res.status(500).json({ error: "DB error" });
             }
 
-            const amount = Number(trx[0].amount);
+            if (!trx || trx.length === 0) {
+                return res.status(404).json({ error: "Transaction not found" });
+            }
+
+            const amount = Number(trx[0].amount || 0);
             const user_id = trx[0].user_id;
 
-            // 1. APPROVE TRANSACTION
+            // APPROVE TRANSACTION
             db.query(
                 "UPDATE transactions SET status='success' WHERE id=?",
                 [id]
             );
 
-            // 2. CREDIT USER BALANCE
+            // CREDIT USER BALANCE
             db.query(
                 "UPDATE users SET balance = balance + ? WHERE id=?",
                 [amount, user_id]
             );
 
-            // 3. CHECK REFERRAL INFO
+            // CHECK REFERRAL INFO
             db.query(
                 "SELECT referred_by, referral_bonus_paid FROM users WHERE id=?",
                 [user_id],
                 (err2, userRes) => {
 
                     if (err2 || !userRes || userRes.length === 0) {
-                        return res.send("Deposit approved");
+                        return res.json({ message: "Deposit approved" });
                     }
 
                     const referredBy = userRes[0].referred_by;
                     const alreadyPaid = userRes[0].referral_bonus_paid;
 
-                    // ❌ No referral OR already paid
                     if (!referredBy || alreadyPaid === 1) {
-                        return res.send("Deposit approved");
+                        return res.json({ message: "Deposit approved" });
                     }
 
-                    // 4. FIND REFERRER
                     db.query(
                         "SELECT id FROM users WHERE referral_code=?",
                         [referredBy],
                         (err3, refUser) => {
 
                             if (err3 || !refUser || refUser.length === 0) {
-                                return res.send("Deposit approved");
+                                return res.json({ message: "Deposit approved" });
                             }
 
                             const refId = refUser[0].id;
-
                             const bonus = amount * 0.11;
 
-                            // 5. CREDIT REFERRER
+                            // CREDIT REFERRER
                             db.query(
                                 "UPDATE users SET balance = balance + ? WHERE id=?",
                                 [bonus, refId]
                             );
-                            //save referral history
+
+                            // SAVE REFERRAL HISTORY
                             db.query(
                                 "INSERT INTO referral_history (referrer_id, referred_user_id, amount) VALUES (?, ?, ?)",
-                            [refId, user_id, bonus]
-                        );
+                                [refId, user_id, bonus]
+                            );
 
-                            // 6. MARK BONUS PAID (IMPORTANT FIX)
+                            // MARK BONUS PAID
                             db.query(
                                 "UPDATE users SET referral_bonus_paid=1 WHERE id=?",
                                 [user_id]
                             );
 
-                            return res.send("Deposit approved + referral bonus paid");
+                            return res.json({
+                                message: "Deposit approved + referral bonus paid"
+                            });
                         }
                     );
                 }
@@ -642,22 +644,28 @@ app.get("/referral-history/:userId", (req, res) => {
             return res.status(500).json([]);
         }
 
-        return res.json(result);
+        return res.json(result || []);
     });
 });
-//Admin deposit reject
+
 app.post("/admin/deposit/reject", (req, res) => {
 
     const { id } = req.body;
+
+    if (!id) {
+        return res.status(400).json({ error: "Missing deposit id" });
+    }
 
     db.query(
         "UPDATE transactions SET status='rejected' WHERE id=?",
         [id],
         (err) => {
 
-            if (err) return res.status(500).send("DB error");
+            if (err) {
+                return res.status(500).json({ error: "DB error" });
+            }
 
-            res.send("Deposit rejected");
+            return res.json({ message: "Deposit rejected" });
         }
     );
 });
@@ -668,20 +676,28 @@ app.post("/buy", (req, res) => {
     const { phone, amount } = req.body;
     const investAmount = Number(amount);
 
+    if (!phone || !investAmount || investAmount <= 0) {
+        return res.status(400).json({ error: "Invalid input" });
+    }
+
     db.query(
         "SELECT balance FROM users WHERE phone=?",
         [phone],
         (err, result) => {
 
-            if (err) return res.status(500).json({ error: "DB error" });
+            if (err) {
+                return res.status(500).json({ error: "DB error" });
+            }
 
-            if (!result.length)
+            if (!result || result.length === 0) {
                 return res.status(404).json({ error: "User not found" });
+            }
 
-            const balance = result[0].balance;
+            const balance = Number(result[0].balance || 0);
 
-            if (balance < investAmount)
+            if (balance < investAmount) {
                 return res.status(400).json({ error: "Insufficient balance" });
+            }
 
             const newBalance = balance - investAmount;
 
@@ -692,19 +708,22 @@ app.post("/buy", (req, res) => {
 
             db.query(
                 `INSERT INTO investments (phone, amount, status, end_date)
-                VALUES (?, ?, 'active', DATE_ADD(NOW(), INTERVAL 15 DAY))`,
+                 VALUES (?, ?, 'active', DATE_ADD(NOW(), INTERVAL 15 DAY))`,
                 [phone, investAmount],
                 (err2) => {
 
-                    if (err2)
+                    if (err2) {
                         return res.status(500).json({ error: "Investment failed" });
+                    }
 
-                    res.json({ message: "Investment successful" });
+                    return res.json({
+                        message: "Investment successful"
+                    });
                 }
             );
         }
     );
-});
+})
 
 // ================= TOTAL INVESTED =================
 app.get("/total-invested/:phone", (req, res) => {
@@ -714,9 +733,17 @@ app.get("/total-invested/:phone", (req, res) => {
         [req.params.phone],
         (err, result) => {
 
-            if (err) return res.status(500).json({ error: "DB error" });
+            if (err) {
+                return res.status(500).json({ error: "DB error" });
+            }
 
-            res.json({ total: result[0].total_invested || 0 });
+            if (!result || result.length === 0) {
+                return res.status(404).json({ error: "User not found" });
+            }
+
+            return res.json({
+                total: Number(result[0].total_invested || 0)
+            });
         }
     );
 });
@@ -729,9 +756,17 @@ app.get("/returns/:phone", (req, res) => {
         [req.params.phone],
         (err, result) => {
 
-            if (err) return res.status(500).json({ error: "DB error" });
+            if (err) {
+                return res.status(500).json({ error: "DB error" });
+            }
 
-            res.json({ returns: result[0].total_returns || 0 });
+            if (!result || result.length === 0) {
+                return res.status(404).json({ error: "User not found" });
+            }
+
+            return res.json({
+                returns: Number(result[0].total_returns || 0)
+            });
         }
     );
 });
@@ -743,55 +778,61 @@ app.post("/withdraw", (req, res) => {
 
     const withdrawAmount = Number(amount);
 
-    if (!phone || !withdrawAmount || !pin) {
-        return res.status(400).send("Missing fields");
+    // VALIDATION
+    if (!phone || !withdrawAmount || withdrawAmount <= 0 || !pin) {
+        return res.status(400).json({ error: "Missing or invalid fields" });
     }
 
-    // STEP 1: MINIMUM WITHDRAWAL (₦7500)
+    // MINIMUM WITHDRAWAL
     if (withdrawAmount < 7500) {
-        return res.send("Minimum withdrawal is ₦7500");
+        return res.status(400).json({ error: "Minimum withdrawal is ₦7500" });
     }
 
-    // STEP 2: GET BANK DETAILS
+    // GET BANK DETAILS
     db.query(
         "SELECT * FROM bank_details WHERE phone=?",
         [phone],
         (err, bank) => {
 
-            if (err) return res.status(500).send("DB error");
+            if (err) {
+                return res.status(500).json({ error: "DB error" });
+            }
 
-            if (!bank.length) {
-                return res.send("Please set up bank details first");
+            if (!bank || bank.length === 0) {
+                return res.status(404).json({ error: "Please set up bank details first" });
             }
 
             const userBank = bank[0];
 
-            // STEP 3: VERIFY PIN
-            if (userBank.withdraw_pin !== pin) {
-                return res.send("Invalid withdrawal PIN");
+            // VERIFY PIN
+            if (String(userBank.withdraw_pin) !== String(pin)) {
+                return res.status(403).json({ error: "Invalid withdrawal PIN" });
             }
 
-            // STEP 4: GET USER
+            // GET USER
             db.query(
                 "SELECT * FROM users WHERE phone=?",
                 [phone],
                 (err2, users) => {
 
-                    if (err2) return res.status(500).send("DB error");
+                    if (err2) {
+                        return res.status(500).json({ error: "DB error" });
+                    }
 
-                    if (!users.length) {
-                        return res.send("User not found");
+                    if (!users || users.length === 0) {
+                        return res.status(404).json({ error: "User not found" });
                     }
 
                     const user = users[0];
 
-                    // STEP 5: CHECK RETURNS BALANCE
-                    if (user.total_returns < withdrawAmount) {
-                        return res.send("Insufficient returns balance");
+                    const totalReturns = Number(user.total_returns || 0);
+
+                    if (totalReturns < withdrawAmount) {
+                        return res.status(400).json({ error: "Insufficient returns balance" });
                     }
 
-                    // STEP 6: CHECK WEEKLY LIMIT
-                        db.query(
+                    // WEEKLY LIMIT CHECK
+                    db.query(
                         `SELECT id FROM transactions 
                          WHERE user_id=? 
                          AND type='withdraw' 
@@ -799,17 +840,21 @@ app.post("/withdraw", (req, res) => {
                         [user.id],
                         (err3, existing) => {
 
-                            if (err3) return res.status(500).send("DB error");
-
-                            if (existing.length > 0) {
-                                return res.send("You can only withdraw once per week");
+                            if (err3) {
+                                return res.status(500).json({ error: "DB error" });
                             }
 
-                            // STEP 7: APPLY 3% TAX
+                            if (existing && existing.length > 0) {
+                                return res.status(400).json({
+                                    error: "You can only withdraw once per week"
+                                });
+                            }
+
+                            // TAX CALCULATION
                             const tax = withdrawAmount * 0.03;
                             const finalAmount = withdrawAmount - tax;
 
-                            // STEP 8: INSERT WITHDRAWAL
+                            // INSERT WITHDRAWAL
                             db.query(
                                 `INSERT INTO transactions 
                                 (user_id, type, amount, status, bank_name, account_name, account_number) 
@@ -825,12 +870,14 @@ app.post("/withdraw", (req, res) => {
 
                                     if (err4) {
                                         console.log(err4);
-                                        return res.status(500).send("Transaction failed");
+                                        return res.status(500).json({ error: "Transaction failed" });
                                     }
 
-                                    res.send(
-                                        `Withdrawal submitted successfully. 3% tax deducted (₦${tax.toFixed(2)}). You will receive ₦${finalAmount.toFixed(2)} after approval.`
-                                    );
+                                    return res.json({
+                                        message: "Withdrawal submitted successfully",
+                                        tax: tax.toFixed(2),
+                                        finalAmount: finalAmount.toFixed(2)
+                                    });
                                 }
                             );
                         }
@@ -840,25 +887,24 @@ app.post("/withdraw", (req, res) => {
         }
     );
 });
-// admin get withdrawal request
+
 // bank details update`
 app.post("/bank-details", (req, res) => {
 
     const { phone, account_name, account_number, bank_name, withdraw_pin } = req.body;
 
-    // 1. Validate input
+    // VALIDATION
     if (!phone || !account_name || !account_number || !bank_name || !withdraw_pin) {
         return res.status(400).json({ error: "All fields are required" });
     }
 
-    // 2. Validate PIN (4 digits only)
-    if (!/^\d{4}$/.test(withdraw_pin)) {
+    // PIN VALIDATION
+    if (!/^\d{4}$/.test(String(withdraw_pin))) {
         return res.status(400).json({ error: "PIN must be 4 digits" });
     }
 
-    // 3. Check if bank already exists for this phone
     db.query(
-        "SELECT * FROM bank_details WHERE phone=?",
+        "SELECT id FROM bank_details WHERE phone=?",
         [phone],
         (err, result) => {
 
@@ -867,13 +913,13 @@ app.post("/bank-details", (req, res) => {
                 return res.status(500).json({ error: "DB error" });
             }
 
-            // 4. UPDATE if exists
-            if (result.length > 0) {
+            // UPDATE EXISTING
+            if (result && result.length > 0) {
 
                 db.query(
                     `UPDATE bank_details 
-                    SET account_name=?, account_number=?, bank_name=?, withdraw_pin=? 
-                    WHERE phone=?`,
+                     SET account_name=?, account_number=?, bank_name=?, withdraw_pin=? 
+                     WHERE phone=?`,
                     [account_name, account_number, bank_name, withdraw_pin, phone],
                     (err2) => {
 
@@ -882,17 +928,19 @@ app.post("/bank-details", (req, res) => {
                             return res.status(500).json({ error: "Update failed" });
                         }
 
-                        res.json({ message: "Bank details updated successfully" });
+                        return res.json({
+                            message: "Bank details updated successfully"
+                        });
                     }
                 );
 
             } else {
 
-                // 5. INSERT new record
+                // INSERT NEW
                 db.query(
                     `INSERT INTO bank_details 
-                    (phone, account_name, account_number, bank_name, withdraw_pin) 
-                    VALUES (?, ?, ?, ?, ?)`,
+                     (phone, account_name, account_number, bank_name, withdraw_pin) 
+                     VALUES (?, ?, ?, ?, ?)`,
                     [phone, account_name, account_number, bank_name, withdraw_pin],
                     (err3) => {
 
@@ -901,7 +949,9 @@ app.post("/bank-details", (req, res) => {
                             return res.status(500).json({ error: "Insert failed" });
                         }
 
-                        res.json({ message: "Bank details saved successfully" });
+                        return res.json({
+                            message: "Bank details saved successfully"
+                        });
                     }
                 );
             }
@@ -930,55 +980,69 @@ app.get("/transactions/:phone", (req, res) => {
 
         if (err) {
             console.log(err);
-            return res.status(500).send("DB error");
+            return res.status(500).json({ error: "DB error" });
         }
 
-        res.json(results);
+        return res.json(results || []);
     });
 });
-// admin approve withdrawal
+
 app.post("/admin/approve-withdraw", (req, res) => {
 
     const { id } = req.body;
 
-    // 1. get withdrawal
+    if (!id) {
+        return res.status(400).json({ error: "Missing withdrawal id" });
+    }
+
     db.query(
         "SELECT * FROM transactions WHERE id=?",
         [id],
         (err, result) => {
 
-            if (err) return res.status(500).send("DB error");
+            if (err) {
+                return res.status(500).json({ error: "DB error" });
+            }
+
+            if (!result || result.length === 0) {
+                return res.status(404).json({ error: "Not found" });
+            }
 
             const withdrawal = result[0];
 
-            if (!withdrawal) {
-                return res.send("Not found");
-            }
-
-            // 2. get user
             db.query(
                 "SELECT * FROM users WHERE id=?",
                 [withdrawal.user_id],
                 (err2, users) => {
 
-                    const user = users[0];
-
-                    if (user.returns < withdrawal.amount) {
-                        return res.send("Insufficient balance");
+                    if (err2) {
+                        return res.status(500).json({ error: "DB error" });
                     }
 
-                    // 3. deduct balance
+                    if (!users || users.length === 0) {
+                        return res.status(404).json({ error: "User not found" });
+                    }
+
+                    const user = users[0];
+
+                    const userBalance = Number(user.returns || user.total_returns || 0);
+
+                    if (userBalance < withdrawal.amount) {
+                        return res.status(400).json({ error: "Insufficient balance" });
+                    }
+
                     db.query(
                         "UPDATE users SET returns = returns - ? WHERE id=?",
                         [withdrawal.amount, user.id]
                     );
 
-                    // 4. mark approved
                     db.query(
                         "UPDATE transactions SET status='approved' WHERE id=?",
                         [id],
                         () => {
-                            res.send("Withdrawal approved");
+                            return res.json({
+                                message: "Withdrawal approved"
+                            });
                         }
                     );
                 }
@@ -986,12 +1050,13 @@ app.post("/admin/approve-withdraw", (req, res) => {
         }
     );
 });
+
 app.post("/admin/withdrawals/approve", (req, res) => {
 
     const { id } = req.body;
 
     if (!id) {
-        return res.status(400).send("Missing withdrawal id");
+        return res.status(400).json({ error: "Missing withdrawal id" });
     }
 
     db.query(
@@ -1004,29 +1069,29 @@ app.post("/admin/withdrawals/approve", (req, res) => {
 
             if (err) {
                 console.log("DB ERROR:", err);
-                return res.status(500).send("DB error");
+                return res.status(500).json({ error: "DB error" });
             }
 
             if (!result || result.length === 0) {
-                return res.send("Transaction not found");
+                return res.status(404).json({ error: "Transaction not found" });
             }
 
             const trx = result[0];
 
-            const amount = Number(trx.amount);
-            const balance = Number(trx.total_returns);
+            const amount = Number(trx.amount || 0);
+            const balance = Number(trx.total_returns || 0);
 
-            // ✅ RULE 1: MINIMUM WITHDRAWAL AMOUNT
+            // RULE 1: MINIMUM WITHDRAWAL AMOUNT
             if (amount < 500) {
-                return res.send("Minimum withdrawal is ₦500");
+                return res.status(400).json({ error: "Minimum withdrawal is ₦500" });
             }
 
-            // ✅ RULE 2: CHECK FUNDS
+            // RULE 2: CHECK FUNDS
             if (balance < amount) {
-                return res.send("Insufficient returns balance");
+                return res.status(400).json({ error: "Insufficient returns balance" });
             }
 
-            // ✅ STEP 1: DEDUCT RETURNS FIRST
+            // STEP 1: DEDUCT RETURNS FIRST
             db.query(
                 "UPDATE users SET total_returns = total_returns - ? WHERE id=?",
                 [amount, trx.user_id],
@@ -1034,10 +1099,10 @@ app.post("/admin/withdrawals/approve", (req, res) => {
 
                     if (err1) {
                         console.log("UPDATE ERROR:", err1);
-                        return res.status(500).send("Failed to deduct returns");
+                        return res.status(500).json({ error: "Failed to deduct returns" });
                     }
 
-                    // ✅ STEP 2: UPDATE TRANSACTION STATUS
+                    // STEP 2: UPDATE TRANSACTION STATUS
                     db.query(
                         "UPDATE transactions SET status='success' WHERE id=?",
                         [id],
@@ -1045,10 +1110,12 @@ app.post("/admin/withdrawals/approve", (req, res) => {
 
                             if (err2) {
                                 console.log("STATUS ERROR:", err2);
-                                return res.status(500).send("Failed to update status");
+                                return res.status(500).json({ error: "Failed to update status" });
                             }
 
-                            return res.send("Withdrawal approved successfully");
+                            return res.json({
+                                message: "Withdrawal approved successfully"
+                            });
                         }
                     );
                 }
@@ -1056,6 +1123,7 @@ app.post("/admin/withdrawals/approve", (req, res) => {
         }
     );
 });
+
 app.get("/returns/:phone", (req, res) => {
 
     db.query(
@@ -1063,33 +1131,46 @@ app.get("/returns/:phone", (req, res) => {
         [req.params.phone],
         (err, result) => {
 
-            if (err) return res.status(500).json({ error: "DB error" });
+            if (err) {
+                return res.status(500).json({ error: "DB error" });
+            }
 
-            if (!result.length) {
+            if (!result || result.length === 0) {
                 return res.json({ total: 0 });
             }
 
-            res.json({ total: result[0].total_returns });
+            return res.json({
+                total: Number(result[0].total_returns || 0)
+            });
         }
     );
 });
+
 app.post("/admin/withdrawals/reject", (req, res) => {
 
     const { id } = req.body;
+
+    if (!id) {
+        return res.status(400).json({ error: "Missing withdrawal id" });
+    }
 
     db.query(
         "UPDATE transactions SET status='rejected' WHERE id=?",
         [id],
         (err) => {
 
-            if (err) return res.status(500).send("DB error");
+            if (err) {
+                return res.status(500).json({ error: "DB error" });
+            }
 
-            res.send("Withdrawal rejected");
+            return res.json({
+                message: "Withdrawal rejected"
+            });
         }
     );
 });
-//admin withdrawals
 
+// ADMIN WITHDRAWALS LIST
 app.get("/admin/withdrawals", (req, res) => {
 
     const sql = `
@@ -1114,13 +1195,14 @@ app.get("/admin/withdrawals", (req, res) => {
 
         if (err) {
             console.log(err);
-            return res.status(500).send("DB error");
+            return res.status(500).json({ error: "DB error" });
         }
 
-        res.json(results);
+        return res.json(results || []);
     });
 });
-// admin login
+
+// ADMIN LOGIN
 app.post("/admin/login", (req, res) => {
 
     const { phone, password } = req.body;
@@ -1155,35 +1237,50 @@ app.post("/admin/login", (req, res) => {
     );
 });
 
-
 //admin users
 app.post("/admin/users", (req, res) => {
 
     const { phone, password } = req.body;
 
+    if (!phone || !password) {
+        return res.status(400).json({ error: "Missing admin credentials" });
+    }
+
     db.query(
-        "SELECT * FROM users WHERE phone=? AND password=? AND role='admin'",
+        "SELECT * FROM users WHERE phone=? AND password=? AND role='admin' LIMIT 1",
         [phone, password],
         (err, result) => {
 
-            if (err) return res.status(500).send("DB error");
+            if (err) {
+                return res.status(500).json({ error: "DB error" });
+            }
 
-            if (!result.length) {
-                return res.status(403).send("Unauthorized");
+            if (!result || result.length === 0) {
+                return res.status(403).json({ error: "Unauthorized" });
             }
 
             db.query(
-                "SELECT id, phone, balance, status FROM users",
+                "SELECT id, phone, balance, status FROM users ORDER BY id DESC",
                 (err2, users) => {
-                    res.json(users);
+
+                    if (err2) {
+                        return res.status(500).json({ error: "DB error" });
+                    }
+
+                    return res.json(users || []);
                 }
             );
         }
     );
 });
+
 app.get("/interest-history", (req, res) => {
 
     const { phone } = req.query;
+
+    if (!phone) {
+        return res.status(400).json({ error: "Phone is required" });
+    }
 
     db.query(
         "SELECT * FROM interest_history WHERE phone=? ORDER BY id DESC",
@@ -1191,14 +1288,15 @@ app.get("/interest-history", (req, res) => {
         (err, results) => {
 
             if (err) {
-                return res.status(500).send("DB error");
+                return res.status(500).json({ error: "DB error" });
             }
 
-            res.json(results);
+            return res.json(results || []);
         }
     );
 });
-//admin user bank details
+
+// ADMIN USER BANK DETAILS
 app.get("/admin/user-bank/:phone", (req, res) => {
 
     const phone = req.params.phone;
@@ -1208,26 +1306,31 @@ app.get("/admin/user-bank/:phone", (req, res) => {
         [phone],
         (err, result) => {
 
-            if (err) return res.status(500).json({ error: "DB error" });
+            if (err) {
+                return res.status(500).json({ error: "DB error" });
+            }
 
-            if (!result.length) {
+            if (!result || result.length === 0) {
                 return res.json(null);
             }
 
-            res.json(result[0]);
+            return res.json(result[0]);
         }
     );
 });
+
+
 //admin create bonus section
-
-
 app.post("/admin/create-bonus", (req, res) => {
 
     const { amount, maxUsers, expiryHours, expiryMinutes } = req.body;
 
+    if (!amount || !maxUsers) {
+        return res.status(400).json({ error: "Missing required fields" });
+    }
+
     const code = "BONUS-" + Math.random().toString(36).substring(2, 8).toUpperCase();
 
-    // convert everything into minutes
     const totalMinutes =
         (Number(expiryHours || 0) * 60) + Number(expiryMinutes || 0);
 
@@ -1245,23 +1348,22 @@ app.post("/admin/create-bonus", (req, res) => {
                 return res.status(500).json({ error: "Failed to create bonus" });
             }
 
-            res.json({
+            return res.json({
                 code,
-                amount,
-                maxUsers,
+                amount: Number(amount),
+                maxUsers: Number(maxUsers),
                 expiresAt
             });
         }
     );
 });
-//user claim bonus
 
 app.post("/claim-bonus", (req, res) => {
 
     const { userId, code } = req.body;
 
     if (!userId || !code) {
-        return res.status(400).send("Missing data");
+        return res.status(400).json({ error: "Missing data" });
     }
 
     db.query(
@@ -1271,66 +1373,64 @@ app.post("/claim-bonus", (req, res) => {
 
             if (err) {
                 console.log(err);
-                return res.status(500).send("DB error");
+                return res.status(500).json({ error: "DB error" });
             }
 
-            if (!result.length) {
-                return res.send("Invalid code");
+            if (!result || result.length === 0) {
+                return res.status(404).json({ error: "Invalid code" });
             }
 
             const bonus = result[0];
 
-            // ✅ FIXED EXPIRY CHECK (ROBUST)
             const now = Date.now();
             const expiry = new Date(bonus.expires_at).getTime();
 
             if (isNaN(expiry)) {
-                return res.send("Invalid expiry time");
+                return res.status(400).json({ error: "Invalid expiry time" });
             }
 
             if (expiry <= now) {
-                return res.send("Code expired");
+                return res.status(400).json({ error: "Code expired" });
             }
 
-            // usage limit check
             if (bonus.used_count >= bonus.max_users) {
-                return res.send("Code already fully used");
+                return res.status(400).json({ error: "Code already fully used" });
             }
 
-            // check if user already used it
             db.query(
                 "SELECT * FROM bonus_claims WHERE user_id=? AND code=?",
                 [userId, code],
                 (err2, used) => {
 
                     if (err2) {
-                        console.log(err2);
-                        return res.status(500).send("DB error");
+                        return res.status(500).json({ error: "DB error" });
                     }
 
-                    if (used.length > 0) {
-                        return res.send("You already used this code");
+                    if (used && used.length > 0) {
+                        return res.status(400).json({ error: "You already used this code" });
                     }
 
-                    // add balance
+                    // ADD BALANCE
                     db.query(
                         "UPDATE users SET balance = balance + ? WHERE id=?",
                         [bonus.amount, userId]
                     );
 
-                    // log claim
+                    // LOG CLAIM
                     db.query(
                         "INSERT INTO bonus_claims (user_id, code, amount) VALUES (?, ?, ?)",
                         [userId, code, bonus.amount]
                     );
 
-                    // increase usage count
+                    // INCREASE COUNT
                     db.query(
                         "UPDATE bonus_codes SET used_count = used_count + 1 WHERE code=?",
                         [code]
                     );
 
-                    return res.send(`🎉 Congratulations! You received ₦${bonus.amount}`);
+                    return res.json({
+                        message: `🎉 Congratulations! You received ₦${bonus.amount}`
+                    });
                 }
             );
         }
@@ -1340,21 +1440,24 @@ app.post("/claim-bonus", (req, res) => {
 app.get("/user/has-active-investment/:phone", (req, res) => {
 
     db.query(
-        `SELECT * FROM investments 
+        `SELECT id FROM investments 
          WHERE phone=? AND status='active'`,
         [req.params.phone],
         (err, result) => {
 
-            if (err) return res.status(500).send("DB error");
+            if (err) {
+                return res.status(500).json({ error: "DB error" });
+            }
 
-            res.json({
-                active: result.length > 0
+            return res.json({
+                active: result && result.length > 0
             });
         }
     );
 });
- //admin-all-users
- app.get("/admin/all-users", (req, res) => {
+
+// ADMIN ALL USERS
+app.get("/admin/all-users", (req, res) => {
 
     const sql = `
         SELECT id, phone, status, balance
@@ -1369,26 +1472,38 @@ app.get("/user/has-active-investment/:phone", (req, res) => {
             return res.status(500).json({ error: "DB error" });
         }
 
-        res.json(result);
+        return res.json(result || []);
     });
 });
-//admin lock/unlock
+
+// ADMIN TOGGLE USER STATUS
 app.post("/admin/toggle-user-status", (req, res) => {
 
     const { id, status } = req.body;
+
+    if (!id || !status) {
+        return res.status(400).json({ error: "Missing data" });
+    }
 
     db.query(
         "UPDATE users SET status=? WHERE id=?",
         [status, id],
         (err) => {
 
-            if (err) return res.status(500).send("DB error");
+            if (err) {
+                return res.status(500).json({ error: "DB error" });
+            }
 
-            res.send("User status updated");
+            return res.json({
+                message: "User status updated"
+            });
         }
     );
 });
-// ================= START SERVER =================
-app.listen(3000, () => {
-    console.log("Server running on 3000");
+
+// START SERVER
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+    console.log(`Server running on ${PORT}`);
 });

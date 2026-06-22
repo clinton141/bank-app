@@ -160,7 +160,8 @@ tr:hover{
     <a href="dashboard.html">Home</a>
 </div>
 
-<script src="js/api.js">
+<script>
+const API = "https://mobile-wealth-api.onrender.com";
 
 const user = JSON.parse(localStorage.getItem("user"));
 
@@ -168,16 +169,16 @@ if (!user || !user.phone) {
     window.location.href = "login.html";
 }
 
-function loadTransactions() {
+async function loadTransactions() {
 
-    fetch(`http://localhost:3000/transactions/${user.phone}`)
-    .then(res => res.json())
-    .then(data => {
+    try {
+        const res = await fetch(`${API}/transactions/${user.phone}`);
+        const data = await res.json();
 
         const tbody = document.getElementById("txnBody");
         tbody.innerHTML = "";
 
-        if (!data.length) {
+        if (!Array.isArray(data) || data.length === 0) {
             tbody.innerHTML = `
                 <tr>
                     <td colspan="4" class="empty">No transactions yet</td>
@@ -191,7 +192,8 @@ function loadTransactions() {
             let statusClass = "pending";
 
             if (txn.status === "success") statusClass = "success";
-            if (txn.status === "failed") statusClass = "failed";
+            if (txn.status === "rejected") statusClass = "failed";
+            if (txn.status === "approved") statusClass = "success";
 
             tbody.innerHTML += `
                 <tr>
@@ -203,10 +205,9 @@ function loadTransactions() {
             `;
         });
 
-    })
-    .catch(err => {
-        console.log(err);
-    });
+    } catch (err) {
+        console.log("Transaction load error:", err);
+    }
 }
 
 function goBack(){
@@ -214,7 +215,6 @@ function goBack(){
 }
 
 loadTransactions();
-
 </script>
 
 </body>

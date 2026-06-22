@@ -103,9 +103,9 @@ function contactSupport(){
     const user = JSON.parse(localStorage.getItem("user"));
     const userPhone = user?.phone || "unknown";
 
-    const supportNumber = "23490987676543"; // WhatsApp format (no +, no 0)
+    const supportNumber = "23490987676543";
 
-    const message =` Hello support, I need help. My registered phone is ${userPhone}`;
+    const message = `Hello support, I need help. My registered phone is ${userPhone}`;
 
     const url = `https://wa.me/${supportNumber}?text=${encodeURIComponent(message)}`;
 

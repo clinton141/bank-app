@@ -125,12 +125,8 @@ button:active{
 </div>
 
 <script>
-const API = location.hostname === "localhost"
-    ? "http://localhost:3000"
-    : "https://YOUR-RENDER-URL.onrender.com";
-</script>
+const API = "https://mobile-wealth-api.onrender.com";
 
-<script>
 const user = JSON.parse(localStorage.getItem("user"));
 
 if (!user || !user.phone) {

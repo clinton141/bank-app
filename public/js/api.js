@@ -1,38 +1,42 @@
-const API_BASE = location.hostname === "localhost"
-    ? "http://localhost:3000"
-    : "https://YOUR-RENDER-URL.onrender.com";
+const API_BASE = "https://mobile-wealth-api.onrender.com";
 
 function getToken() {
     return localStorage.getItem("token");
 }
 
 async function apiFetch(url, options = {}) {
-
-    const token = getToken();
-
-    const headers = {
-        ...(options.headers || {})
-    };
-
-    // only set Content-Type when NOT FormData
-    if (!(options.body instanceof FormData)) {
-        headers["Content-Type"] = "application/json";
-    }
-
-    if (token) {
-        headers["Authorization"] = "Bearer " + token;
-    }
-
-    const res = await fetch(API_BASE + url, {
-        ...options,
-        headers
-    });
-
-    const text = await res.text();
-
     try {
-        return JSON.parse(text);
-    } catch {
-        return text;
+        const token = getToken();
+
+        const headers = {
+            "Content-Type": "application/json",
+            ...(options.headers || {})
+        };
+
+        if (token) {
+            headers["Authorization"] = `Bearer ${token}`;
+        }
+
+        const res = await fetch(`${API_BASE}${url}`, {
+            ...options,
+            headers
+        });
+
+        let data;
+        try {
+            data = await res.json();
+        } catch (e) {
+            data = null;
+        }
+
+        if (!res.ok) {
+            throw new Error(data?.message || "Request failed");
+        }
+
+        return data;
+
+    } catch (err) {
+        console.log("API Error:", err.message);
+        throw err;
     }
 }

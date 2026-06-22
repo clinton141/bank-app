@@ -175,9 +175,7 @@ style="
 
 <script>
 
-const API = location.hostname === "localhost"
-    ? "http://localhost:3000"
-    : "https://YOUR-RENDER-URL.onrender.com";
+const API = "https://mobile-wealth-api.onrender.com";
 
 async function loadUsers() {
 
@@ -232,8 +230,6 @@ async function loadUsers() {
 async function toggleUser(id){
 
     try {
-        const admin = JSON.parse(localStorage.getItem("admin"));
-
         await fetch(`${API}/admin/toggle-user-status`, {
             method: "POST",
             headers: {
@@ -241,9 +237,7 @@ async function toggleUser(id){
             },
             body: JSON.stringify({
                 id,
-                status: "toggle",
-                adminPhone: admin?.phone,
-                adminPassword: admin?.password
+                status: "toggle"
             })
         });
 

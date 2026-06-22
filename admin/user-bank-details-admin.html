@@ -138,13 +138,11 @@ User Bank Details Admin
 
 <script>
 
-const API = location.hostname === "localhost"
-    ? "http://localhost:3000"
-    : "https://YOUR-RENDER-URL.onrender.com";
+const API = "https://mobile-wealth-api.onrender.com";
 
 function loadAll() {
 
-    fetch(`${API}/admin/user-bank`)
+    fetch(`${API}/admin/all-users`)
     .then(res => res.json())
     .then(data => {
 
@@ -156,7 +154,7 @@ function loadAll() {
             list.innerHTML += `
                 <div class="card">
                     <p><b>Phone:</b> ${user.phone}</p>
-                    <p><b>Bank:</b> ${user.bank_name || "N/A"}</p>
+                    <p><b>Status:</b> ${user.status || "active"}</p>
 
                     <button class="view"
                         onclick="viewDetails('${user.phone}')">

@@ -94,9 +94,7 @@ button:active{
 
 <script>
 
-const API = location.hostname === "localhost"
-    ? "http://localhost:3000"
-    : "https://YOUR-RENDER-URL.onrender.com";
+const API = "https://mobile-wealth-api.onrender.com";
 
 async function login(){
 
@@ -120,7 +118,6 @@ async function login(){
 
         if (res.ok && data?.success) {
 
-            // store admin session (JWT-ready later)
             localStorage.setItem("adminLoggedIn", "true");
             localStorage.setItem("admin", JSON.stringify(data));
 

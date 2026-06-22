@@ -283,9 +283,7 @@ style="
 </div>
 
 <script>
-const API = location.hostname === "localhost"
-    ? "http://localhost:3000"
-    : "https://YOUR-RENDER-URL.onrender.com";
+const API = "https://mobile-wealth-api.onrender.com";
 </script>
 
 <script>
@@ -342,16 +340,15 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 
-</script>
-//referral
+<!-- REFERRAL -->
 <script>
-const user = JSON.parse(localStorage.getItem("user"));
+const userRef = JSON.parse(localStorage.getItem("user"));
 
-if (!user || !user.phone) {
+if (!userRef || !userRef.phone) {
     window.location.href = "login.html";
 }
 
-const referralCode = user.referral_code;
+const referralCode = userRef.referral_code;
 
 const link = `${location.origin}/signup.html?ref=${referralCode}`;
 
@@ -365,6 +362,7 @@ function copyLink() {
 }
 </script>
 
+<!-- TIME -->
 <script>
 function updateTime() {
 
@@ -399,16 +397,16 @@ function updateTime() {
     minutes = minutes < 10 ? "0" + minutes : minutes;
 
     document.getElementById("date").innerText =
-        `${dayName}, ${day}${suffix(day)} ${month}, ${year};
-
-        ${hours}:${minutes} ${ampm}`;
+        `${dayName}, ${day}${suffix(day)} ${month}, ${year}
+${hours}:${minutes} ${ampm}`;
 }
+
 updateTime();
 setInterval(updateTime, 1000);
 </script>
 
+<!-- INVESTMENT CHECK + BONUS -->
 <script>
-// ================== CHECK INVESTMENT ==================
 async function checkInvestment(phone) {
 
     try {
@@ -440,8 +438,6 @@ async function claimBonus() {
     const msg = await res.text();
     alert(msg);
 }
-    
-
 </script>
 
 </body>

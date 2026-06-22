@@ -110,7 +110,7 @@ button {
 
 <script>
 
-const API = "http://localhost:3000";
+const API = "https://mobile-wealth-api.onrender.com";
 
 async function generateBonus() {
 
@@ -123,13 +123,6 @@ async function generateBonus() {
         alert("Amount and users are required");
         return;
     }
-
-    console.log("Sending:", {
-        amount,
-        users,
-        hours,
-        minutes
-    });
 
     try {
         const res = await fetch(`${API}/admin/create-bonus`, {
@@ -146,8 +139,6 @@ async function generateBonus() {
         });
 
         const data = await res.json();
-
-        console.log("Response:", data);
 
         document.getElementById("resultBox").style.display = "block";
         document.getElementById("resultBox").innerHTML = `
