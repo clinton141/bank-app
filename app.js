@@ -162,14 +162,7 @@ app.use("/uploads",
 express.static("uploads"));
 
 // TEST CONNECTION
-db.getConnection((err, connection) => {
-    if (err) {
-        console.log("❌ DB Connection Error:", err.message);
-    } else {
-        console.log("✅ TiDB Connected Successfully");
-        connection.release();
-    }
-});
+
 
 // CHECK USER STATUS FOR LOCKING
 function checkUserStatus(phone, cb) {
