@@ -1,7 +1,4 @@
 const express = require("express");
-const mysql = require("mysql2");
-require("dotenv").config();
-
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const cron = require("node-cron");
@@ -10,6 +7,7 @@ const fs = require("fs");
 const path = require("path");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
+const db = require("./config/db");
 
 const JWT_SECRET = process.env.JWT_SECRET || "mobile_wealth_secret_key_2026";
 
@@ -59,28 +57,7 @@ app.get("/admin/login.html", (req, res) => {
 
 // ================= DATABASE =================
 
-const mysql = require("mysql2");
-require("dotenv").config();
 
-const db = mysql.createPool({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    port: process.env.DB_PORT || 4000,
-    ssl: {
-        rejectUnauthorized: true
-    }
-});
-
-db.getConnection((err, connection) => {
-    if (err) {
-        console.log("❌ DB Connection Error:", err.message);
-    } else {
-        console.log("✅ TiDB Connected Successfully");
-        connection.release();
-    }
-});
 
 // ADMIN LOGIN ROUTE
 app.post("/admin/login", (req, res) => {
