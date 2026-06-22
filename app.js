@@ -8,7 +8,7 @@ const fs = require("fs");
 const path = require("path");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
-const db = require("./DB");
+const db = require("./config/DB");
 
 const JWT_SECRET = process.env.JWT_SECRET || "mobile_wealth_secret_key_2026";
 
