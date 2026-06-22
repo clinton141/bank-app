@@ -1,5 +1,7 @@
 const express = require("express");
-const mysql2 = require("mysql2");require("dotenv").config();
+const mysql = require("mysql2");
+require("dotenv").config();
+
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const cron = require("node-cron");
@@ -29,30 +31,6 @@ function verifyToken(req, res, next) {
         next();
     });
 }
-
-const app = express();
-
-app.use(cors());
-app.use(express.json());
-app.use(bodyParser.json());
-
-// STATIC FILES
-app.use(express.static(path.join(__dirname, "public")));
-app.use("/admin", express.static(path.join(__dirname, "admin")));
-
-// ❌ BLOCK DIRECT ACCESS TO ADMIN DASHBOARD FILE
-//app.use("admin", (req, res) => {
-    //return res.status(403).send("Access denied");
-//});
-
-global.adminLoggedIn = global.adminLoggedIn || false;
-
-// LOGIN PAGE ROUTE
-app.get("/admin/login.html", (req, res) => {
-    return res.sendFile(
-        path.join(__dirname, "admin", "login.html")
-    );
-});
 
 // ADMIN LOGIN ROUTE
 app.post("/admin/login", (req, res) => {
@@ -154,17 +132,6 @@ const upload = multer({ storage });
 // SERVE UPLOADED FILES
 app.use("/uploads", 
 express.static("uploads"));
-
-// ================= DATABASE =================
-const mysql = require("mysql2");
-require("dotenv").config();
-
-const db = mysql.createPool({
-    uri: process.env.DATABASE_URL,
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0
-});
 
 // TEST CONNECTION
 db.getConnection((err, connection) => {
