@@ -32,6 +32,45 @@ function verifyToken(req, res, next) {
     });
 }
 
+const app = express();
+
+app.use(cors());
+app.use(express.json());
+app.use(bodyParser.json());
+
+// STATIC FILES
+app.use(express.static(path.join(__dirname, "public")));
+app.use("/admin", express.static(path.join(__dirname, "admin")));
+
+// BLOCK ADMIN FILE ACCESS (optional)
+// app.use("/admin", (req, res) => {
+//     return res.status(403).send("Access denied");
+// });
+
+global.adminLoggedIn = global.adminLoggedIn || false;
+
+// LOGIN PAGE ROUTE
+app.get("/admin/login.html", (req, res) => {
+    return res.sendFile(
+        path.join(__dirname, "admin", "login.html")
+    );
+});
+
+
+// ================= DATABASE =================
+
+const db = mysql.createPool(process.env.DATABASE_URL);
+
+// TEST CONNECTION (IMPORTANT)
+db.getConnection((err, connection) => {
+    if (err) {
+        console.log("❌ DB Connection Error:", err.message);
+    } else {
+        console.log("✅ TiDB Connected Successfully");
+        connection.release();
+    }
+});
+
 // ADMIN LOGIN ROUTE
 app.post("/admin/login", (req, res) => {
 
