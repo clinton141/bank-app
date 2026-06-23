@@ -180,23 +180,12 @@ const API = "https://mobile-wealth-api.onrender.com";
 async function loadUsers() {
 
     try {
-        const admin = JSON.parse(localStorage.getItem("admin"));
-
-        if (!admin?.phone || !admin?.password) {
-            alert("Unauthorized admin");
-            window.location.href = "login.html";
-            return;
-        }
 
         const res = await fetch(`${API}/admin/users`, {
-            method: "POST",
+            method: "GET",
             headers: {
                 "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                phone: admin.phone,
-                password: admin.password
-            })
+            }
         });
 
         const data = await res.json().catch(() => []);
