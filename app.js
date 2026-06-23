@@ -479,14 +479,19 @@ app.get("/admin/deposits", (req, res) => {
             t.receipt,
             u.phone
         FROM transactions t
-        JOIN users u ON t.user_id = u.id
-        WHERE t.type='deposit'
+        LEFT JOIN users u ON t.user_id = u.id
+        WHERE t.type = 'deposit'
         ORDER BY t.id DESC
     `;
 
     db.query(sql, (err, results) => {
-        if (err) return res.status(500).json({ error: "DB error" });
-        return res.json(results || []);
+
+        if (err) {
+            console.log("DB ERROR:", err);
+            return res.status(200).json([]); // NEVER return HTML crash
+        }
+
+        return res.status(200).json(results || []);
     });
 });
 
