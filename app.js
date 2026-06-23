@@ -46,9 +46,9 @@ app.use("/admin", express.static(path.join(__dirname, "admin")));
 //     return res.status(403).send("Access denied");
 // });
 
-app.get("/admin/login.html", (req, res) => {
-    res.sendFile(path.join(__dirname, "admin", "login.html"));
-});
+//app.get("/admin/login.html", (req, res) => {
+   // res.sendFile(path.join(__dirname, "admin", "login.html"));
+//});
 
 
 // ================= DATABASE =================
@@ -57,7 +57,7 @@ app.get("/admin/login.html", (req, res) => {
 
 // ADMIN LOGIN ROUTE
 
-// ADMIN DASHBOARD ROUTE (PROTECTED)
+// ADMIN DASHBOARD ROUTE
 app.get("/admin/dashboard", (req, res) => {
 
     return res.sendFile(
@@ -67,10 +67,6 @@ app.get("/admin/dashboard", (req, res) => {
 
 // SUPPORT BOTH URL FORMATS
 app.get("/admin/dashboard.html", (req, res) => {
-
-    if (!global.adminLoggedIn) {
-        return res.redirect("/admin/login.html");
-    }
 
     return res.sendFile(
         path.join(__dirname, "admin", "dashboard.html")
