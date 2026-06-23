@@ -115,14 +115,14 @@ function generateReferralCode() {
 }
 
 // CREATE UPLOADS FOLDER
-if (!fs.existsSync("uploads")) {
-    fs.mkdirSync("uploads");
+if (!fs.existsSync(path.join(__dirname, "uploads"))) {
+    fs.mkdirSync(path.join(__dirname, "uploads"));
 }
 
 // MULTER CONFIG
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, "uploads/");
+        cb(null, path.join(__dirname, "uploads"));
     },
     filename: function (req, file, cb) {
         cb(null, Date.now() + "-" + file.originalname);
@@ -132,8 +132,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // SERVE UPLOADED FILES
-app.use("/uploads", 
-express.static("uploads"));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // TEST CONNECTION
 
