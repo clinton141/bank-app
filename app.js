@@ -1185,11 +1185,16 @@ app.post("/admin/login", (req, res) => {
 
             const admin = result[0];
 
+            const token = "admin_" + admin.id + "_" + Date.now();
+
             return res.json({
                 success: true,
-                adminId: admin.id,
-                phone: admin.phone,
-                role: admin.role
+                token,
+                admin: {
+                    id: admin.id,
+                    phone: admin.phone,
+                    role: admin.role
+                }
             });
         }
     );
