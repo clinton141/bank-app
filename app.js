@@ -424,18 +424,16 @@ app.get("/balance/:phone", (req, res) => {
 
 app.post("/deposit", upload.single("receipt"), (req, res) => {
 
-    const { phone, amount } = req.body;
+    const phone = req.body.phone?.trim();
+    const amount = Number(req.body.amount);
     const receipt = req.file ? req.file.filename : null;
 
-    const depositAmount = Number(amount);
-
-    // VALIDATION
-    if (!phone || !depositAmount || depositAmount <= 0 || !receipt) {
+    if (!phone || !amount || amount <= 0 || !receipt) {
         return res.status(400).json({ error: "Missing or invalid fields" });
     }
 
     db.query(
-        "SELECT id FROM users WHERE phone=?",
+        "SELECT id FROM users WHERE phone = ? LIMIT 1",
         [phone],
         (err, users) => {
 
@@ -451,10 +449,9 @@ app.post("/deposit", upload.single("receipt"), (req, res) => {
             const userId = users[0].id;
 
             db.query(
-                `INSERT INTO transactions 
-                (user_id, type, amount, status, receipt)
-                VALUES (?, 'deposit', ?, 'pending', ?)`,
-                [userId, depositAmount, receipt],
+                `INSERT INTO transactions (user_id, type, amount, status, receipt)
+                 VALUES (?, 'deposit', ?, 'pending', ?)`,
+                [userId, amount, receipt],
                 (err2) => {
 
                     if (err2) {
@@ -463,7 +460,8 @@ app.post("/deposit", upload.single("receipt"), (req, res) => {
                     }
 
                     return res.json({
-                        message: "Deposit sent for admin approval"
+                        success: true,
+                        message: "Deposit submitted for admin approval"
                     });
                 }
             );
