@@ -119,7 +119,8 @@ async function login(){
         if (res.ok && data?.success) {
 
             localStorage.setItem("adminLoggedIn", "true");
-            localStorage.setItem("admin", JSON.stringify(data));
+            localStorage.setItem("adminToken", data.token);
+            localStorage.setItem("admin", JSON.stringify(data.admin));
 
             msg.style.color = "green";
             msg.innerText = "Login successful...";

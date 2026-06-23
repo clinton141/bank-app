@@ -71,23 +71,29 @@ app.post("/admin/login", (req, res) => {
         (err, result) => {
 
             if (err) {
-                return res.status(500).send("DB error");
+                return res.status(500).json({ error: "DB error" });
             }
 
             if (!result || result.length === 0) {
-                return res.status(401).send("Invalid admin login");
+                return res.status(401).json({ error: "Invalid admin login" });
             }
 
-            global.adminLoggedIn = true;
+            const admin = result[0];
 
-            res.json({
+            // SIMPLE TOKEN (no JWT needed for now)
+            const token = "admin_" + admin.id + "_" + Date.now();
+
+            return res.json({
                 success: true,
-                admin: result[0]
+                token,
+                admin: {
+                    id: admin.id,
+                    phone: admin.phone
+                }
             });
         }
     );
 });
-
 // ADMIN DASHBOARD ROUTE (PROTECTED)
 app.get("/admin/dashboard", (req, res) => {
 
