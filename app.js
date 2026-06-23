@@ -46,11 +46,24 @@ app.use("/admin", express.static(path.join(__dirname, "admin")));
 //     return res.status(403).send("Access denied");
 // });
 
-//app.get("/admin/login.html", (req, res) => {
-   // res.sendFile(path.join(__dirname, "admin", "login.html"));
-//});
+app.get("/admin/login.html", (req, res) => {
+    res.sendFile(path.join(__dirname, "admin", "login.html"));
+});
 
+app.get("/admin/users", (req, res) => {
 
+    db.query(
+        "SELECT id, phone, balance, status FROM users ORDER BY id DESC",
+        (err, users) => {
+
+            if (err) {
+                return res.status(500).json({ error: "DB error" });
+            }
+
+            return res.json(users || []);
+        }
+    );
+});
 // ================= DATABASE =================
 
 
