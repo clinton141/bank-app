@@ -46,13 +46,8 @@ app.use("/admin", express.static(path.join(__dirname, "admin")));
 //     return res.status(403).send("Access denied");
 // });
 
-global.adminLoggedIn = global.adminLoggedIn || false;
-
-// LOGIN PAGE ROUTE
 app.get("/admin/login.html", (req, res) => {
-    return res.sendFile(
-        path.join(__dirname, "admin", "login.html")
-    );
+    res.sendFile(path.join(__dirname, "admin", "login.html"));
 });
 
 
@@ -61,45 +56,9 @@ app.get("/admin/login.html", (req, res) => {
 
 
 // ADMIN LOGIN ROUTE
-app.post("/admin/login", (req, res) => {
 
-    const { phone, password } = req.body;
-
-    db.query(
-        "SELECT * FROM users WHERE phone=? AND password=? AND role='admin' LIMIT 1",
-        [phone, password],
-        (err, result) => {
-
-            if (err) {
-                return res.status(500).json({ error: "DB error" });
-            }
-
-            if (!result || result.length === 0) {
-                return res.status(401).json({ error: "Invalid admin login" });
-            }
-
-            const admin = result[0];
-
-            // SIMPLE TOKEN (no JWT needed for now)
-            const token = "admin_" + admin.id + "_" + Date.now();
-
-            return res.json({
-                success: true,
-                token,
-                admin: {
-                    id: admin.id,
-                    phone: admin.phone
-                }
-            });
-        }
-    );
-});
 // ADMIN DASHBOARD ROUTE (PROTECTED)
 app.get("/admin/dashboard", (req, res) => {
-
-    if (!global.adminLoggedIn) {
-        return res.redirect("/admin/login.html");
-    }
 
     return res.sendFile(
         path.join(__dirname, "admin", "dashboard.html")
