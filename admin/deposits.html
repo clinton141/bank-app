@@ -105,20 +105,11 @@ Deposit Approval Panel
 
 const API = "https://mobile-wealth-api.onrender.com";
 
-async function loadDeposits() {
+function loadDeposits() {
 
-    try {
-        const res = await fetch(`${API}/admin/deposits`);
-
-        const text = await res.text();
-
-        let data;
-        try {
-            data = JSON.parse(text);
-        } catch (e) {
-            console.log("NOT JSON RESPONSE:", text);
-            data = [];
-        }
+    fetch(`${API}/admin/deposits`)
+    .then(res => res.json())
+    .then(data => {
 
         const container = document.getElementById("deposits");
         container.innerHTML = "";
@@ -141,9 +132,10 @@ async function loadDeposits() {
             `;
         });
 
-    } catch (err) {
+    })
+    .catch(err => {
         console.log("Load deposits error:", err);
-    }
+    });
 }
 
 function approve(id){
@@ -151,7 +143,8 @@ function approve(id){
         method:"POST",
         headers:{"Content-Type":"application/json"},
         body:JSON.stringify({id})
-    }).then(()=>loadDeposits());
+    })
+    .then(()=>loadDeposits());
 }
 
 function reject(id){
@@ -159,9 +152,9 @@ function reject(id){
         method:"POST",
         headers:{"Content-Type":"application/json"},
         body:JSON.stringify({id})
-    }).then(()=>loadDeposits());
+    })
+    .then(()=>loadDeposits());
 }
-
 loadDeposits();
 
 </script>
