@@ -284,7 +284,6 @@ app.post("/signup", (req, res) => {
         }
     );
 });
-//bank-details
 
 // =================user LOGIN =================
 app.post("/login", (req, res) => {
