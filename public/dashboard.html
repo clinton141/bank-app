@@ -5,156 +5,189 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-body{
-    margin:0;
-    font-family:Arial;
-    background:#f5f7fb;
-    overflow-x:hidden;
+
+body {
+    margin: 0;
+    font-family: Arial;
+    background: #f5f7fb;
+    overflow-x: hidden;
 }
 
 /* HEADER */
-.header{
-    background:linear-gradient(135deg,#0099ff,#0066cc);
-    color:#fff;
-    padding:16px;
-    font-size:18px;
-    font-weight:bold;
-    text-align:left;
-    position:sticky;
-    top:0;
-    z-index:10;
+.header {
+    background: linear-gradient(135deg, #0099ff, #0066cc);
+    color: white;
+    padding: 18px;
+    font-size: 18px;
+    font-weight: bold;
 }
 
-/* MAIN WRAPPER */
-.container{
-    padding:12px;
-    padding-bottom:120px;
+/* CONTAINER */
+.container {
+    padding: 15px;
+    padding-bottom: 120px; /* space for bottom nav */
 }
 
 /* GRID */
-.grid{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:10px;
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 10px;
 }
 
-/* FULL WIDTH */
-.full{
-    grid-column:1 / -1;
+/* TOP TIME */
+.top-time {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    text-align: right;
+    background: rgba(255,255,255,0.9);
+    padding: 8px 12px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    z-index: 999;
 }
 
 /* CARDS */
-.card{
-    background:#8fd3f4;
-    border-radius:16px;
-    padding:14px;
-    box-shadow:0 3px 10px rgba(0,0,0,0.08);
-    overflow:hidden;
+.card {
+    background: skyblue;
+    padding: 15px;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
 }
 
-.card h2{
-    margin:0;
-    font-size:13px;
-    color:#333;
+.full {
+    grid-column: span 2;
 }
 
-.value{
-    font-size:18px;
-    font-weight:bold;
-    margin-top:8px;
+/* TEXT */
+.card h2 {
+    font-size: 14px;
+    margin: 0;
+    color: #666;
 }
+
+.value {
+    font-size: 20px;
+    font-weight: bold;
+    margin-top: 8px;
+}
+
+/* COLORS */
+#balance { color: #8b4513; }
+#totalInvested { color: #d4af37; }
+.returns { color: #00c853; }
 
 /* BUTTONS */
-.btn{
-    width:100%;
-    padding:12px;
-    border:none;
-    border-radius:12px;
-    background:#0099ff;
-    color:#fff;
-    font-size:14px;
-}
-
-/* FIXED ELEMENTS SAFE */
-.top-time{
-    position:fixed;
-    top:70px;
-    right:10px;
-    background:#fff;
-    padding:6px 10px;
-    border-radius:10px;
-    font-size:12px;
-    z-index:20;
-    box-shadow:0 2px 8px rgba(0,0,0,0.15);
-}
-
-/* BONUS FIX (NO OVERLAP) */
-#bonusBox{
-    position:fixed;
-    bottom:140px;
-    right:10px;
-    width:160px;
-    background:#fff3cd;
-    padding:10px;
-    border-radius:12px;
-    font-size:12px;
-    z-index:50;
-}
-
-/* REF LINK */
-.ref{
-    background:#fff;
-    padding:12px;
-    border-radius:12px;
-    margin-top:10px;
-}
-
-.ref input{
-    width:100%;
-    padding:10px;
-    border:1px solid #ddd;
-    border-radius:10px;
-    font-size:12px;
+button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    background: #0099ff;
+    color: white;
+    font-size: 14px;
 }
 
 /* BOTTOM NAV */
-.bottom-nav{
-    position:fixed;
-    bottom:0;
-    left:0;
-    right:0;
-    background:#fff;
-    display:flex;
-    justify-content:space-around;
-    padding:8px 0;
-    border-top:1px solid #ddd;
-    z-index:100;
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: skyblue;
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 0;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+    z-index: 999;
 }
 
-.bottom-nav a{
-    font-size:11px;
-    text-align:center;
-    text-decoration:none;
-    color:#333;
-    flex:1;
+.bottom-nav a {
+    text-decoration: none;
+    color: #333;
+    font-size: 11px;
+    text-align: center;
+}
+
+/* ABOUT BUTTON */
+.about-btn {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    padding: 6px 10px;
+    font-size: 12px;
+    background: #0a84ff;
+    color: white;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: bold;
+    z-index: 9999;
+}
+
+/* HELP BUTTON */
+.help-btn {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    padding: 6px 10px;
+    font-size: 12px;
+    background: #0a84ff;
+    color: white;
+    border-radius: 20px;
+    text-decoration: none;
+    font-weight: bold;
+    z-index: 9999;
+}
+
+/* BONUS BOX */
+#bonusBox {
+    display: none;
+    position: fixed;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 75px;
+    background: #fff3cd;
+    padding: 10px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    z-index: 9999;
+    font-size: 12px;
 }
 
 /* MOBILE FIX */
-@media(max-width:480px){
-    .grid{
-        grid-template-columns:1fr;
+@media (max-width: 768px) {
+
+    .grid {
+        grid-template-columns: 1fr;
     }
 
-    #bonusBox{
-        width:130px;
-        font-size:11px;
+    .about-btn, .help-btn {
+        font-size: 10px;
+        padding: 5px 8px;
+    }
+
+    .bottom-nav {
+        font-size: 10px;
     }
 }
+
 </style>
+</head>
 
-<div class="header">Welcome User</div>
+<body>
 
-<div class="top-time" id="clock"></div>
+<!-- HEADER -->
+<div class="header">
+    Welcome <span id="welcome"></span>
+</div>
+
+<div class="top-time">
+    <div id="date"></div>
+    <div id="time"></div>
+</div>
 
 <div class="container">
 
@@ -162,52 +195,64 @@ body{
 
         <div class="card">
             <h2>Balance</h2>
-            <div class="value">₦11159589</div>
+            <div class="value" id="balance">₦0</div>
         </div>
 
         <div class="card">
             <h2>Returns</h2>
-            <div class="value">₦27500</div>
+            <div class="value returns" id="returns">₦0</div>
         </div>
 
         <div class="card full">
             <h2>Total Invested</h2>
-            <div class="value">₦40000</div>
+            <div class="value" id="totalInvested">₦0</div>
         </div>
 
         <div class="card full">
-            <button class="btn">Deposit</button>
+            <button onclick="window.location.href='deposit.html'">Deposit</button>
         </div>
 
         <div class="card full">
-            <button class="btn">Withdraw</button>
+            <button onclick="window.location.href='withdraw.html'">Withdraw</button>
         </div>
 
     </div>
 
-    <div class="ref">
-        <h3 style="margin:0 0 10px 0;">Referral Link</h3>
-        <input readonly value="https://mobile-wealth-api.onrender.com/ref/12345">
+    <!-- BONUS -->
+    <div id="bonusBox">
+        <b>🎁 Bonus</b><br>
+        <input id="bonusCode" placeholder="Enter code" style="width:50%;padding:5px;">
+        <button onclick="claimBonus()" style="margin-top:5px;">Accept</button>
+    </div>
+
+    <!-- REFERRAL -->
+    <div style="background:#fff;padding:5px;margin-top:5px;border-radius:5px;">
+        <h3>Your Referral Link</h3>
+
+        <input id="refLink" readonly style="width:50%;padding:5px;" />
+
+        <button onclick="copyLink()" style="margin-top:5px;width:50%;">
+            Copy Link
+        </button>
     </div>
 
 </div>
 
-<div id="bonusBox">
-🎁 Bonus<br>
-<input style="width:100%;padding:6px;margin-top:5px;">
-<button style="width:100%;margin-top:5px;background:#0099ff;color:#fff;border:none;padding:8px;border-radius:8px;">
-Accept
-</button>
-</div>
+<!-- BUTTONS -->
+<a href="about.html" class="about-btn">About</a>
+<a href="help.html" class="help-btn">Help</a>
 
+<!-- BOTTOM NAV -->
 <div class="bottom-nav">
-    <a href="#">🏠<br>Home</a>
-    <a href="#">💰<br>Deposit</a>
-    <a href="#">💸<br>Withdraw</a>
-    <a href="#">📊<br>History</a>
-    <a href="#">🔗<br>Referral</a>
-    <a href="#">Logout</a>
+    <a href="deposit.html">💰<br>Deposit</a>
+    <a href="products.html">💸<br>Products</a>
+    <a href="withdraw.html">💸<br>Withdraw</a>
+    <a href="transactions.html">📊<br>History</a>
+    <a href="referal-history.html">📊<br>view referral</a>
+    <a href="Interest-history.html">📊<br>view interests</a>
+    <a href="login.html">Logout</a>
 </div>
+
 </body>
 
 <script>
