@@ -122,7 +122,7 @@ function loadDeposits() {
                 <p><b>Amount:</b> ₦${dep.amount}</p>
                 <p><b>Status:</b> ${dep.status}</p>
 
-                <img src="${API}/uploads/${dep.receipt}" />
+                ${dep.receipt ? <img src="${API}/uploads/${dep.receipt}" /> : ""}
 
                 <div style="margin-top:10px;">
                     <button class="approve" onclick="approve(${dep.id})">Approve</button>
