@@ -1208,42 +1208,7 @@ app.post("/admin/login", (req, res) => {
     );
 });
 
-//admin users
-app.post("/admin/users", (req, res) => {
 
-    const { phone, password } = req.body;
-
-    if (!phone || !password) {
-        return res.status(400).json({ error: "Missing admin credentials" });
-    }
-
-    db.query(
-        "SELECT * FROM users WHERE phone=? AND password=? AND role='admin' LIMIT 1",
-        [phone, password],
-        (err, result) => {
-
-            if (err) {
-                return res.status(500).json({ error: "DB error" });
-            }
-
-            if (!result || result.length === 0) {
-                return res.status(403).json({ error: "Unauthorized" });
-            }
-
-            db.query(
-                "SELECT id, phone, balance, status FROM users ORDER BY id DESC",
-                (err2, users) => {
-
-                    if (err2) {
-                        return res.status(500).json({ error: "DB error" });
-                    }
-
-                    return res.json(users || []);
-                }
-            );
-        }
-    );
-});
 
 app.get("/interest-history", (req, res) => {
 
