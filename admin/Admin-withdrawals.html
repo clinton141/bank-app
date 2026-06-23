@@ -115,7 +115,7 @@ const API = "https://mobile-wealth-api.onrender.com";
 
 function load() {
 
-    fetch(`${API}/admin/admin-withdrawals`)
+    fetch(`${API}/admin/withdrawals`)
     .then(res => res.json())
     .then(data => {
 
@@ -163,8 +163,7 @@ function approve(id){
         headers:{"Content-Type":"application/json"},
         body:JSON.stringify({id})
     })
-    .then(()=>load())
-    .catch(err => console.log(err));
+    .then(()=>load());
 }
 
 function reject(id){
@@ -173,8 +172,7 @@ function reject(id){
         headers:{"Content-Type":"application/json"},
         body:JSON.stringify({id})
     })
-    .then(()=>load())
-    .catch(err => console.log(err));
+    .then(()=>load());
 }
 
 load();
