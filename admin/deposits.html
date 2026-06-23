@@ -105,37 +105,47 @@ Deposit Approval Panel
 
 const API = "https://mobile-wealth-api.onrender.com";
 
+document.addEventListener("DOMContentLoaded", () => {
+    loadDeposits();
+});
+
 function loadDeposits() {
 
     fetch(`${API}/admin/deposits`)
     .then(res => res.json())
     .then(data => {
 
+        console.log("DEPOSITS:", data);
+
         const container = document.getElementById("deposits");
+
+        if (!container) {
+            console.log("ERROR: #deposits div not found");
+            return;
+        }
+
         container.innerHTML = "";
 
         data.forEach(dep => {
 
             container.innerHTML += `
-            <div class="card">
-                <p><b>Phone:</b> ${dep.phone}</p>
-                <p><b>Amount:</b> ₦${dep.amount}</p>
-                <p><b>Status:</b> ${dep.status}</p>
+                <div class="card">
+                    <p><b>Phone:</b> ${dep.phone}</p>
+                    <p><b>Amount:</b> ₦${dep.amount}</p>
+                    <p><b>Status:</b> ${dep.status}</p>
 
-                ${dep.receipt ? <img src="${API}/uploads/${dep.receipt}" /> : ""}
+                    ${dep.receipt ? <img src="${API}/uploads/${dep.receipt}" /> : ""}
 
-                <div style="margin-top:10px;">
-                    <button class="approve" onclick="approve(${dep.id})">Approve</button>
-                    <button class="reject" onclick="reject(${dep.id})">Reject</button>
+                    <div style="margin-top:10px;">
+                        <button onclick="approve(${dep.id})">Approve</button>
+                        <button onclick="reject(${dep.id})">Reject</button>
+                    </div>
                 </div>
-            </div>
             `;
         });
 
     })
-    .catch(err => {
-        console.log("Load deposits error:", err);
-    });
+    .catch(err => console.log("Load error:", err));
 }
 
 function approve(id){
@@ -143,8 +153,7 @@ function approve(id){
         method:"POST",
         headers:{"Content-Type":"application/json"},
         body:JSON.stringify({id})
-    })
-    .then(()=>loadDeposits());
+    }).then(()=>loadDeposits());
 }
 
 function reject(id){
@@ -152,10 +161,8 @@ function reject(id){
         method:"POST",
         headers:{"Content-Type":"application/json"},
         body:JSON.stringify({id})
-    })
-    .then(()=>loadDeposits());
+    }).then(()=>loadDeposits());
 }
-loadDeposits();
 
 </script>
 
