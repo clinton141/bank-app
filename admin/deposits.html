@@ -105,64 +105,47 @@ Deposit Approval Panel
 
 const API = "https://mobile-wealth-api.onrender.com";
 
-document.addEventListener("DOMContentLoaded", () => {
-    loadDeposits();
-});
+async function loadDeposits() {
 
-function loadDeposits() {
+    try {
+        const res = await fetch(`${API}/admin/deposits`);
 
-    fetch(`${API}/admin/deposits`)
-    .then(res => res.json())
-    .then(data => {
+        const text = await res.text();
 
-        console.log("DEPOSITS:", data);
+        console.log("RAW RESPONSE:", text);
+
+        let data;
+        try {
+            data = JSON.parse(text);
+        } catch (e) {
+            console.log("NOT JSON (SERVER ERROR):", text);
+            return;
+        }
 
         const container = document.getElementById("deposits");
 
         if (!container) {
-            console.log("ERROR: #deposits div not found");
+            console.log("Missing #deposits container");
             return;
         }
 
         container.innerHTML = "";
 
         data.forEach(dep => {
-
             container.innerHTML += `
-                <div class="card">
-                    <p><b>Phone:</b> ${dep.phone}</p>
-                    <p><b>Amount:</b> ₦${dep.amount}</p>
-                    <p><b>Status:</b> ${dep.status}</p>
-
-                    ${dep.receipt ? <img src="${API}/uploads/${dep.receipt}" /> : ""}
-
-                    <div style="margin-top:10px;">
-                        <button onclick="approve(${dep.id})">Approve</button>
-                        <button onclick="reject(${dep.id})">Reject</button>
-                    </div>
+                <div>
+                    <p>${dep.phone}</p>
+                    <p>${dep.amount}</p>
                 </div>
             `;
         });
 
-    })
-    .catch(err => console.log("Load error:", err));
+    } catch (err) {
+        console.log("FETCH ERROR:", err);
+    }
 }
 
-function approve(id){
-    fetch(`${API}/admin/deposit/approve`, {
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({id})
-    }).then(()=>loadDeposits());
-}
-
-function reject(id){
-    fetch(`${API}/admin/deposit/reject`, {
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({id})
-    }).then(()=>loadDeposits());
-}
+loadDeposits();
 
 </script>
 
