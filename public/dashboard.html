@@ -5,20 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-    
 
 body {
     margin: 0;
     font-family: Arial;
     background: #f5f7fb;
+    overflow-x: hidden;
 }
 
-/* HEADER (like Opay) */
+/* HEADER */
 .header {
     background: linear-gradient(135deg, #0099ff, #0066cc);
     color: white;
-    padding: 20px;
-    text-align: left;
+    padding: 18px;
     font-size: 18px;
     font-weight: bold;
 }
@@ -26,9 +25,10 @@ body {
 /* CONTAINER */
 .container {
     padding: 15px;
+    padding-bottom: 120px; /* space for bottom nav */
 }
 
-/* GRID CARDS */
+/* GRID */
 .grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -36,108 +36,50 @@ body {
     margin-top: 10px;
 }
 
+/* TOP TIME */
 .top-time {
     position: fixed;
     top: 10px;
     right: 10px;
     text-align: right;
-    background: rgba(255,255,255,0.85);
+    background: rgba(255,255,255,0.9);
     padding: 8px 12px;
     border-radius: 10px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     z-index: 999;
 }
 
-.top-time #date {
-    font-size: 11px;
-    color: #555;
-}
-
-.top-time #time {
-    font-size: 16px;
-    font-weight: bold;
-    color: #0099ff;
-}
-
 /* CARDS */
 .card {
-    background:skyblue;
+    background: skyblue;
     padding: 15px;
     border-radius: 15px;
     box-shadow: 0 5px 15px rgba(0,0,0,0.08);
 }
 
-/* FULL WIDTH CARD */
 .full {
     grid-column: span 2;
 }
 
-/* TITLES */
+/* TEXT */
 .card h2 {
     font-size: 14px;
     margin: 0;
-    color: #666666;
+    color: #666;
 }
 
 .value {
     font-size: 20px;
     font-weight: bold;
     margin-top: 8px;
-    color: #111;
 }
 
-/* RETURNS STYLE */
-.returns {
-    color: #00c853;
-}
-#totalInvested {
-    color: #d4af37; /* soft gold */
-    font-weight: 600;
-    font-size: 20px;
-}
+/* COLORS */
+#balance { color: #8b4513; }
+#totalInvested { color: #d4af37; }
+.returns { color: #00c853; }
 
-#balance {
-    color: #8b4513; /* brown */
-    font-weight: 600;
-    font-size: 20px;
-}
-
-
-/* BOTTOM NAV (Mobile App Style) */
-.bottom-nav {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background:skyblue;
-    display: flex;
-    justify-content: space-around;
-    padding: 10px 0;
-    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-}
-.about-btn{
-    position: fixed;
-    top: 10px;
-    right: 170px;
-    padding: 6px 10px;
-    font-size: 12px;
-    background: #0a84ff;
-    color: white;
-    border-radius: 6px;
-    text-decoration: none;
-    font-weight: bold;
-    z-index: 9999;
-}
-
-
-.bottom-nav a {
-    text-decoration: none;
-    color: #333;
-    font-size: 12px;
-    text-align: center;
-}
-
-/* BUTTON STYLE */
+/* BUTTONS */
 button {
     width: 100%;
     padding: 12px;
@@ -148,20 +90,65 @@ button {
     font-size: 14px;
 }
 
-/* RESPONSIVE */
-@media(min-width: 768px) {
-    .grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
+/* BOTTOM NAV */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: skyblue;
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 0;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+    z-index: 999;
 }
 
+.bottom-nav a {
+    text-decoration: none;
+    color: #333;
+    font-size: 11px;
+    text-align: center;
+}
+
+/* ABOUT BUTTON */
+.about-btn {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    padding: 6px 10px;
+    font-size: 12px;
+    background: #0a84ff;
+    color: white;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: bold;
+    z-index: 9999;
+}
+
+/* HELP BUTTON */
+.help-btn {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    padding: 6px 10px;
+    font-size: 12px;
+    background: #0a84ff;
+    color: white;
+    border-radius: 20px;
+    text-decoration: none;
+    font-weight: bold;
+    z-index: 9999;
+}
+
+/* BONUS BOX */
 #bonusBox {
     display: none;
     position: fixed;
     right: 10px;
     top: 50%;
     transform: translateY(-50%);
-    width: 160px;
+    width: 150px;
     background: #fff3cd;
     padding: 10px;
     border-radius: 12px;
@@ -170,14 +157,22 @@ button {
     font-size: 12px;
 }
 
-@media (max-width: 480px) {
-    #bonusBox {
-        width: 130px;
-        right: 5px;
-        font-size: 11px;
+/* MOBILE FIX */
+@media (max-width: 768px) {
+
+    .grid {
+        grid-template-columns: 1fr;
+    }
+
+    .about-btn, .help-btn {
+        font-size: 10px;
+        padding: 5px 8px;
+    }
+
+    .bottom-nav {
+        font-size: 10px;
     }
 }
-
 
 </style>
 </head>
@@ -194,7 +189,6 @@ button {
     <div id="time"></div>
 </div>
 
-<!-- MAIN -->
 <div class="container">
 
     <div class="grid">
@@ -219,68 +213,46 @@ button {
         </div>
 
         <div class="card full">
-            <button onclick="window.location.href='Withdraw.html'">Withdraw</button>
+            <button onclick="window.location.href='withdraw.html'">Withdraw</button>
         </div>
 
     </div>
+
+    <!-- BONUS -->
     <div id="bonusBox">
-    <div style="font-weight:bold; margin-bottom:5px;">🎁 Bonus</div>
+        <b>🎁 Bonus</b><br>
+        <input id="bonusCode" placeholder="Enter code" style="width:100%;padding:5px;">
+        <button onclick="claimBonus()" style="margin-top:5px;">Accept</button>
+    </div>
 
-    <input id="bonusCode"
-        placeholder="Enter code"
-        style="width:100%; padding:5px; font-size:11px;">
+    <!-- REFERRAL -->
+    <div style="background:#fff;padding:10px;margin-top:10px;border-radius:10px;">
+        <h3>Your Referral Link</h3>
 
-    <button onclick="claimBonus()"
-        style="width:100%; margin-top:5px; font-size:11px;">
-        Accept
-    </button>
+        <input id="refLink" readonly style="width:100%;padding:10px;" />
+
+        <button onclick="copyLink()" style="margin-top:5px;width:100%;">
+            Copy Link
+        </button>
+    </div>
+
 </div>
 
-    
-<div style="background:#fff;padding:10px;margin:5px;border-radius:10px;">
-    <h3>Your Referral Link</h3>
-
-    <input id="refLink" readonly style="width:10%;padding:10px;" />
-
-    <button onclick="copyLink()" style="margin-top:5px;width:10%;padding:10px;background:#0099ff;color:white;border:none;">
-        Copy Link
-    </button>
-</div>
-
- <a href="about.html" class="about-btn">About</a>
- <a href="help.html"
-style="
-    position: fixed;
-    top: 10px;
-    left: 75%;
-    transform: translateX(-50%);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 8px 14px;
-    background: #0a84ff;
-    color: white;
-    text-decoration: none;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: bold;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-    z-index: 9999;
-">
-    ❓ Help Center
-</a>
+<!-- BUTTONS -->
+<a href="about.html" class="about-btn">About</a>
+<a href="help.html" class="help-btn">Help</a>
 
 <!-- BOTTOM NAV -->
 <div class="bottom-nav">
     <a href="dashboard.html">🏠<br>Home</a>
     <a href="deposit.html">💰<br>Deposit</a>
-    <a href="products.html">💸<br>Buy products</a>
-    <a href="Withdraw.html">💸<br>Withdraw</a>
-    <a href="interest-history.html">📊<br> View Interest History</a>
-    <a href="referral-history.html">📊<br> Referral History</a>
-    <a href="Transactions.html">💸<br>Transactions History</a>
+    <a href="products.html">💸<br>Products</a>
+    <a href="withdraw.html">💸<br>Withdraw</a>
+    <a href="transactions.html">📊<br>History</a>
     <a href="login.html">Logout</a>
 </div>
+
+</body>
 
 <script>
 const API = "https://mobile-wealth-api.onrender.com";
