@@ -148,7 +148,7 @@ button {
     right: 10px;
     top: 50%;
     transform: translateY(-50%);
-    width: 150px;
+    width: 75px;
     background: #fff3cd;
     padding: 10px;
     border-radius: 12px;
@@ -221,17 +221,17 @@ button {
     <!-- BONUS -->
     <div id="bonusBox">
         <b>🎁 Bonus</b><br>
-        <input id="bonusCode" placeholder="Enter code" style="width:100%;padding:5px;">
+        <input id="bonusCode" placeholder="Enter code" style="width:50%;padding:5px;">
         <button onclick="claimBonus()" style="margin-top:5px;">Accept</button>
     </div>
 
     <!-- REFERRAL -->
-    <div style="background:#fff;padding:10px;margin-top:10px;border-radius:10px;">
+    <div style="background:#fff;padding:5px;margin-top:5px;border-radius:5px;">
         <h3>Your Referral Link</h3>
 
-        <input id="refLink" readonly style="width:100%;padding:10px;" />
+        <input id="refLink" readonly style="width:50%;padding:5px;" />
 
-        <button onclick="copyLink()" style="margin-top:5px;width:100%;">
+        <button onclick="copyLink()" style="margin-top:5px;width:50%;">
             Copy Link
         </button>
     </div>
@@ -244,11 +244,12 @@ button {
 
 <!-- BOTTOM NAV -->
 <div class="bottom-nav">
-    <a href="dashboard.html">🏠<br>Home</a>
     <a href="deposit.html">💰<br>Deposit</a>
     <a href="products.html">💸<br>Products</a>
     <a href="withdraw.html">💸<br>Withdraw</a>
     <a href="transactions.html">📊<br>History</a>
+    <a href="referal-history.html">📊<br>view referal</a>
+    <a href="Interest-history.html">📊<br>view interests</a>
     <a href="login.html">Logout</a>
 </div>
 
