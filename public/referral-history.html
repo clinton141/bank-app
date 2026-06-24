@@ -96,8 +96,20 @@ async function loadReferralHistory() {
 
     try {
 
-        const res = await fetch(`${API}/referral-history/${user.id}`);
-        const data = await res.json();
+        const userId = user.id || user.phone;
+
+        const res = await fetch(`${API}/referral-history/${userId}`);
+
+        const text = await res.text();
+
+        let data;
+
+        try {
+            data = JSON.parse(text);
+        } catch (e) {
+            console.log("NON-JSON RESPONSE:", text);
+            data = [];
+        }
 
         const container = document.getElementById("history");
 
