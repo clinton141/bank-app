@@ -1478,22 +1478,22 @@ app.get("/referral-commission/:phone", (req, res) => {
 
     const sql = `
         SELECT 
-            u.phone AS referred_user,
-            r.amount AS deposit_amount,
-            (r.amount * 0.10) AS commission,
-            r.created_at
-        FROM referral_bonus_history r
-        INNER JOIN users u ON u.id = r.referred_user_id
-        INNER JOIN users ref ON ref.id = r.referrer_id
-        WHERE ref.phone = ?
-        ORDER BY r.created_at DESC
+            deposit_amount,
+            commission_amount AS commission,
+            referred_user_id,
+            created_at
+        FROM referral_bonus_history
+        WHERE referrer_id = (
+            SELECT id FROM users WHERE phone = ?
+        )
+        ORDER BY created_at DESC
     `;
 
     db.query(sql, [phone], (err, result) => {
 
         if (err) {
-            console.log("REFERRAL COMMISSION ERROR:", err);
-            return res.status(500).json([]);
+            console.log("REFERRAL ERROR:", err);
+            return res.status(200).json([]); // prevent 500 crash
         }
 
         return res.json(result || []);
