@@ -589,7 +589,7 @@ app.post("/admin/deposit/approve", (req, res) => {
     );
 });
 //referral history
-app.get("/referral-history/:userId", (req, res) => {
+app.get("/referral-history/:user_id", (req, res) => {
 
     const userId = req.params.userId;
 
