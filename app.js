@@ -599,7 +599,7 @@ app.get("/referral-history/:userId", (req, res) => {
             referral_history.created_at,
             users.phone AS referred_user
         FROM referral_history
-        INNER JOIN users 
+        LEFT JOIN users 
             ON users.id = referral_history.referred_user_id
         WHERE referral_history.referrer_id = ?
         ORDER BY referral_history.created_at DESC
