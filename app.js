@@ -509,6 +509,7 @@ app.post("/ezeaguuy/deposit/approve", (req, res) => {
         (err, trx) => {
 
             if (err) {
+                console.log("TX ERROR:", err);
                 return res.status(500).json({ error: "DB error" });
             }
 
@@ -519,19 +520,19 @@ app.post("/ezeaguuy/deposit/approve", (req, res) => {
             const amount = Number(trx[0].amount || 0);
             const user_id = trx[0].user_id;
 
-            // APPROVE TRANSACTION
+            // 1. APPROVE DEPOSIT
             db.query(
                 "UPDATE transactions SET status='success' WHERE id=?",
                 [id]
             );
 
-            // CREDIT USER BALANCE
+            // 2. CREDIT USER
             db.query(
                 "UPDATE users SET balance = balance + ? WHERE id=?",
                 [amount, user_id]
             );
 
-            // CHECK REFERRAL INFO
+            // 3. CHECK USER REFERRAL INFO
             db.query(
                 "SELECT referred_by, referral_bonus_paid FROM users WHERE id=?",
                 [user_id],
@@ -544,10 +545,12 @@ app.post("/ezeaguuy/deposit/approve", (req, res) => {
                     const referredBy = userRes[0].referred_by;
                     const alreadyPaid = userRes[0].referral_bonus_paid;
 
+                    // NO REFERRAL OR ALREADY PAID
                     if (!referredBy || alreadyPaid === 1) {
                         return res.json({ message: "Deposit approved" });
                     }
 
+                    // 4. FIND REFERRER USER
                     db.query(
                         "SELECT id FROM users WHERE referral_code=?",
                         [referredBy],
@@ -558,36 +561,36 @@ app.post("/ezeaguuy/deposit/approve", (req, res) => {
                             }
 
                             const refId = refUser[0].id;
-                            const bonus = amount * 0.11;
 
-                            // CREDIT REFERRER
+                            const commission = amount * 0.10;
+
+                            // 5. CREDIT REFERRER
                             db.query(
                                 "UPDATE users SET balance = balance + ? WHERE id=?",
-                                [bonus, refId]
+                                [commission, refId]
                             );
 
-                            // SAVE REFERRAL HISTORY
+                            // 6. SAVE INTO referral_commission (NEW TABLE FIX)
                             db.query(
-    `INSERT INTO referral_commission 
-    (referrer_id, referred_user_id, deposit_id, deposit_amount, commission_amount)
-    VALUES (?, ?, ?, ?, ?)`,
-    [
-        referrerId,
-        userId,
-        depositId,
-        depositAmount,
-        commission
-    ]
-);
+                                `INSERT INTO referral_commission 
+                                (referrer_id, referred_user_id, deposit_id, deposit_amount, commission_amount)
+                                VALUES (?, ?, ?, ?, ?)`,
+                                [refId, user_id, id, amount, commission],
+                                (err4) => {
+                                    if (err4) {
+                                        console.log("REFERRAL INSERT ERROR:", err4);
+                                    }
+                                }
+                            );
 
-                            // MARK BONUS PAID
+                            // 7. MARK BONUS PAID
                             db.query(
                                 "UPDATE users SET referral_bonus_paid=1 WHERE id=?",
                                 [user_id]
                             );
 
                             return res.json({
-                                message: "Deposit approved + referral bonus paid"
+                                message: "Deposit approved + referral commission paid"
                             });
                         }
                     );
