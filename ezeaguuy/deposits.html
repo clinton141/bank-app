@@ -79,6 +79,13 @@ button{
 
 <div class="container" id="deposits"></div>
 
+<!-- BACK -->
+<div class="bottom">
+<a href="dashboard.html">
+<button>⬅️ admin Dashboard</button>
+</a>
+</div>
+
 <script>
 
 const API = "https://mobile-wealth-api.onrender.com";
@@ -122,7 +129,7 @@ async function loadDeposits() {
 }
 
 function approve(id){
-    fetch(`${API}/admin/deposit/approve`, {
+    fetch(`${API}/ezeaguuy/deposit/approve`, {
         method:"POST",
         headers:{"Content-Type":"application/json"},
         body:JSON.stringify({id})
@@ -130,7 +137,7 @@ function approve(id){
 }
 
 function reject(id){
-    fetch(`${API}/admin/deposit/reject`, {
+    fetch(`${API}/ezeaguuy/deposit/reject`, {
         method:"POST",
         headers:{"Content-Type":"application/json"},
         body:JSON.stringify({id})

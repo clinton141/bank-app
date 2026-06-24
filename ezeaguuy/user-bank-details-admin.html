@@ -142,7 +142,7 @@ const API = "https://mobile-wealth-api.onrender.com";
 
 function loadAll() {
 
-    fetch(`${API}/admin/all-users`)
+    fetch(`${API}/ezeaguuy/all-users`)
     .then(res => res.json())
     .then(data => {
 
@@ -173,7 +173,7 @@ function loadAll() {
 // VIEW SINGLE USER BANK DETAILS
 function viewDetails(phone) {
 
-    fetch(`${API}/admin/user-bank/${phone}`)
+    fetch(`${API}/ezeaguuy/user-bank/${phone}`)
     .then(res => res.json())
     .then(data => {
 
@@ -211,7 +211,7 @@ function search(){
         return;
     }
 
-    fetch(`${API}/admin/user-bank/${phone}`)
+    fetch(`${API}/ezeaguuy/user-bank/${phone}`)
     .then(res => res.json())
     .then(data => {
 
