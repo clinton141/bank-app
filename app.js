@@ -568,9 +568,17 @@ app.post("/ezeaguuy/deposit/approve", (req, res) => {
 
                             // SAVE REFERRAL HISTORY
                             db.query(
-                                "INSERT INTO referral_history (referrer_id, referred_user_id, amount) VALUES (?, ?, ?)",
-                                [refId, user_id, bonus]
-                            );
+    `INSERT INTO referral_commission 
+    (referrer_id, referred_user_id, deposit_id, deposit_amount, commission_amount)
+    VALUES (?, ?, ?, ?, ?)`,
+    [
+        referrerId,
+        userId,
+        depositId,
+        depositAmount,
+        commission
+    ]
+);
 
                             // MARK BONUS PAID
                             db.query(
