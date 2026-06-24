@@ -86,9 +86,9 @@ body{
 <script>
 const API = "https://mobile-wealth-api.onrender.com";
 
-const user = JSON.parse(localStorage.getItem("user"));
+const user = JSON.parse(localStorage.getItem("user") || "{}");
 
-if (!user || !user.id) {
+if (!user.id) {
     window.location.href = "login.html";
 }
 
@@ -100,7 +100,6 @@ async function loadReferralHistory() {
         const data = await res.json();
 
         const container = document.getElementById("history");
-
         if (!container) return;
 
         container.innerHTML = "";
@@ -114,22 +113,17 @@ async function loadReferralHistory() {
 
             container.innerHTML += `
                 <div class="card">
-                    <div class="user">👤 ${item.referred_user || "Unknown"}</div>
-                    <div class="amount">💰 ₦${Number(item.amount || 0).toFixed(2)}</div>
-                    <div class="date">📅 ${new Date(item.created_at).toLocaleString()}</div>
+                    <div>👤 ${item.referred_user || "Unknown"}</div>
+                    <div>💰 ₦${Number(item.amount || 0).toFixed(2)}</div>
+                    <div>📅 ${new Date(item.created_at).toLocaleString()}</div>
                 </div>
             `;
         });
 
     } catch (err) {
-
         console.log(err);
-
-        const container = document.getElementById("history");
-
-        if (container) {
-            container.innerHTML = <p class="empty">Failed to load referral history</p>;
-        }
+        document.getElementById("history").innerHTML =
+            <p class="empty">Failed to load referral history</p>;
     }
 }
 
