@@ -3,37 +3,66 @@
 <head>
 <title>Referral Earnings</title>
 
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <style>
 body{
     margin:0;
     font-family:Arial;
-    background:#f4f7fb;
+    background:#eef3f9;
+    -webkit-tap-highlight-color: transparent;
 }
 
+/* TOP BAR */
 .topbar{
-    background:#007bff;
+    position:sticky;
+    top:0;
+    z-index:10;
+    background:linear-gradient(135deg,#007bff,#0056d6);
     color:white;
-    padding:15px;
+    padding:14px;
     text-align:center;
     font-weight:bold;
+    font-size:16px;
+    box-shadow:0 2px 10px rgba(0,0,0,0.1);
 }
 
+/* CONTAINER */
+#history{
+    padding:12px;
+    padding-bottom:80px;
+}
+
+/* CARD STYLE (OPAY LOOK) */
 .card{
     background:white;
-    margin:10px;
-    padding:12px;
-    border-radius:12px;
-    box-shadow:0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom:12px;
+    padding:14px;
+    border-radius:16px;
+    box-shadow:0 3px 12px rgba(0,0,0,0.08);
+    border-left:4px solid #007bff;
 }
 
+/* TEXT */
 p{
     margin:6px 0;
     font-size:14px;
+    color:#333;
 }
 
+/* AMOUNT HIGHLIGHT */
 .amount{
-    color:green;
+    color:#00a650;
     font-weight:bold;
+    font-size:15px;
+}
+
+/* EMPTY STATE */
+.empty{
+    text-align:center;
+    color:#888;
+    margin-top:40px;
+    font-size:14px;
 }
 /* BOTTOM NAV */
 .bottom-nav{
@@ -54,17 +83,13 @@ p{
     font-size:13px;
 }
 
-.space{
-    height:70px;
-}
-
 </style>
 </head>
 
 <body>
 
 <div class="topbar">
-Referral Commission History
+💰 Referral Commission History
 </div>
 
 <div id="history"></div>
@@ -95,7 +120,7 @@ async function load() {
         container.innerHTML = "";
 
         if (!Array.isArray(data) || data.length === 0) {
-            container.innerHTML = "<p style='text-align:center;'>No referral earnings yet</p>";
+            container.innerHTML = <div class="empty">No referral earnings yet</div>;
             return;
         }
 
@@ -103,8 +128,8 @@ async function load() {
 
             container.innerHTML += `
                 <div class="card">
-                    <p>👤 ${item.referred_user}</p>
-                    <p>💰 Deposit: ₦${item.deposit_amount}</p>
+                    <p>👤 <b>User:</b> ${item.referred_user}</p>
+                    <p>💰 <b>Deposit:</b> ₦${item.deposit_amount}</p>
                     <p class="amount">🎁 Commission: ₦${item.commission}</p>
                     <p>📅 ${new Date(item.created_at).toLocaleString()}</p>
                 </div>
@@ -114,6 +139,8 @@ async function load() {
 
     } catch (err) {
         console.log(err);
+        document.getElementById("history").innerHTML =
+            <div class="empty">Failed to load data</div>;
     }
 }
 
