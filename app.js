@@ -1471,6 +1471,35 @@ app.post("/ezeaguuy/toggle-user-status", (req, res) => {
         }
     );
 });
+//referral commission
+app.get("/referral-commission/:phone", (req, res) => {
+
+    const phone = req.params.phone;
+
+    const sql = `
+        SELECT 
+            u.phone AS referred_user,
+            r.amount AS deposit_amount,
+            (r.amount * 0.10) AS commission,
+            r.created_at
+        FROM referral_bonus_history r
+        INNER JOIN users u ON u.id = r.referred_user_id
+        INNER JOIN users ref ON ref.id = r.referrer_id
+        WHERE ref.phone = ?
+        ORDER BY r.created_at DESC
+    `;
+
+    db.query(sql, [phone], (err, result) => {
+
+        if (err) {
+            console.log("REFERRAL COMMISSION ERROR:", err);
+            return res.status(500).json([]);
+        }
+
+        return res.json(result || []);
+    });
+
+});
 
 // START SERVER
 const PORT = process.env.PORT || 3000;

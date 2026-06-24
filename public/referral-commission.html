@@ -1,0 +1,126 @@
+[6:30 pm, 24/06/2026] God Is Good 😊: app.get("/referral-commission/:phone", (req, res) => {
+
+    const phone = req.params.phone;
+
+    const sql = `
+        SELECT 
+            u.phone AS referred_user,
+            r.amount AS deposit_amount,
+            (r.amount * 0.10) AS commission,
+            r.created_at
+        FROM referral_bonus_history r
+        INNER JOIN users u ON u.id = r.referred_user_id
+        INNER JOIN users ref ON ref.id = r.referrer_id
+        WHERE ref.phone = ?
+        ORDER BY r.created_at DESC
+    `;
+
+    db.query(sql, [phone], (err, result) => {
+
+        if (err) {
+            console.log("REFERRAL COMMISSION ERROR:", err);
+            return res.status(500).json([]);
+        }
+
+        return res.json(result || []);
+    });
+
+});
+[6:36 pm, 24/06/2026] God Is Good 😊: <!DOCTYPE html>
+<html>
+<head>
+<title>Referral Earnings</title>
+
+<style>
+body{
+    margin:0;
+    font-family:Arial;
+    background:#f4f7fb;
+}
+
+.topbar{
+    background:#007bff;
+    color:white;
+    padding:15px;
+    text-align:center;
+    font-weight:bold;
+}
+
+.card{
+    background:white;
+    margin:10px;
+    padding:12px;
+    border-radius:12px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.1);
+}
+
+p{
+    margin:6px 0;
+    font-size:14px;
+}
+
+.amount{
+    color:green;
+    font-weight:bold;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="topbar">
+Referral Commission History
+</div>
+
+<div id="history"></div>
+
+<script>
+
+const API = "https://mobile-wealth-api.onrender.com";
+
+const user = JSON.parse(localStorage.getItem("user"));
+
+if (!user || !user.phone) {
+    window.location.href = "login.html";
+}
+
+async function load() {
+
+    try {
+
+        const res = await fetch(`${API}/referral-commission/${user.phone}`);
+        const data = await res.json();
+
+        const container = document.getElementById("history");
+        container.innerHTML = "";
+
+        if (!Array.isArray(data) || data.length === 0) {
+            container.innerHTML = "<p style='text-align:center;'>No referral earnings yet</p>";
+            return;
+        }
+
+        data.forEach(item => {
+
+            container.innerHTML += `
+                <div class="card">
+                    <p>👤 ${item.referred_user}</p>
+                    <p>💰 Deposit: ₦${item.deposit_amount}</p>
+                    <p class="amount">🎁 Commission: ₦${item.commission}</p>
+                    <p>📅 ${new Date(item.created_at).toLocaleString()}</p>
+                </div>
+            `;
+
+        });
+
+    } catch (err) {
+        console.log(err);
+    }
+}
+
+load();
+
+</script>
+
+</body>
+</html>
