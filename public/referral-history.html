@@ -92,38 +92,47 @@ if (!user || !user.phone) {
     window.location.href = "login.html";
 }
 
-fetch(`${API}/referral-history/${user.id}`)
-.then(res => res.json())
-.then(data => {
+async function loadReferralHistory() {
 
-    const container = document.getElementById("history");
+    try {
 
-    container.innerHTML = "";
+        const res = await fetch(`${API}/referral-history/${user.id}`);
+        const data = await res.json();
 
-    if (!Array.isArray(data) || data.length === 0) {
-        container.innerHTML = <p class="empty">No referral earnings yet</p>;
-        return;
+        const container = document.getElementById("history");
+
+        if (!container) return;
+
+        container.innerHTML = "";
+
+        if (!Array.isArray(data) || data.length === 0) {
+            container.innerHTML = <p class="empty">No referral earnings yet</p>;
+            return;
+        }
+
+        data.forEach(item => {
+
+            container.innerHTML += `
+                <div class="card">
+                    <div class="user">👤 ${item.referred_user || "Unknown"}</div>
+                    <div class="amount">💰 ₦${Number(item.amount || 0).toFixed(2)}</div>
+                    <div class="date">📅 ${new Date(item.created_at).toLocaleString()}</div>
+                </div>
+            `;
+        });
+
+    } catch (err) {
+
+        console.log(err);
+
+        const container = document.getElementById("history");
+        if (container) {
+            container.innerHTML = <p class="empty">Failed to load referral history</p>;
+        }
     }
+}
 
-    data.forEach(item => {
-
-        container.innerHTML += `
-        <div class="card">
-            <div class="user">👤 ${item.referred_user || "Unknown"}</div>
-            <div class="amount">💰 ₦${Number(item.amount || 0).toFixed(2)}</div>
-            <div class="date">📅 ${new Date(item.created_at).toLocaleString()}</div>
-        </div>
-        `;
-    });
-
-})
-.catch(err => {
-
-    console.log(err);
-
-    document.getElementById("history").innerHTML =
-        <p class="empty">Failed to load referral history</p>;
-});
+document.addEventListener("DOMContentLoaded", loadReferralHistory);
 </script>
 
 </body>
