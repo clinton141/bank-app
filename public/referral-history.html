@@ -96,9 +96,9 @@ async function loadReferralHistory() {
 
     try {
 
-        const userId = user.id || user.phone;
+        const phone = user.phone;
 
-        const res = await fetch(`${API}/referral-history/${userId}`);
+        const res = await fetch(`${API}/referral-history/${phone}`);
 
         const text = await res.text();
 
@@ -138,6 +138,7 @@ async function loadReferralHistory() {
         console.log(err);
 
         const container = document.getElementById("history");
+
         if (container) {
             container.innerHTML = <p class="empty">Failed to load referral history</p>;
         }
