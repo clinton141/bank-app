@@ -597,7 +597,7 @@ app.get("/referral-history/:userId", (req, res) => {
         SELECT 
             referral_history.amount,
             referral_history.created_at,
-            COALESCE(users.phone, 'Unknown User') AS referred_user
+            users.phone AS referred_user
         FROM referral_history
         LEFT JOIN users 
             ON users.id = referral_history.referred_user_id
@@ -608,11 +608,11 @@ app.get("/referral-history/:userId", (req, res) => {
     db.query(sql, [userId], (err, result) => {
 
         if (err) {
-            console.log("Referral History DB Error:", err);
-            return res.status(500).json([]);
+            console.log("Referral Error:", err);
+            return res.status(200).json([]); // IMPORTANT FIX
         }
 
-        res.json(result || []);
+        res.status(200).json(result || []);
     });
 });
 
