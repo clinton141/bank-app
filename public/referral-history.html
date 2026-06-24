@@ -8,78 +8,66 @@
 body{
     margin:0;
     font-family:Arial;
-    background:#eef3f9;
+    background:linear-gradient(135deg,#0a84ff,#00c2ff);
+    min-height:100vh;
+    padding:15px;
 }
 
-/* TOP BAR */
-.topbar{
-    background:linear-gradient(135deg,#0099ff,#0066ff);
-    color:white;
-    padding:16px;
+.header{
     text-align:center;
-    font-size:18px;
+    color:white;
+    font-size:20px;
     font-weight:bold;
-    position:sticky;
-    top:0;
+    margin-top:10px;
+    margin-bottom:20px;
 }
 
-/* CONTAINER */
-#history{
-    padding:12px;
-    padding-bottom:80px;
-}
-
-/* CARD STYLE */
 .card{
     background:white;
-    margin-bottom:12px;
-    padding:14px;
+    padding:15px;
     border-radius:15px;
-    box-shadow:0 3px 10px rgba(0,0,0,0.08);
+    margin-bottom:12px;
+    box-shadow:0 5px 15px rgba(0,0,0,0.1);
 }
 
-/* TEXT */
 .user{
-    font-size:15px;
     font-weight:bold;
-    margin-bottom:6px;
+    font-size:14px;
 }
 
 .amount{
-    color:#00c853;
+    color:#16a34a;
     font-weight:bold;
-    margin-bottom:6px;
+    margin-top:5px;
 }
 
 .date{
     font-size:12px;
-    color:#777;
+    color:gray;
+    margin-top:3px;
 }
 
-/* EMPTY STATE */
 .empty{
     text-align:center;
-    color:#888;
-    margin-top:30px;
+    color:white;
+    margin-top:40px;
 }
 
-/* BOTTOM BUTTON */
-.bottom{
+.bottom-nav{
     position:fixed;
     bottom:0;
     left:0;
     right:0;
-    background:#fff;
-    border-top:1px solid #ddd;
-    text-align:center;
+    background:white;
+    display:flex;
+    justify-content:center;
+    padding:10px;
+    box-shadow:0 -2px 10px rgba(0,0,0,0.1);
 }
 
-.bottom a{
-    display:block;
-    padding:14px;
+.bottom-nav a{
     text-decoration:none;
-    color:white;
-    background:#0099ff;
+    color:#0a84ff;
     font-weight:bold;
 }
 </style>
@@ -87,14 +75,12 @@ body{
 
 <body>
 
-<div class="topbar">
-Referral History
-</div>
+<div class="header">💰 Referral History</div>
 
 <div id="history"></div>
 
-<div class="bottom">
-    <a href="dashboard.html">⬅️ Back to Dashboard</a>
+<div class="bottom-nav">
+    <a href="dashboard.html">🏠 Home</a>
 </div>
 
 <script>
@@ -102,7 +88,7 @@ const API = "https://mobile-wealth-api.onrender.com";
 
 const user = JSON.parse(localStorage.getItem("user"));
 
-if (!user || !user.id) {
+if (!user || !user.phone) {
     window.location.href = "login.html";
 }
 
@@ -110,11 +96,24 @@ async function loadReferralHistory() {
 
     try {
 
-        const res = await fetch(`${API}/referral-history/${user.id}`);
+        const userId = user.id || user.phone;
 
-        const data = await res.json();
+        const res = await fetch(`${API}/referral-history/${userId}`);
+
+        const text = await res.text();
+
+        let data;
+
+        try {
+            data = JSON.parse(text);
+        } catch (e) {
+            console.log("NON-JSON RESPONSE:", text);
+            data = [];
+        }
 
         const container = document.getElementById("history");
+
+        if (!container) return;
 
         container.innerHTML = "";
 
@@ -135,9 +134,13 @@ async function loadReferralHistory() {
         });
 
     } catch (err) {
+
         console.log(err);
-        document.getElementById("history").innerHTML =
-            <p class="empty">Failed to load referral history</p>;
+
+        const container = document.getElementById("history");
+        if (container) {
+            container.innerHTML = <p class="empty">Failed to load referral history</p>;
+        }
     }
 }
 
