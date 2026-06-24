@@ -39,18 +39,18 @@ app.use(bodyParser.json());
 
 // STATIC FILES
 app.use(express.static(path.join(__dirname, "public")));
-app.use("/admin", express.static(path.join(__dirname, "admin")));
+app.use("/ezeaguuy", express.static(path.join(__dirname, "ezeaguuy")));
 
 // BLOCK ADMIN FILE ACCESS (optional)
 // app.use("/admin", (req, res) => {
 //     return res.status(403).send("Access denied");
 // });
 
-app.get("/admin/login.html", (req, res) => {
-    res.sendFile(path.join(__dirname, "admin", "login.html"));
+app.get("/ezeaguuy/login.html", (req, res) => {
+    res.sendFile(path.join(__dirname, "ezeaguuy", "login.html"));
 });
 
-app.get("/admin/users", (req, res) => {
+app.get("/ezeaguuy/users", (req, res) => {
 
     db.query(
         "SELECT id, phone, balance, status FROM users ORDER BY id DESC",
@@ -71,18 +71,18 @@ app.get("/admin/users", (req, res) => {
 // ADMIN LOGIN ROUTE
 
 // ADMIN DASHBOARD ROUTE
-app.get("/admin/dashboard", (req, res) => {
+app.get("/ezeaguuy/dashboard", (req, res) => {
 
     return res.sendFile(
-        path.join(__dirname, "admin", "dashboard.html")
+        path.join(__dirname, "ezeaguuy", "dashboard.html")
     );
 });
 
 // SUPPORT BOTH URL FORMATS
-app.get("/admin/dashboard.html", (req, res) => {
+app.get("/ezeaguuy/dashboard.html", (req, res) => {
 
     return res.sendFile(
-        path.join(__dirname, "admin", "dashboard.html")
+        path.join(__dirname, "ezeaguuy", "dashboard.html")
     );
 });
 
@@ -469,7 +469,7 @@ app.post("/deposit", upload.single("receipt"), (req, res) => {
     );
 });
 //Admin deposit panel
-app.get("/admin/deposits", (req, res) => {
+app.get("/ezeaguuy/deposits", (req, res) => {
 
     const sql = `
         SELECT 
@@ -495,7 +495,7 @@ app.get("/admin/deposits", (req, res) => {
     });
 });
 
-app.post("/admin/deposit/approve", (req, res) => {
+app.post("/ezeaguuy/deposit/approve", (req, res) => {
 
     const { id } = req.body;
 
@@ -614,7 +614,7 @@ app.get("/referral-history/:userId", (req, res) => {
     });
 });
 
-app.post("/admin/deposit/reject", (req, res) => {
+app.post("/ezeaguuy/deposit/reject", (req, res) => {
 
     const { id } = req.body;
 
@@ -953,7 +953,7 @@ app.get("/transactions/:phone", (req, res) => {
     });
 });
 
-app.post("/admin/approve-withdraw", (req, res) => {
+app.post("/ezeaguuy/approve-withdraw", (req, res) => {
 
     const { id } = req.body;
 
@@ -1017,7 +1017,7 @@ app.post("/admin/approve-withdraw", (req, res) => {
     );
 });
 
-app.post("/admin/withdrawals/approve", (req, res) => {
+app.post("/ezeaguuy/withdrawals/approve", (req, res) => {
 
     const { id } = req.body;
 
@@ -1112,7 +1112,7 @@ app.get("/returns/:phone", (req, res) => {
     );
 });
 
-app.post("/admin/withdrawals/reject", (req, res) => {
+app.post("/ezeaguuy/withdrawals/reject", (req, res) => {
 
     const { id } = req.body;
 
@@ -1137,7 +1137,7 @@ app.post("/admin/withdrawals/reject", (req, res) => {
 });
 
 // ADMIN WITHDRAWALS LIST
-app.get("/admin/withdrawals", (req, res) => {
+app.get("/ezeaguuy/withdrawals", (req, res) => {
 
     const sql = `
         SELECT 
@@ -1169,7 +1169,7 @@ app.get("/admin/withdrawals", (req, res) => {
 });
 
 // ADMIN LOGIN
-app.post("/admin/login", (req, res) => {
+app.post("/ezeaguuy/login", (req, res) => {
 
     const { phone, password } = req.body;
 
@@ -1178,7 +1178,7 @@ app.post("/admin/login", (req, res) => {
     }
 
     db.query(
-        "SELECT * FROM users WHERE phone=? AND password=? AND role='admin' LIMIT 1",
+        "SELECT * FROM users WHERE phone=? AND password=? AND role='ezeaguuy' LIMIT 1",
         [phone, password],
         (err, result) => {
 
@@ -1191,17 +1191,17 @@ app.post("/admin/login", (req, res) => {
                 return res.status(401).json({ error: "Invalid admin login" });
             }
 
-            const admin = result[0];
+            const ezeaguuy = result[0];
 
-            const token = "admin_" + admin.id + "_" + Date.now();
+            const token = "ezeaguuy_" + ezeaguuy.id + "_" + Date.now();
 
             return res.json({
                 success: true,
                 token,
-                admin: {
-                    id: admin.id,
-                    phone: admin.phone,
-                    role: admin.role
+                ezeaguuy: {
+                    id: ezeaguuy.id,
+                    phone: ezeaguuy.phone,
+                    role: ezeaguuy.role
                 }
             });
         }
@@ -1209,7 +1209,7 @@ app.post("/admin/login", (req, res) => {
 });
 
 //admin users
-app.post("/admin/users", (req, res) => {
+app.post("/ezeaguuy/users", (req, res) => {
 
     const { phone, password } = req.body;
 
@@ -1218,7 +1218,7 @@ app.post("/admin/users", (req, res) => {
     }
 
     db.query(
-        "SELECT * FROM users WHERE phone=? AND password=? AND role='admin' LIMIT 1",
+        "SELECT * FROM users WHERE phone=? AND password=? AND role='ezeaguuy' LIMIT 1",
         [phone, password],
         (err, result) => {
 
@@ -1268,7 +1268,7 @@ app.get("/interest-history", (req, res) => {
 });
 
 // ADMIN USER BANK DETAILS
-app.get("/admin/user-bank/:phone", (req, res) => {
+app.get("/ezeaguuy/user-bank/:phone", (req, res) => {
 
     const phone = req.params.phone;
 
@@ -1292,7 +1292,7 @@ app.get("/admin/user-bank/:phone", (req, res) => {
 
 
 //admin create bonus section
-app.post("/admin/create-bonus", (req, res) => {
+app.post("/ezeaguuy/create-bonus", (req, res) => {
 
     const { amount, maxUsers, expiryHours, expiryMinutes } = req.body;
 
@@ -1428,7 +1428,7 @@ app.get("/user/has-active-investment/:phone", (req, res) => {
 });
 
 // ADMIN ALL USERS
-app.get("/admin/all-users", (req, res) => {
+app.get("/ezeaguuy/all-users", (req, res) => {
 
     const sql = `
         SELECT id, phone, status, balance
@@ -1448,7 +1448,7 @@ app.get("/admin/all-users", (req, res) => {
 });
 
 // ADMIN TOGGLE USER STATUS
-app.post("/admin/toggle-user-status", (req, res) => {
+app.post("/ezeaguuy/toggle-user-status", (req, res) => {
 
     const { id, status } = req.body;
 
