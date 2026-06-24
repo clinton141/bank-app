@@ -106,7 +106,7 @@ async function login(){
 
     try {
 
-        const res = await fetch(`${API}/admin/login`, {
+        const res = await fetch(`${API}/ezeaguuy/login`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -118,9 +118,9 @@ async function login(){
 
         if (res.ok && data?.success) {
 
-            localStorage.setItem("adminLoggedIn", "true");
-            localStorage.setItem("adminToken", data.token);
-            localStorage.setItem("admin", JSON.stringify(data.admin));
+            localStorage.setItem("ezeaguuyLoggedIn", "true");
+            localStorage.setItem("ezeaguuyToken", data.token);
+            localStorage.setItem("ezeaguuy", JSON.stringify(data.ezeaguuy));
 
             msg.style.color = "green";
             msg.innerText = "Login successful...";
