@@ -105,7 +105,7 @@ Withdrawal Approval Panel
 <!-- BACK -->
 <div class="bottom">
 <a href="dashboard.html">
-<button>⬅️ Admin Dashboard</button>
+<button>⬅️ admin Dashboard</button>
 </a>
 </div>
 
@@ -115,7 +115,7 @@ const API = "https://mobile-wealth-api.onrender.com";
 
 function load() {
 
-    fetch(`${API}/admin/withdrawals`)
+    fetch(`${API}/ezeaguuy/withdrawals`)
     .then(res => res.json())
     .then(data => {
 
@@ -158,7 +158,7 @@ function load() {
 }
 
 function approve(id){
-    fetch(`${API}/admin/withdrawals/approve`, {
+    fetch(`${API}/ezeaguuy/withdrawals/approve`, {
         method:"POST",
         headers:{"Content-Type":"application/json"},
         body:JSON.stringify({id})
@@ -167,7 +167,7 @@ function approve(id){
 }
 
 function reject(id){
-    fetch(`${API}/admin/withdrawals/reject`, {
+    fetch(`${API}/ezeaguuy/withdrawals/reject`, {
         method:"POST",
         headers:{"Content-Type":"application/json"},
         body:JSON.stringify({id})
