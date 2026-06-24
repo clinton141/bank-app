@@ -167,10 +167,11 @@ style="
 </a>
 
 <div class="bottom-actions">
-<a href="/admin/withdrawals.html"><button>Withdrawals</button></a>
-<a href="/admin/deposits.html"><button>Deposits</button></a>
-<a href="/admin/user-bank-details-admin.html"><button>Bank Details</button></a>
-<a href="/admin/admin-bonus.html"><button>Bonus</button></a>
+<a href="/ezeaguuy/withdrawals.html"><button>Withdrawals</button></a>
+<a href="/ezeaguuy/deposits.html"><button>Deposits</button></a>
+<a href="/ezeaguuy/user-bank-details-admin.html"><button>Bank Details</button></a>
+<a href="/ezeaguuy/admin-bonus.html"><button>Bonus</button></a>
+<a href="/ezeaguuy/admin-user-control.html"><button>user-control</button></a>
 </div>
 
 <script>
@@ -181,7 +182,7 @@ async function loadUsers() {
 
     try {
 
-        const res = await fetch(`${API}/admin/users`, {
+        const res = await fetch(`${API}/ezeaguuy/users`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json"
@@ -219,7 +220,7 @@ async function loadUsers() {
 async function toggleUser(id){
 
     try {
-        await fetch(`${API}/admin/toggle-user-status`, {
+        await fetch(`${API}/ezeaguuy/toggle-user-status`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"

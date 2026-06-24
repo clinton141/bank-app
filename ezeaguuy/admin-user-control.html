@@ -74,7 +74,7 @@ const API = "https://mobile-wealth-api.onrender.com";
 async function loadUsers() {
 
     try {
-        const res = await fetch(`${API}/admin/all-users`);
+        const res = await fetch(`${API}/ezeaguuy/all-users`);
 
         if (!res.ok) {
             throw new Error("Failed to load users: " + res.status);
@@ -114,7 +114,7 @@ async function toggleUser(id, status) {
     try {
         const newStatus = status === "active" ? "locked" : "active";
 
-        const res = await fetch(`${API}/admin/toggle-user-status`, {
+        const res = await fetch(`${API}/ezeaguuy/toggle-user-status`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ id, status: newStatus })

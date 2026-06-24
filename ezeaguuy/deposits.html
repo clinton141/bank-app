@@ -88,7 +88,7 @@ document.addEventListener("DOMContentLoaded", loadDeposits);
 async function loadDeposits() {
 
     try {
-        const res = await fetch(`${API}/admin/deposits`);
+        const res = await fetch(`${API}/ezeaguuy/deposits`);
         const data = await res.json();
 
         const container = document.getElementById("deposits");
