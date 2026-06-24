@@ -173,6 +173,48 @@ button {
         font-size: 10px;
     }
 }
+.bottom-nav{
+    position:fixed;
+    bottom:0;
+    left:0;
+    right:0;
+    background:#fff;
+    display:flex;
+    justify-content:space-between;
+    padding:4px 2px;
+    border-top:1px solid #ddd;
+    z-index:9999;
+}
+
+.bottom-nav a{
+    flex:1;
+    text-decoration:none;
+    text-align:center;
+    font-size:9px;
+    color:#333;
+    padding:6px 2px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:1px;
+}
+
+.bottom-nav a span{
+    font-size:14px;
+}
+
+/* make spacing tighter on small screens */
+@media(max-width:480px){
+    .bottom-nav a{
+        font-size:8px;
+        padding:5px 1px;
+    }
+
+    .bottom-nav a span{
+        font-size:13px;
+    }
+}
 
 </style>
 </head>
@@ -244,13 +286,15 @@ button {
 
 <!-- BOTTOM NAV -->
 <div class="bottom-nav">
-    <a href="deposit.html">💰<br>Deposit</a>
-    <a href="products.html">💸<br>Products</a>
-    <a href="withdraw.html">💸<br>Withdraw</a>
-    <a href="transactions.html">📊<br>History</a>
-    <a href="referal-history.html">📊<br>view referral</a>
-    <a href="Interest-history.html">📊<br>view interests</a>
-    <a href="login.html">Logout</a>
+
+    <a href="deposit.html"><span>💰</span>Dep</a>
+    <a href="products.html"><span>🛍️</span>Prod</a>
+    <a href="withdraw.html"><span>💸</span>W/d</a>
+    <a href="transactions.html"><span>📊</span>Hist</a>
+    <a href="referal-history.html"><span>🔗</span>Ref</a>
+    <a href="Interest-history.html"><span>📈</span>Int</a>
+    <a href="login.html"><span>🚪</span>Out</a>
+
 </div>
 
 </body>
