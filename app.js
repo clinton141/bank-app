@@ -1193,7 +1193,7 @@ app.post("/ezeaguuy/login", (req, res) => {
 
             const admin = result[0];
 
-            const admin = "admin_" + admin.id + "_" + Date.now();
+            const token = "admin_" + admin.id + "_" + Date.now();
 
             return res.json({
                 success: true,
