@@ -165,10 +165,10 @@ cron.schedule("0 0 * * *", () => {
 
     // 2. GET ACTIVE INVESTMENTS
     const sql = `
-        SELECT phone, SUM(amount) AS total_amount
+        SELECT user_id, SUM(amount) AS total_amount
         FROM investments
         WHERE status='active'
-        GROUP BY phone
+        GROUP BY user_id
     `;
 
     db.query(sql, (err, results) => {
@@ -191,9 +191,9 @@ cron.schedule("0 0 * * *", () => {
             // UPDATE USER RETURNS
             db.query(
                 `UPDATE users 
-                 SET total_returns = total_returns + ? 
-                 WHERE phone=?`,
-                [interest, row.phone],
+                 SET total_returns = COALESCE(total_returns,0) + ? 
+                 WHERE id=?`,
+                [interest, row.user_id],
                 (err2) => {
                     if (err2) console.log("Update error:", err2);
                 }
@@ -201,9 +201,9 @@ cron.schedule("0 0 * * *", () => {
 
             // SAVE INTEREST HISTORY
             db.query(
-                `INSERT INTO interest_history (phone, amount, interest)
-                 VALUES (?, ?, ?)`,
-                [row.phone, totalAmount, interest],
+                `INSERT INTO interest_history (user_id, amount, interest, created_at)
+                 VALUES (?, ?, ?, NOW())`,
+                [row.user_id, totalAmount, interest],
                 (err3) => {
                     if (err3) console.log("History save error:", err3);
                 }
