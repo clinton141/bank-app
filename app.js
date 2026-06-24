@@ -605,9 +605,12 @@ app.get("/referral-history/:userId", (req, res) => {
 
     db.query(sql, [userId], (err, result) => {
 
-        if (err) return res.json([]);
+        if (err) {
+            console.log(err);
+            return res.status(200).json([]); // IMPORTANT
+        }
 
-        res.json(result || []);
+        return res.status(200).json(result || []);
     });
 });
 
