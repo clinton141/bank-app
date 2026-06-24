@@ -1178,7 +1178,7 @@ app.post("/ezeaguuy/login", (req, res) => {
     }
 
     db.query(
-        "SELECT * FROM users WHERE phone=? AND password=? AND role='ezeaguuy' LIMIT 1",
+        "SELECT * FROM users WHERE phone=? AND password=? AND role='admin' LIMIT 1",
         [phone, password],
         (err, result) => {
 
@@ -1191,17 +1191,17 @@ app.post("/ezeaguuy/login", (req, res) => {
                 return res.status(401).json({ error: "Invalid admin login" });
             }
 
-            const ezeaguuy = result[0];
+            const admin = result[0];
 
-            const token = "ezeaguuy_" + ezeaguuy.id + "_" + Date.now();
+            const admin = "admin_" + admin.id + "_" + Date.now();
 
             return res.json({
                 success: true,
                 token,
-                ezeaguuy: {
-                    id: ezeaguuy.id,
-                    phone: ezeaguuy.phone,
-                    role: ezeaguuy.role
+                user: {
+                    id: admin.id,
+                    phone: admin.phone,
+                    role: admin.role
                 }
             });
         }
@@ -1218,7 +1218,7 @@ app.post("/ezeaguuy/users", (req, res) => {
     }
 
     db.query(
-        "SELECT * FROM users WHERE phone=? AND password=? AND role='ezeaguuy' LIMIT 1",
+        "SELECT * FROM users WHERE phone=? AND password=? AND role='admin' LIMIT 1",
         [phone, password],
         (err, result) => {
 
