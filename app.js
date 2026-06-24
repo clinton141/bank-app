@@ -1247,27 +1247,7 @@ app.post("/admin/users", (req, res) => {
     );
 });
 
-app.get("/interest-history", (req, res) => {
 
-    const { phone } = req.query;
-
-    if (!phone) {
-        return res.status(400).json({ error: "Phone is required" });
-    }
-
-    db.query(
-        "SELECT * FROM interest_history WHERE phone=? ORDER BY id DESC",
-        [phone],
-        (err, results) => {
-
-            if (err) {
-                return res.status(500).json({ error: "DB error" });
-            }
-
-            return res.json(results || []);
-        }
-    );
-});
 
 // ADMIN USER BANK DETAILS
 app.get("/admin/user-bank/:phone", (req, res) => {
