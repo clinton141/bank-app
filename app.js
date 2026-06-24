@@ -597,7 +597,7 @@ app.get("/referral-history/:userId", (req, res) => {
         SELECT 
             referral_history.amount,
             referral_history.created_at,
-            users.phone AS referred_user
+            COALESCE(users.phone, 'Unknown User') AS referred_user
         FROM referral_history
         LEFT JOIN users 
             ON users.id = referral_history.referred_user_id
@@ -612,7 +612,7 @@ app.get("/referral-history/:userId", (req, res) => {
             return res.status(500).json([]);
         }
 
-        return res.json(result || []);
+        res.json(result || []);
     });
 });
 
