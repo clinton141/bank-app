@@ -595,24 +595,19 @@ app.get("/referral-history/:userId", (req, res) => {
 
     const sql = `
         SELECT 
-            referral_history.amount,
-            referral_history.created_at,
-            users.phone AS referred_user
-        FROM referral_history
-        LEFT JOIN users 
-            ON users.id = referral_history.referred_user_id
-        WHERE referral_history.referrer_id = ?
-        ORDER BY referral_history.created_at DESC
+            referral_bonus_history.amount,
+            referral_bonus_history.created_at,
+            referral_bonus_history.referred_user_id
+        FROM referral_bonus_history
+        WHERE referrer_id = ?
+        ORDER BY created_at DESC
     `;
 
     db.query(sql, [userId], (err, result) => {
 
-        if (err) {
-            console.log("Referral Error:", err);
-            return res.status(200).json([]); // IMPORTANT FIX
-        }
+        if (err) return res.json([]);
 
-        res.status(200).json(result || []);
+        res.json(result || []);
     });
 });
 
