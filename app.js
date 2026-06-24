@@ -589,9 +589,9 @@ app.post("/admin/deposit/approve", (req, res) => {
     );
 });
 //referral history
-app.get("/referral-history/:user_id", (req, res) => {
+app.get("/referral-history/:phone", (req, res) => {
 
-    const userId = req.params.userId;
+    const phone = req.params.phone;
 
     const sql = `
         SELECT 
@@ -601,11 +601,13 @@ app.get("/referral-history/:user_id", (req, res) => {
         FROM referral_history
         INNER JOIN users 
             ON users.id = referral_history.referred_user_id
-        WHERE referral_history.referrer_id = ?
+        WHERE referral_history.referrer_id = (
+            SELECT id FROM users WHERE phone = ?
+        )
         ORDER BY referral_history.created_at DESC
     `;
 
-    db.query(sql, [userId], (err, result) => {
+    db.query(sql, [phone], (err, result) => {
 
         if (err) {
             console.log("Referral History DB Error:", err);
