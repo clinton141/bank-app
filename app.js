@@ -846,11 +846,12 @@ app.post("/withdraw", (req, res) => {
                             // INSERT WITHDRAWAL
                             db.query(
                                 `INSERT INTO transactions 
-                                (user_id, type, amount, status, bank_name, account_name, account_number) 
+                                (user_id, type, amount, tax,status, bank_name, account_name, account_number) 
                                 VALUES (?, 'withdraw', ?, 'pending', ?, ?, ?)`,
                                 [
                                     user.id,
                                     finalAmount,
+                                    tax,
                                     userBank.bank_name,
                                     userBank.account_name,
                                     userBank.account_number
@@ -861,7 +862,10 @@ app.post("/withdraw", (req, res) => {
                                         console.log(err4);
                                         return res.status(500).json({ error: "Transaction failed" });
                                     }
-                                         // 🏦 ADD TAX TO ADMIN VAULT (IMPORTANT FIX)
+         // ✅ GET INSERTED WITHDRAWAL ID (optional but good practice)
+        const withdrawalId = result.insertId;
+
+         // 🏦 ADD TAX TO ADMIN VAULT (IMPORTANT FIX)
         db.query(
             `UPDATE admin_vault 
              SET total_balance = total_balance + ? 
@@ -874,6 +878,16 @@ app.post("/withdraw", (req, res) => {
             }
         );
 
+         // (OPTIONAL BUT RECOMMENDED) LOG TAX
+        db.query(
+            `INSERT INTO admin_vault_log (withdrawal_id, amount) VALUES (?, ?)`,
+            [withdrawalId, tax],
+            (err6) => {
+                if (err6) {
+                    console.log("Vault log error:", err6);
+                }
+            }
+        );
                                     return res.json({
                                         message: "Withdrawal submitted successfully",
                                         tax: tax.toFixed(2),
@@ -988,6 +1002,7 @@ app.get("/transactions/:phone", (req, res) => {
     });
 });
 
+
 app.post("/ezeaguuy/approve-withdraw", (req, res) => {
 
     const { id } = req.body;
@@ -996,8 +1011,9 @@ app.post("/ezeaguuy/approve-withdraw", (req, res) => {
         return res.status(400).json({ error: "Missing withdrawal id" });
     }
 
+    // 1. GET WITHDRAWAL
     db.query(
-        "SELECT * FROM transactions WHERE id=?",
+        "SELECT * FROM transactions WHERE id=? AND status='pending'",
         [id],
         (err, result) => {
 
@@ -1006,14 +1022,19 @@ app.post("/ezeaguuy/approve-withdraw", (req, res) => {
             }
 
             if (!result || result.length === 0) {
-                return res.status(404).json({ error: "Not found" });
+                return res.status(404).json({ error: "Withdrawal not found or already processed" });
             }
 
             const withdrawal = result[0];
 
+            const userId = withdrawal.user_id;
+            const amount = Number(withdrawal.amount || 0);
+            const tax = Number(withdrawal.tax || 0);
+
+            // 2. GET USER
             db.query(
                 "SELECT * FROM users WHERE id=?",
-                [withdrawal.user_id],
+                [userId],
                 (err2, users) => {
 
                     if (err2) {
@@ -1026,23 +1047,37 @@ app.post("/ezeaguuy/approve-withdraw", (req, res) => {
 
                     const user = users[0];
 
-                    const userBalance = Number(user.returns || user.total_returns || 0);
+                    const balance = Number(user.total_returns || 0);
 
-                    if (userBalance < withdrawal.amount) {
+                    if (balance < amount) {
                         return res.status(400).json({ error: "Insufficient balance" });
                     }
 
+                    // 3. DEDUCT USER BALANCE (CONSISTENT COLUMN)
                     db.query(
-                        "UPDATE users SET returns = returns - ? WHERE id=?",
-                        [withdrawal.amount, user.id]
+                        "UPDATE users SET total_returns = total_returns - ? WHERE id=?",
+                        [amount, userId]
                     );
 
+                    // 4. CREDIT ADMIN VAULT WITH TAX
+                    db.query(
+                        "UPDATE admin_vault SET total_balance = total_balance + ? WHERE id=1",
+                        [tax]
+                    );
+
+                    // 5. MARK WITHDRAWAL APPROVED
                     db.query(
                         "UPDATE transactions SET status='approved' WHERE id=?",
                         [id],
-                        () => {
+                        (err3) => {
+                            if (err3) {
+                                return res.status(500).json({ error: "Failed to update transaction" });
+                            }
+
                             return res.json({
-                                message: "Withdrawal approved"
+                                message: "Withdrawal approved successfully",
+                                amount: amount,
+                                tax: tax
                             });
                         }
                     );
@@ -1084,7 +1119,7 @@ app.post("/ezeaguuy/withdrawals/approve", (req, res) => {
 
             // RULE 1: MINIMUM WITHDRAWAL AMOUNT
             if (amount < 500) {
-                return res.status(400).json({ error: "Minimum withdrawal is ₦500" });
+                return res.status(400).json({ error: "Minimum withdrawal is ₦7500" });
             }
 
             // RULE 2: CHECK FUNDS
