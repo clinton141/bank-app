@@ -1508,7 +1508,7 @@ app.post("/ezeaguuy/toggle-user-status", (req, res) => {
     );
 });
 //referral commission
-app.get("/referral-commission/:userId", (req, res) => {
+app.get("/referral-commission/:phone", (req, res) => {
 
     const userId = req.params.userId;
 
