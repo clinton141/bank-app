@@ -1510,21 +1510,24 @@ app.post("/ezeaguuy/toggle-user-status", (req, res) => {
 //referral commission
 app.get("/referral-commission/:phone", (req, res) => {
 
-    const userId = req.params.userId;
+    const phone = req.params.phone;
 
     const sql = `
         SELECT 
-            referral_commission.amount,
+            referral_commission.commission_amount,
+            referral_commission.deposit_amount,
             referral_commission.created_at,
             users.phone AS referred_user
         FROM referral_commission
         INNER JOIN users 
             ON users.id = referral_commission.referred_user_id
-        WHERE referral_commission.referrer_id = ?
+        WHERE referral_commission.referrer_id = (
+            SELECT id FROM users WHERE phone = ?
+        )
         ORDER BY referral_commission.created_at DESC
     `;
 
-    db.query(sql, [userId], (err, result) => {
+    db.query(sql, [phone], (err, result) => {
 
         if (err) {
             console.log("Referral commission DB Error:", err);
