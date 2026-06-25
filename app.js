@@ -817,7 +817,7 @@ app.post("/withdraw", (req, res) => {
                         `SELECT id FROM transactions 
                          WHERE user_id=? 
                          AND type='withdraw' 
-                         AND created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)`,
+                         AND created_at >= DATE_SUB(NOW(), INTERVAL 0 DAY)`,
                         [user.id],
                         (err3, existing) => {
 
