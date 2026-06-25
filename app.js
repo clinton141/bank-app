@@ -969,6 +969,10 @@ app.post("/ezeaguuy/approve-withdraw", (req, res) => {
 
     const { id } = req.body;
 
+    if (!id) {
+        return res.status(400).send("Missing withdrawal id");
+    }
+
     // 1. get withdrawal
     db.query(
         "SELECT * FROM transactions WHERE id=?",
@@ -977,36 +981,71 @@ app.post("/ezeaguuy/approve-withdraw", (req, res) => {
 
             if (err) return res.status(500).send("DB error");
 
-            const withdrawal = result[0];
-
-            if (!withdrawal) {
-                return res.send("Not found");
+            if (!result || result.length === 0) {
+                return res.status(404).send("Withdrawal not found");
             }
+
+            const trx = result[0];
 
             // 2. get user
             db.query(
                 "SELECT * FROM users WHERE id=?",
-                [withdrawal.user_id],
+                [trx.user_id],
                 (err2, users) => {
+
+                    if (err2) return res.status(500).send("DB error");
+
+                    if (!users || users.length === 0) {
+                        return res.status(404).send("User not found");
+                    }
 
                     const user = users[0];
 
-                    if (user.returns < withdrawal.amount) {
-                        return res.send("Insufficient balance");
+                    const amount = Number(trx.amount);
+                    const tax = Number(trx.tax || amount * 0.03);
+
+                    // 3. CHECK BALANCE
+                    if (Number(user.total_returns) < amount) {
+                        return res.status(400).send("Insufficient balance");
                     }
 
-                    // 3. deduct balance
+                    // 4. DEDUCT ONLY AMOUNT FROM USER
                     db.query(
-                        "UPDATE users SET returns = returns - ? WHERE id=?",
-                        [withdrawal.amount, user.id]
-                    );
+                        "UPDATE users SET total_returns = total_returns - ? WHERE id=?",
+                        [amount, user.id],
+                        (err3) => {
 
-                    // 4. mark approved
-                    db.query(
-                        "UPDATE transactions SET status='approved' WHERE id=?",
-                        [id],
-                        () => {
-                            res.send("Withdrawal approved");
+                            if (err3) {
+                                console.log("Deduction error:", err3);
+                                return res.status(500).send("Deduction failed");
+                            }
+
+                            // 5. ADD TAX TO ADMIN VAULT
+                            db.query(
+                                "UPDATE admin_vault SET total_balance = total_balance + ? WHERE id=1",
+                                [tax],
+                                (err4) => {
+
+                                    if (err4) {
+                                        console.log("Vault error:", err4);
+                                    }
+
+                                    // 6. MARK WITHDRAWAL APPROVED
+                                    db.query(
+                                        "UPDATE transactions SET status='approved' WHERE id=?",
+                                        [id],
+                                        (err5) => {
+
+                                            if (err5) {
+                                                console.log("Status error:", err5);
+                                                return res.status(500).send("Status update failed");
+                                            }
+
+                                            return res.send("Withdrawal approved successfully");
+                                        }
+                                    );
+                                }
+                            );
                         }
                     );
                 }
