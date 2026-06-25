@@ -862,9 +862,7 @@ app.post("/withdraw", (req, res) => {
                                         console.log(err4);
                                         return res.status(500).json({ error: "Transaction failed" });
                                     }
-         // ✅ GET INSERTED WITHDRAWAL ID (optional but good practice)
-        const withdrawalId = result.insertId;
-
+         
          // 🏦 ADD TAX TO ADMIN VAULT (IMPORTANT FIX)
         db.query(
             `UPDATE admin_vault 
@@ -878,16 +876,7 @@ app.post("/withdraw", (req, res) => {
             }
         );
 
-         // (OPTIONAL BUT RECOMMENDED) LOG TAX
-        db.query(
-            `INSERT INTO admin_vault_log (withdrawal_id, amount) VALUES (?, ?)`,
-            [withdrawalId, tax],
-            (err6) => {
-                if (err6) {
-                    console.log("Vault log error:", err6);
-                }
-            }
-        );
+        
                                     return res.json({
                                         message: "Withdrawal submitted successfully",
                                         tax: tax.toFixed(2),
