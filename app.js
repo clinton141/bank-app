@@ -153,9 +153,18 @@ function checkUserStatus(phone, cb) {
 
 // ================= DAILY INVESTMENT SYSTEM =================
 // runs every 12AM
-cron.schedule("*3/ * * * *", () => {
+let isRunning = false;
 
-    
+cron.schedule("0 0 * * *", () => {
+
+    if (isRunning) {
+        console.log("⚠️ Interest job already running. Skipped.");
+        return;
+    }
+
+    isRunning = true;
+
+    console.log("🔥 DAILY INTEREST STARTED:", new Date().toString());
 
     // 1. expire investments
     db.query(
@@ -165,58 +174,66 @@ cron.schedule("*3/ * * * *", () => {
         }
     );
 
-    // 2. get active investments grouped by phone
+    // 2. ONLY GET INVESTMENTS NOT PROCESSED TODAY
     const sql = `
-        SELECT phone, SUM(amount) AS total_amount
+        SELECT id, phone, amount
         FROM investments
         WHERE status='active'
-        GROUP BY phone
+        AND (last_interest_date IS NULL OR last_interest_date < CURDATE())
     `;
 
     db.query(sql, (err, results) => {
 
         if (err) {
             console.log("Interest fetch error:", err);
+            isRunning = false;
             return;
         }
 
-        if (!results.length) {
-            console.log("⚠️ No active investments found");
+        if (!results || results.length === 0) {
+            console.log("⚠️ No new investments to process");
+            isRunning = false;
             return;
         }
 
         results.forEach(row => {
 
-            const interest = Number(row.total_amount) * 0.10;
+            const interest = Number(row.amount) * 0.10;
 
-            // 1. UPDATE USER TOTAL RETURNS
+            // 1. UPDATE USER BALANCE
             db.query(
                 `UPDATE users 
                  SET total_returns = total_returns + ? 
                  WHERE phone=?`,
                 [interest, row.phone],
                 (err2) => {
-                    if (err2) {
-                        console.log("Update error:", err2);
-                    }
+                    if (err2) console.log("Update error:", err2);
                 }
             );
 
-            // 2. SAVE INTEREST HISTORY (THIS FIXES YOUR ISSUE)
+            // 2. SAVE HISTORY
             db.query(
                 `INSERT INTO interest_history (phone, amount, interest)
                  VALUES (?, ?, ?)`,
-                [row.phone, row.total_amount, interest],
+                [row.phone, row.amount, interest],
                 (err3) => {
-                    if (err3) {
-                        console.log("History save error:", err3);
-                    
-                    }
+                    if (err3) console.log("History error:", err3);
                 }
             );
 
+            // 3. MARK AS PROCESSED (CRITICAL FIX)
+            db.query(
+                `UPDATE investments 
+                 SET last_interest_date = CURDATE() 
+                 WHERE id=?`,
+                [row.id],
+                (err4) => {
+                    if (err4) console.log("Tracking error:", err4);
+                }
+            );
         });
 
+        isRunning = false;
     });
 
 }, {
