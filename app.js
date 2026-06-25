@@ -861,6 +861,18 @@ app.post("/withdraw", (req, res) => {
                                         console.log(err4);
                                         return res.status(500).json({ error: "Transaction failed" });
                                     }
+                                         // 🏦 ADD TAX TO ADMIN VAULT (IMPORTANT FIX)
+        db.query(
+            `UPDATE admin_vault 
+             SET total_balance = total_balance + ? 
+             WHERE id = 1`,
+            [tax],
+            (err5) => {
+                if (err5) {
+                    console.log("Vault update error:", err5);
+                }
+            }
+        );
 
                                     return res.json({
                                         message: "Withdrawal submitted successfully",
