@@ -155,7 +155,9 @@ function checkUserStatus(phone, cb) {
 // runs every 12AM
 cron.schedule("0 0 * * *", () => {
 
-    // 1. EXPIRE INVESTMENTS
+    
+
+    // 1. expire investments
     db.query(
         "UPDATE investments SET status='expired' WHERE end_date <= NOW() AND status='active'",
         (err) => {
@@ -163,12 +165,12 @@ cron.schedule("0 0 * * *", () => {
         }
     );
 
-    // 2. GET ACTIVE INVESTMENTS
+    // 2. get active investments grouped by phone
     const sql = `
-        SELECT user_id, SUM(amount) AS total_amount
+        SELECT phone, SUM(amount) AS total_amount
         FROM investments
         WHERE status='active'
-        GROUP BY user_id
+        GROUP BY phone
     `;
 
     db.query(sql, (err, results) => {
@@ -178,34 +180,38 @@ cron.schedule("0 0 * * *", () => {
             return;
         }
 
-        if (!results || results.length === 0) {
+        if (!results.length) {
             console.log("⚠️ No active investments found");
             return;
         }
 
         results.forEach(row => {
 
-            const totalAmount = Number(row.total_amount || 0);
-            const interest = totalAmount * 0.10;
+            const interest = Number(row.total_amount) * 0.10;
 
-            // UPDATE USER RETURNS
+            // 1. UPDATE USER TOTAL RETURNS
             db.query(
                 `UPDATE users 
-                 SET total_returns = COALESCE(total_returns,0) + ? 
-                 WHERE id=?`,
-                [interest, row.user_id],
+                 SET total_returns = total_returns + ? 
+                 WHERE phone=?`,
+                [interest, row.phone],
                 (err2) => {
-                    if (err2) console.log("Update error:", err2);
+                    if (err2) {
+                        console.log("Update error:", err2);
+                    }
                 }
             );
 
-            // SAVE INTEREST HISTORY
+            // 2. SAVE INTEREST HISTORY (THIS FIXES YOUR ISSUE)
             db.query(
-                `INSERT INTO interest_history (user_id, amount, interest, created_at)
-                 VALUES (?, ?, ?, NOW())`,
-                [row.user_id, totalAmount, interest],
+                `INSERT INTO interest_history (phone, amount, interest)
+                 VALUES (?, ?, ?)`,
+                [row.phone, row.total_amount, interest],
                 (err3) => {
-                    if (err3) console.log("History save error:", err3);
+                    if (err3) {
+                        console.log("History save error:", err3);
+                    
+                    }
                 }
             );
 
