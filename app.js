@@ -579,7 +579,8 @@ app.post("/ezeaguuy/deposit/approve", (req, res) => {
                             }
 
                             const refId = refUser[0].id;
-                            const bonus = amount * 0.11;
+
+                            const commission = amount * 0.11;
 
                             // CREDIT REFERRER
                             db.query(
@@ -587,10 +588,18 @@ app.post("/ezeaguuy/deposit/approve", (req, res) => {
                                 [commission, refId]
                             );
 
-                            // SAVE REFERRAL HISTORY
+                            // 💥 FIXED INSERT (THIS WAS YOUR MAIN BUG)
                             db.query(
-                                `INSERT INTO referral_commission (referrer_id, referred_user_id, deposit_id,deposit_amount,commission_amount) VALUES (?,?,?, ?, ?)`,
-                                [refId, user_id,id,amount,commission]
+                                `INSERT INTO referral_commission 
+                                (referrer_id, referred_user_id, deposit_id, deposit_amount, commission_amount)
+                                VALUES (?, ?, ?, ?, ?)`,
+                                [
+                                    refId,
+                                    user_id,
+                                    id,
+                                    amount,
+                                    commission
+                                ]
                             );
 
                             // MARK BONUS PAID
@@ -600,7 +609,7 @@ app.post("/ezeaguuy/deposit/approve", (req, res) => {
                             );
 
                             return res.json({
-                                message: "Deposit approved + referral bonus paid"
+                                message: "Deposit approved + referral commission saved"
                             });
                         }
                     );
