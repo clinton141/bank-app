@@ -153,11 +153,11 @@ function checkUserStatus(phone, cb) {
 
 // ================= DAILY INVESTMENT SYSTEM =================
 // runs every 12AM
-cron.schedule("*/3 * * * *", () => {
+cron.schedule("*3/ * * * *", () => {
 
-    console.log("🔥 Interest job running:", new Date());
+    
 
-    // expire investments
+    // 1. expire investments
     db.query(
         "UPDATE investments SET status='expired' WHERE end_date <= NOW() AND status='active'",
         (err) => {
@@ -165,11 +165,12 @@ cron.schedule("*/3 * * * *", () => {
         }
     );
 
+    // 2. get active investments grouped by phone
     const sql = `
-        SELECT i.id, i.phone, i.amount
-        FROM investments i
-        WHERE i.status='active'
-        AND (i.last_interest_at IS NULL OR DATE(i.last_interest_at) < CURDATE())
+        SELECT phone, SUM(amount) AS total_amount
+        FROM investments
+        WHERE status='active'
+        GROUP BY phone
     `;
 
     db.query(sql, (err, results) => {
@@ -179,37 +180,41 @@ cron.schedule("*/3 * * * *", () => {
             return;
         }
 
-        if (!results || results.length === 0) {
-            console.log("⚠️ No new investments to process");
+        if (!results.length) {
+            console.log("⚠️ No active investments found");
             return;
         }
 
         results.forEach(row => {
 
-            const interest = Number(row.amount) * 0.10;
+            const interest = Number(row.total_amount) * 0.10;
 
-            // 1. UPDATE USER BALANCE
+            // 1. UPDATE USER TOTAL RETURNS
             db.query(
                 `UPDATE users 
                  SET total_returns = total_returns + ? 
                  WHERE phone=?`,
-                [interest, row.phone]
+                [interest, row.phone],
+                (err2) => {
+                    if (err2) {
+                        console.log("Update error:", err2);
+                    }
+                }
             );
 
-            // 2. INSERT HISTORY
+            // 2. SAVE INTEREST HISTORY (THIS FIXES YOUR ISSUE)
             db.query(
                 `INSERT INTO interest_history (phone, amount, interest)
                  VALUES (?, ?, ?)`,
-                [row.phone, row.amount, interest]
+                [row.phone, row.total_amount, interest],
+                (err3) => {
+                    if (err3) {
+                        console.log("History save error:", err3);
+                    
+                    }
+                }
             );
 
-            // 3. MARK INVESTMENT AS PROCESSED TODAY
-            db.query(
-                `UPDATE investments 
-                 SET last_interest_at = NOW() 
-                 WHERE id=?`,
-                [row.id]
-            );
         });
 
     });
