@@ -179,7 +179,7 @@ cron.schedule("0 0 * * *", () => {
         SELECT id, phone, amount
         FROM investments
         WHERE status='active'
-        AND (last_interest_date IS NULL OR last_interest_date < CURDATE())
+        AND (last_interest_time IS NULL OR DATE(last_interest_time) < CURDATE())
     `;
 
     db.query(sql, (err, results) => {
@@ -223,14 +223,14 @@ cron.schedule("0 0 * * *", () => {
 
             // 3. MARK AS PROCESSED (CRITICAL FIX)
             db.query(
-                `UPDATE investments 
-                 SET last_interest_date = CURDATE() 
-                 WHERE id=?`,
-                [row.id],
-                (err4) => {
-                    if (err4) console.log("Tracking error:", err4);
-                }
-            );
+    `UPDATE investments 
+        SET last_interest_time = NOW() 
+        WHERE id=?`,
+        [row.id],
+        (err) => {
+        if (err) console.log("Tracking error:", err);
+    }
+);
         });
 
         isRunning = false;
