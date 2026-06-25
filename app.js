@@ -482,10 +482,8 @@ app.post("/deposit", upload.single("receipt"), (req, res) => {
                         return res.status(500).json({ error: "Deposit failed" });
                     }
 
-                    return res.json({
-                        success: true,
-                        message: "Deposit submitted for admin approval"
-                    });
+                    return res.json("Deposit submitted for admin approval"
+                    );
                 }
             );
         }
