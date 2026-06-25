@@ -67,7 +67,7 @@ p{
 🎁💰Referral Commission History
 </div>
 
-<div id="history"></div>
+<div id="commission"></div>
 
 <!-- BOTTOM NAV -->
 <div class="bottom-nav">
@@ -91,7 +91,7 @@ async function load() {
         const res = await fetch(`${API}/referral-commission/${user.id}`);
         const data = await res.json();
 
-        const container = document.getElementById("history");
+        const container = document.getElementById("commission");
         container.innerHTML = "";
 
         if (!Array.isArray(data) || data.length === 0) {
