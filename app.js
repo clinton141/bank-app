@@ -836,11 +836,12 @@ app.post("/withdraw", (req, res) => {
                             // STEP 8: INSERT WITHDRAWAL
                             db.query(
                                 `INSERT INTO transactions 
-                                (user_id, type, amount, status, bank_name, account_name, account_number) 
-                                VALUES (?, 'withdraw', ?, 'pending', ?, ?, ?)`,
+                                (user_id, type, amount, tax,status,bank_name, account_name, account_number) 
+                                VALUES (?, 'withdraw', ?,?, 'pending', ?, ?, ?)`,
                                 [
                                     user.id,
-                                    finalAmount,
+                                    withdrawAmount,
+                                    tax,
                                     userBank.bank_name,
                                     userBank.account_name,
                                     userBank.account_number
@@ -1002,7 +1003,7 @@ app.post("/ezeaguuy/approve-withdraw", (req, res) => {
                     const user = users[0];
 
                     const amount = Number(trx.amount);
-                    const tax = Number(trx.tax || amount * 0.03);
+                    const tax = Number(trx.tax || 0);
 
                     // 3. CHECK BALANCE
                     if (Number(user.total_returns) < amount) {
