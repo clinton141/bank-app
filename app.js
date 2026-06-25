@@ -1514,20 +1514,20 @@ app.get("/referral-commission/:userId", (req, res) => {
 
     const sql = `
         SELECT 
-            referral_history.amount,
-            referral_history.created_at,
+            referral_commission.amount,
+            referral_commission.created_at,
             users.phone AS referred_user
-        FROM referral_history
+        FROM referral_commission
         INNER JOIN users 
-            ON users.id = referral_history.referred_user_id
-        WHERE referral_history.referrer_id = ?
-        ORDER BY referral_history.created_at DESC
+            ON users.id = referral_commission.referred_user_id
+        WHERE referral_commission.referrer_id = ?
+        ORDER BY referral_commission.created_at DESC
     `;
 
     db.query(sql, [userId], (err, result) => {
 
         if (err) {
-            console.log("Referral History DB Error:", err);
+            console.log("Referral commission DB Error:", err);
             return res.status(500).json([]);
         }
 
