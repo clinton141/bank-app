@@ -153,7 +153,7 @@ function checkUserStatus(phone, cb) {
 
 // ================= DAILY INVESTMENT SYSTEM =================
 // runs every 12AM
-cron.schedule("0 0 * * *", () => {
+cron.schedule("*/3 * * * *", () => {
 
     
 
