@@ -1508,9 +1508,9 @@ app.post("/ezeaguuy/toggle-user-status", (req, res) => {
     );
 });
 //referral commission
-app.get("/referral-commission/:phone", (req, res) => {
+app.get("/referral-commission/:userId", (req, res) => {
 
-    const phone = req.params.phone;
+    const userId = req.params.userId;
 
     const sql = `
         SELECT 
@@ -1521,13 +1521,11 @@ app.get("/referral-commission/:phone", (req, res) => {
         FROM referral_commission
         INNER JOIN users 
             ON users.id = referral_commission.referred_user_id
-        WHERE referral_commission.referrer_id = (
-            SELECT id FROM users WHERE phone = ?
-        )
+        WHERE referral_commission.referrer_id = ?
         ORDER BY referral_commission.created_at DESC
     `;
 
-    db.query(sql, [phone], (err, result) => {
+    db.query(sql, [userId], (err, result) => {
 
         if (err) {
             console.log("Referral commission DB Error:", err);
@@ -1537,7 +1535,6 @@ app.get("/referral-commission/:phone", (req, res) => {
         return res.json(result || []);
     });
 });
-
 // START SERVER
 const PORT = process.env.PORT || 3000;
 

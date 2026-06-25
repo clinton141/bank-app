@@ -80,7 +80,7 @@ const API = "https://mobile-wealth-api.onrender.com";
 
 const user = JSON.parse(localStorage.getItem("user"));
 
-if (!user || !user.phone) {
+if (!user || !user.id) {
     window.location.href = "login.html";
 }
 
@@ -88,7 +88,7 @@ async function load() {
 
     try {
 
-        const res = await fetch(`${API}/referral-commission/${user.phone}`);
+        const res = await fetch(`${API}/referral-commission/${user.id}`);
         const data = await res.json();
 
         const container = document.getElementById("history");
