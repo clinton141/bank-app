@@ -104,8 +104,8 @@ async function load() {
             container.innerHTML += `
                 <div class="card">
                     <p>👤 ${item.referred_user}</p>
-                    <p>💰 Deposit: ₦${item.deposit_amount}</p>
-                    <p class="amount">🎁 Commission: ₦${item.commission}</p>
+                    <p>💰 Deposit: ₦${Number(item.deposit_amount || 0).toFixed(2)}</p>
+                    <p class="amount">🎁 Commission: ₦${Number(item.commission_amount || 0).toFixed(2)}</p>
                     <p>📅 ${new Date(item.created_at).toLocaleString()}</p>
                 </div>
             `;
@@ -113,7 +113,7 @@ async function load() {
         });
 
     } catch (err) {
-        console.log(err);
+        console.log("Referral load error:", err);
     }
 }
 

@@ -1534,7 +1534,7 @@ app.get("/referral-commission/:phone", (req, res) => {
             return res.status(500).json([]);
         }
 
-        return res.json(result);
+        return res.json(result || []);
     });
 });
 
