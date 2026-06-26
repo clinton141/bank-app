@@ -778,110 +778,110 @@ app.post("/withdraw", (req, res) => {
         return res.status(400).send("Missing fields");
     }
 
-    // STEP 1: MINIMUM WITHDRAWAL (₦12500)
+    // STEP 1: MINIMUM WITHDRAWAL
     if (withdrawAmount < 12500) {
         return res.send("Minimum withdrawal is ₦12500");
     }
-    //2 referral to activate withdrawal
+
+    // STEP 2: GET USER FIRST (IMPORTANT FIX)
     db.query(
-    `SELECT COUNT(*) AS total 
-     FROM users 
-     WHERE referred_by = ? AND first_deposit >= 10000`,
-    [user.referral_code],
-    (err, ref) => {
-
-        if (err) {
-            return res.status(500).send("DB error");
-        }
-
-        const count = ref[0].total;
-
-        if (count < 2) {
-            return res.status(403).send(
-                "You must refer at least 2 active users with ₦10000 deposit to withdraw"
-            );
-        }
-
-    // STEP 2: GET BANK DETAILS
-    db.query(
-        "SELECT * FROM bank_details WHERE phone=?",
+        "SELECT * FROM users WHERE phone=?",
         [phone],
-        (err, bank) => {
+        (err2, users) => {
 
-            if (err) return res.status(500).send("DB error");
+            if (err2) return res.status(500).send("DB error");
 
-            if (!bank.length) {
-                return res.send("Please set up bank details first");
+            if (!users || users.length === 0) {
+                return res.send("User not found");
             }
 
-            const userBank = bank[0];
+            const user = users[0];
 
-            // STEP 3: VERIFY PIN
-            if (userBank.withdraw_pin !== pin) {
-                return res.send("Invalid withdrawal PIN");
-            }
-
-            // STEP 4: GET USER
+            // STEP 3: REFERRAL CHECK (FIXED LOCATION)
             db.query(
-                "SELECT * FROM users WHERE phone=?",
-                [phone],
-                (err2, users) => {
+                `SELECT COUNT(*) AS total 
+                 FROM users 
+                 WHERE referred_by = ? AND first_deposit >= 10000`,
+                [user.referral_code],
+                (errRef, ref) => {
 
-                    if (err2) return res.status(500).send("DB error");
-
-                    if (!users.length) {
-                        return res.send("User not found");
+                    if (errRef) {
+                        return res.status(500).send("DB error");
                     }
 
-                    const user = users[0];
-
-                    // STEP 5: CHECK RETURNS BALANCE
-                    if (user.total_returns < withdrawAmount) {
-                        return res.send("Insufficient returns balance");
+                    if (ref[0].total < 2) {
+                        return res.status(403).send(
+                            "You must refer at least 2 active users with ₦10000 deposit"
+                        );
                     }
 
-                    // STEP 6: CHECK WEEKLY LIMIT
-                        db.query(
-                        `SELECT id FROM transactions 
-                         WHERE user_id=? 
-                         AND type='withdraw' 
-                         AND created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)`,
-                        [user.id],
-                        (err3, existing) => {
+                    // STEP 4: BANK DETAILS
+                    db.query(
+                        "SELECT * FROM bank_details WHERE phone=?",
+                        [phone],
+                        (errBank, bank) => {
 
-                            if (err3) return res.status(500).send("DB error");
+                            if (errBank) return res.status(500).send("DB error");
 
-                            if (existing.length > 0) {
-                                return res.send("You can only withdraw once per week");
+                            if (!bank || bank.length === 0) {
+                                return res.send("Please set up bank details first");
                             }
 
-                            // STEP 7: APPLY 3% TAX
-                            const tax = withdrawAmount * 0.03;
-                            const finalAmount = withdrawAmount - tax;
+                            const userBank = bank[0];
 
-                            // STEP 8: INSERT WITHDRAWAL
+                            // STEP 5: VERIFY PIN
+                            if (userBank.withdraw_pin !== pin) {
+                                return res.send("Invalid withdrawal PIN");
+                            }
+
+                            // STEP 6: CHECK BALANCE
+                            if (user.total_returns < withdrawAmount) {
+                                return res.send("Insufficient returns balance");
+                            }
+
+                            // STEP 7: WEEKLY LIMIT
                             db.query(
-                                `INSERT INTO transactions 
-                                (user_id, type, amount, tax,status,bank_name, account_name, account_number) 
-                                VALUES (?, 'withdraw', ?,?, 'pending', ?, ?, ?)`,
-                                [
-                                    user.id,
-                                    withdrawAmount,
-                                    tax,
-                                    userBank.bank_name,
-                                    userBank.account_name,
-                                    userBank.account_number
-                                ],
-                                (err4) => {
+                                `SELECT id FROM transactions 
+                                 WHERE user_id=? 
+                                 AND type='withdraw' 
+                                 AND created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)`,
+                                [user.id],
+                                (err3, existing) => {
 
-                                    if (err4) {
-                                        console.log(err4);
-                                        return res.status(500).send("Transaction failed");
+                                    if (err3) return res.status(500).send("DB error");
+
+                                    if (existing.length > 0) {
+                                        return res.send("You can only withdraw once per week");
                                     }
 
-                                    res.send(
-                                        `Withdrawal submitted successfully. 3% tax deducted (₦${tax.toFixed(2)}). You will receive ₦${finalAmount.toFixed(2)} after approval.
-                                    `);
+                                    // STEP 8: TAX CALCULATION
+                                    const tax = withdrawAmount * 0.03;
+                                    const finalAmount = withdrawAmount - tax;
+
+                                    // STEP 9: INSERT WITHDRAWAL
+                                    db.query(
+                                        `INSERT INTO transactions 
+                                        (user_id, type, amount, tax, status, bank_name, account_name, account_number) 
+                                        VALUES (?, 'withdraw', ?, ?, 'pending', ?, ?, ?)`,
+                                        [
+                                            user.id,
+                                            withdrawAmount,
+                                            tax,
+                                            userBank.bank_name,
+                                            userBank.account_name,
+                                            userBank.account_number
+                                        ],
+                                        (err4) => {
+
+                                            if (err4) {
+                                                console.log(err4);
+                                                return res.status(500).send("Transaction failed");
+                                            }
+
+                                            res.send(`
+                                            Withdrawal submitted successfully. Tax deducted ₦${tax.toFixed(2)}. You will receive ₦${finalAmount.toFixed(2)} after approval.` );
+                                        }
+                                    );
                                 }
                             );
                         }
@@ -1099,7 +1099,7 @@ app.post("/ezeaguuy/approve-withdraw", (req, res) => {
         }
     );
 });
-});
+
 app.post("/ezeaguuy/withdrawals/approve", (req, res) => {
 
     const { id } = req.body;
