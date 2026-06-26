@@ -103,13 +103,13 @@ function contactSupport(){
     const user = JSON.parse(localStorage.getItem("user"));
     const userPhone = user?.phone || "unknown";
 
-    const supportNumber = "";
-
     const message = `Hello support, I need help. My registered phone is ${userPhone}`;
 
-    const url = `https://wa.me/${supportNumber}?text=${encodeURIComponent(message)}`;
+    // WhatsApp GROUP LINK (no number required)
+    const groupLink = "https://chat.whatsapp.com/CMbT9P9kParETgXL88QCT3?s=cl&p=a&mlu=3";
 
-    window.location.href = url;
+    // Redirect user directly to group
+    window.location.href = groupLink;
 }
 </script>
 
