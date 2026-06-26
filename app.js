@@ -778,10 +778,29 @@ app.post("/withdraw", (req, res) => {
         return res.status(400).send("Missing fields");
     }
 
-    // STEP 1: MINIMUM WITHDRAWAL (₦7500)
-    if (withdrawAmount < 7500) {
-        return res.send("Minimum withdrawal is ₦7500");
+    // STEP 1: MINIMUM WITHDRAWAL (₦12500)
+    if (withdrawAmount < 12500) {
+        return res.send("Minimum withdrawal is ₦12500");
     }
+    //2 referral to activate withdrawal
+    db.query(
+    `SELECT COUNT(*) AS total 
+     FROM users 
+     WHERE referred_by = ? AND first_deposit >= 10000`,
+    [user.referral_code],
+    (err, ref) => {
+
+        if (err) {
+            return res.status(500).send("DB error");
+        }
+
+        const count = ref[0].total;
+
+        if (count < 2) {
+            return res.status(403).send(
+                "You must refer at least 2 active users with ₦10000 deposit to withdraw"
+            );
+        }
 
     // STEP 2: GET BANK DETAILS
     db.query(
@@ -981,7 +1000,6 @@ app.post("/ezeaguuy/approve-withdraw", (req, res) => {
         return res.status(400).send("Missing withdrawal id");
     }
 
-    // 1. get withdrawal
     db.query(
         "SELECT * FROM transactions WHERE id=?",
         [id],
@@ -992,10 +1010,9 @@ app.post("/ezeaguuy/approve-withdraw", (req, res) => {
             if (!result || result.length === 0) {
                 return res.status(404).send("Withdrawal not found");
             }
-
+        
             const trx = result[0];
-
-            // 2. get user
+        
             db.query(
                 "SELECT * FROM users WHERE id=?",
                 [trx.user_id],
@@ -1012,44 +1029,65 @@ app.post("/ezeaguuy/approve-withdraw", (req, res) => {
                     const amount = Number(trx.amount);
                     const tax = Number(trx.tax || 0);
 
-                    // 3. CHECK BALANCE
+                    // 1. CHECK BALANCE
                     if (Number(user.total_returns) < amount) {
                         return res.status(400).send("Insufficient balance");
                     }
 
-                    // 4. DEDUCT ONLY AMOUNT FROM USER
+                    // 2. REFERRAL ELIGIBILITY CHECK (FIXED)
                     db.query(
-                        "UPDATE users SET total_returns = total_returns - ? WHERE id=?",
-                        [amount, user.id],
-                        (err3) => {
+                        `SELECT COUNT(*) AS total 
+                         FROM users 
+                         WHERE referred_by = ? 
+                         AND first_deposit >= 10000`,
+                        [user.referral_code],   // ✅ FIXED HERE
+                        (err3, ref) => {
 
                             if (err3) {
-                                console.log("Deduction error:", err3);
-                                return res.status(500).send("Deduction failed");
+                                return res.status(500).send("Referral check error");
                             }
 
-                            // 5. ADD TAX TO ADMIN VAULT
+                            if (ref[0].total < 2) {
+                                return res.status(403).send(
+                                    "User not eligible for withdrawal (need 2 referrals)"
+                                );
+                            }
+
+                            // 3. DEDUCT USER BALANCE
                             db.query(
-                                "UPDATE admin_vault SET total_balance = total_balance + ? WHERE id=1",
-                                [tax],
+                                "UPDATE users SET total_returns = total_returns - ? WHERE id=?",
+                                [amount, user.id],
                                 (err4) => {
 
                                     if (err4) {
-                                        console.log("Vault error:", err4);
+                                        console.log("Deduction error:", err4);
+                                        return res.status(500).send("Deduction failed");
                                     }
 
-                                    // 6. MARK WITHDRAWAL APPROVED
+                                    // 4. ADD TAX TO ADMIN VAULT
                                     db.query(
-                                        "UPDATE transactions SET status='approved' WHERE id=?",
-                                        [id],
+                                        "UPDATE admin_vault SET total_balance = total_balance + ? WHERE id=1",
+                                        [tax],
                                         (err5) => {
 
                                             if (err5) {
-                                                console.log("Status error:", err5);
-                                                return res.status(500).send("Status update failed");
+                                                console.log("Vault error:", err5);
                                             }
 
-                                            return res.send("Withdrawal approved successfully");
+                                            // 5. MARK APPROVED
+                                            db.query(
+                                                "UPDATE transactions SET status='approved' WHERE id=?",
+                                                [id],
+                                                (err6) => {
+
+                                                    if (err6) {
+                                                        console.log("Status error:", err6);
+                                                        return res.status(500).send("Status update failed");
+                                                    }
+
+                                                    return res.send("Withdrawal approved successfully");
+                                                }
+                                            );
                                         }
                                     );
                                 }
@@ -1061,7 +1099,7 @@ app.post("/ezeaguuy/approve-withdraw", (req, res) => {
         }
     );
 });
-
+});
 app.post("/ezeaguuy/withdrawals/approve", (req, res) => {
 
     const { id } = req.body;
