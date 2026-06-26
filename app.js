@@ -454,7 +454,11 @@ app.post("/deposit", upload.single("receipt"), (req, res) => {
     if (!phone || !amount || amount <= 0 || !receipt) {
         return res.status(400).json({ error: "Missing or invalid fields" });
     }
+    const depositAmount = Number(amount);
 
+    if (depositAmount < 10000) {
+    return res.status(400).send("Minimum deposit is ₦10,000");
+}
     db.query(
         "SELECT id FROM users WHERE phone = ? LIMIT 1",
         [phone],
@@ -798,10 +802,19 @@ app.post("/withdraw", (req, res) => {
             const user = users[0];
 
             // STEP 3: REFERRAL CHECK (FIXED LOCATION)
-            db.query(
-    `SELECT COUNT(*) AS total 
-     FROM users 
-     WHERE referred_by = ? AND first_deposit >= 10000`,
+           db.query(
+    `SELECT COUNT(*) AS total
+     FROM (
+         SELECT t.user_id
+         FROM transactions t
+         WHERE t.type = 'deposit'
+         AND t.status = 'success'
+         AND t.amount >= 10000
+         AND t.user_id IN (
+             SELECT id FROM users WHERE referred_by = ?
+         )
+         GROUP BY t.user_id
+     ) AS qualified_users`,
     [user.referral_code],
     (errRef, ref) => {
 
@@ -814,7 +827,7 @@ app.post("/withdraw", (req, res) => {
 
         if (total < 2) {
             return res.status(403).send(
-                "You must refer at least 2 active users with ₦10000 deposit"
+                "You must refer at least 2 users with minimum ₦10,000 first deposit each (admin approved)"
             );
         }
 
