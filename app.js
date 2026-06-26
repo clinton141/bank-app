@@ -799,21 +799,24 @@ app.post("/withdraw", (req, res) => {
 
             // STEP 3: REFERRAL CHECK (FIXED LOCATION)
             db.query(
-                `SELECT COUNT(*) AS total 
-                 FROM users 
-                 WHERE referred_by = ? AND first_deposit >= 10000`,
-                [user.referral_code],
-                (errRef, ref) => {
+    `SELECT COUNT(*) AS total 
+     FROM users 
+     WHERE referred_by = ? AND first_deposit >= 10000`,
+    [user.referral_code],
+    (errRef, ref) => {
 
-                    if (errRef) {
-                        return res.status(500).send("DB error");
-                    }
+        if (errRef) {
+            console.log("Referral DB error:", errRef);
+            return res.status(500).send("DB error");
+        }
 
-                    if (ref[0].total < 2) {
-                        return res.status(403).send(
-                            "You must refer at least 2 active users with ₦10000 deposit"
-                        );
-                    }
+        const total = ref?.[0]?.total || 0;
+
+        if (total < 2) {
+            return res.status(403).send(
+                "You must refer at least 2 active users with ₦10000 deposit"
+            );
+        }
 
                     // STEP 4: BANK DETAILS
                     db.query(
@@ -879,7 +882,7 @@ app.post("/withdraw", (req, res) => {
                                             }
 
                                             res.send(`
-                                            Withdrawal submitted successfully. Tax deducted ₦${tax.toFixed(2)}. You will receive ₦${finalAmount.toFixed(2)} after approval.` );
+                                            Withdrawal submitted successfully. Tax deducted ₦${tax.toFixed(2)}. You will receive ₦${finalAmount.toFixed(2)} after approval.s` );
                                         }
                                     );
                                 }
