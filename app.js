@@ -1654,13 +1654,105 @@ app.get("/investments/user/:phone", (req, res) => {
     });
 });
 //Ai chat
-app.post("/chat", async (req, res) => {
+const axios = require("axios");
 
-    const { message } = req.body;
+app.post("/chat-ai", async (req, res) => {
 
-    const reply = "AI response will go here";
+    const { message, userId } = req.body;
 
-    res.json({ reply });
+    if (!message) {
+        return res.status(400).json({ error: "Message required" });
+    }
+
+    try {
+
+        const response = await axios.post(
+            "https://api.openai.com/v1/chat/completions",
+            {
+                model: "gpt-4o-mini",
+                messages: [
+                    {
+                        role: "system",
+                        content: `
+You are Mobile Wealth AI support assistant.
+
+Rules:
+- Only answer questions about deposit, investment, withdrawal, referral system.
+- Do NOT approve transactions.
+- Do NOT give financial manipulation advice.
+- Be short, clear, and helpful.
+                        `
+                    },
+                    {
+                        role: "user",
+                        content: message
+                    }
+                ]
+            },
+            {
+                headers: {
+                    "Authorization": `Bearer YOUR_OPENAI_API_KEY`,
+                    "Content-Type": "application/json"
+                }
+            }
+        );
+
+        const aiReply = response.data.choices[0].message.content;
+
+        res.json({ reply: aiReply });
+
+    } catch (err) {
+        console.log(err.message);
+        res.status(500).json({ error: "AI service error" });
+    }
+});
+//user sends message
+app.post("/chat/send", (req, res) => {
+
+    const { user_id, message } = req.body;
+
+    db.query(
+        "INSERT INTO chat_messages (user_id, message) VALUES (?, ?)",
+        [user_id, message],
+        (err) => {
+
+            if (err) return res.status(500).json({ error: "Failed" });
+
+            res.json({ message: "Sent" });
+        }
+    );
+});
+//admin gets all message
+app.get("/ezeaguuy/chats", (req, res) => {
+
+    db.query(
+        `SELECT chat_messages.*, users.phone
+         FROM chat_messages
+         JOIN users ON users.id = chat_messages.user_id
+         ORDER BY chat_messages.created_at DESC`,
+        (err, result) => {
+
+            if (err) return res.status(500).json([]);
+
+            res.json(result || []);
+        }
+    );
+});
+//admin reples
+app.post("/ezeaguuy/chat/reply", (req, res) => {
+
+    const { id, reply } = req.body;
+
+    db.query(
+        "UPDATE chat_messages SET reply=?, is_admin_reply=1 WHERE id=?",
+        [reply, id],
+        (err) => {
+
+            if (err) return res.status(500).json({ error: "Failed" });
+
+            res.json({ message: "Replied" });
+        }
+    );
 });
 // START SERVER
 const PORT = process.env.PORT || 3000;
