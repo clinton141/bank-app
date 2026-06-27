@@ -1627,25 +1627,24 @@ app.get("/investments/all", (req, res) => {
     });
 });
 // user active and inactive investment
-app.get("/investments/user/:phone", (req, res) => {
+app.get("/investments/user/:id", (req, res) => {
 
-    const phone = req.params.phone;
+    const id = req.params.id;
 
     const sql = `
         SELECT 
-            i.id,
-            i.amount,
-            i.daily_interest,
-            i.status,
-            i.created_at,
-            i.end_date
-        FROM investments i
-        INNER JOIN users u ON u.id = i.user_id
-        WHERE u.phone = ?
-        ORDER BY i.created_at DESC
+            id,
+            amount,
+            daily_interest,
+            status,
+            created_at,
+            end_date
+        FROM investments
+        WHERE user_id = ?
+        ORDER BY created_at DESC
     `;
 
-    db.query(sql, [phone], (err, result) => {
+    db.query(sql, [id], (err, result) => {
 
         if (err) {
             console.log("User investment error:", err);
