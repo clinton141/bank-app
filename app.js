@@ -1604,7 +1604,6 @@ app.get("/investments/all", (req, res) => {
     const sql = `
         SELECT 
             i.id,
-            i.user_id,
             u.phone,
             i.amount,
             i.daily_interest,
@@ -1612,7 +1611,7 @@ app.get("/investments/all", (req, res) => {
             i.created_at,
             i.end_date
         FROM investments i
-        INNER JOIN users u ON u.id = i.user_id
+        INNER JOIN users u ON u.id = i.phone
         ORDER BY i.created_at DESC
     `;
 
@@ -1634,13 +1633,14 @@ app.get("/investments/user/:id", (req, res) => {
     const sql = `
         SELECT 
             id,
+            phone,
             amount,
             daily_interest,
             status,
             created_at,
             end_date
         FROM investments
-        WHERE user_id = ?
+        WHERE phone = ?
         ORDER BY created_at DESC
     `;
 
