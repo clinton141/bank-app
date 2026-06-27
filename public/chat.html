@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Support Chat</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: #0f172a;
+            color: white;
+        }
+
+        .chat-box {
+            height: 400px;
+            overflow-y: auto;
+            background: #1e293b;
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .msg {
+            margin: 10px 0;
+        }
+
+        .user {
+            text-align: right;
+            color: #00ff99;
+        }
+
+        .bot {
+            text-align: left;
+            color: #38bdf8;
+        }
+
+        input {
+            width: 80%;
+            padding: 10px;
+        }
+
+        button {
+            padding: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+<h2>💬 Mobile Wealth Assistant</h2>
+
+<div class="chat-box" id="chatBox"></div>
+
+<input type="text" id="input" placeholder="Ask a question...">
+<button onclick="sendMsg()">Send</button>
+
+<script>
+
+function botReply(message) {
+
+    message = message.toLowerCase();
+
+    if (message.includes("deposit")) {
+        return "Go to deposit page, copy account details, transfer money, then upload receipt for approval.";
+    }
+
+    if (message.includes("withdraw")) {
+        return "Withdrawals require minimum ₦12,500 and must meet referral requirement.";
+    }
+
+    if (message.includes("investment")) {
+        return "Click invest, choose amount, and your daily profit starts automatically.";
+    }
+
+    if (message.includes("hello")) {
+        return "Hello 👋 Welcome to Mobile Wealth Support!";
+    }
+
+    return "Sorry, I don't understand. Please contact admin support.";
+}
+
+function sendMsg() {
+
+    const input = document.getElementById("input");
+    const chatBox = document.getElementById("chatBox");
+
+    const userMsg = input.value;
+    if (!userMsg) return;
+
+    chatBox.innerHTML += <div class="msg user">You: ${userMsg}</div>;
+
+    const reply = botReply(userMsg);
+
+    chatBox.innerHTML += <div class="msg bot">Bot: ${reply}</div>;
+
+    input.value = "";
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+</script>
+
+</body>
+</html>

@@ -1653,6 +1653,15 @@ app.get("/investments/user/:phone", (req, res) => {
         return res.json(result || []);
     });
 });
+//Ai chat
+app.post("/chat", async (req, res) => {
+
+    const { message } = req.body;
+
+    const reply = "AI response will go here";
+
+    res.json({ reply });
+});
 // START SERVER
 const PORT = process.env.PORT || 3000;
 
