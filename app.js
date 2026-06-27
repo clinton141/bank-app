@@ -1604,15 +1604,14 @@ app.get("/investments/all", (req, res) => {
     const sql = `
         SELECT 
             i.id,
-            u.phone,
-            i.amount,
-            i.daily_interest,
-            i.status,
-            i.created_at,
-            i.end_date
-        FROM investments i
-        INNER JOIN users u ON u.phone = i.phone
-        ORDER BY i.created_at DESC
+            phone,
+            amount,
+            daily_interest,
+            status,
+            created_at,
+            end_date
+        FROM investments 
+        ORDER BY created_at DESC
     `;
 
     db.query(sql, (err, result) => {
