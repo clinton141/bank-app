@@ -97,7 +97,7 @@ async function loadInvestments() {
 
             container.innerHTML += `
                 <div class="card">
-                    <div class="row">📱 User: ${inv.phone}</div>
+                    <div class="row">📱 User: ${inv.user.id}</div>
                     <div class="row">💰 Amount: ₦${Number(inv.amount).toFixed(2)}</div>
                     <div class="row">📈 Daily Interest: ₦${Number(inv.daily_interest).toFixed(2)}</div>
                     <div class="row">📅 Start: ${new Date(inv.created_at).toLocaleString()}</div>
