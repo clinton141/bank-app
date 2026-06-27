@@ -1598,6 +1598,34 @@ app.get("/referral-commission/:userId", (req, res) => {
         return res.json(result || []);
     });
 });
+//fetch all investment by admin
+app.get("/investments/all", (req, res) => {
+
+    const sql = `
+        SELECT 
+            i.id,
+            i.user_id,
+            u.phone,
+            i.amount,
+            i.daily_interest,
+            i.status,
+            i.created_at,
+            i.end_date
+        FROM investments i
+        INNER JOIN users u ON u.id = i.user_id
+        ORDER BY i.created_at DESC
+    `;
+
+    db.query(sql, (err, result) => {
+
+        if (err) {
+            console.log("Investment fetch error:", err);
+            return res.status(500).json([]);
+        }
+
+        return res.json(result);
+    });
+});
 // START SERVER
 const PORT = process.env.PORT || 3000;
 
