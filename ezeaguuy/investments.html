@@ -38,26 +38,27 @@
             margin: 5px 0;
         }
 
-        * BACK BUTTON */
-.bottom{
-    position:fixed;
-    bottom:0;
-    left:0;
-    right:0;
-    display:flex;
-}
+        /* BACK BUTTON */
+        .bottom {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+        }
 
-.bottom a{
-    flex:1;
-}
+        .bottom a {
+            flex: 1;
+        }
 
-.bottom button{
-    width:100%;
-    border-radius:0;
-    background:#0099ff;
-    color:white;
-    padding:12px;
-}
+        .bottom button {
+            width: 100%;
+            border-radius: 0;
+            background: #0099ff;
+            color: white;
+            padding: 12px;
+            border: none;
+        }
     </style>
 </head>
 
@@ -67,11 +68,11 @@
 
 <div id="container"></div>
 
-<!-- BACK -->
+<!-- BACK BUTTON -->
 <div class="bottom">
-<a href="dashboard.html">
-<button>⬅️ admin Dashboard</button>
-</a>
+    <a href="dashboard.html">
+        <button>⬅️ Back to Dashboard</button>
+    </a>
 </div>
 
 <script>
@@ -97,7 +98,7 @@ async function loadInvestments() {
 
             container.innerHTML += `
                 <div class="card">
-                    <div class="row">📱 User: ${inv.user.id}</div>
+                    <div class="row">📱 Phone: ${inv.phone}</div>
                     <div class="row">💰 Amount: ₦${Number(inv.amount).toFixed(2)}</div>
                     <div class="row">📈 Daily Interest: ₦${Number(inv.daily_interest).toFixed(2)}</div>
                     <div class="row">📅 Start: ${new Date(inv.created_at).toLocaleString()}</div>
@@ -113,8 +114,6 @@ async function loadInvestments() {
 }
 
 loadInvestments();
-
-
 </script>
 
 </body>

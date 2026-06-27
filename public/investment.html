@@ -10,6 +10,7 @@
             color: white;
             margin: 0;
             padding: 20px;
+            padding-bottom: 80px;
         }
 
         h2 {
@@ -36,6 +37,29 @@
         .row {
             margin: 5px 0;
         }
+
+        /* BACK BUTTON */
+        .bottom {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+        }
+
+        .bottom a {
+            flex: 1;
+            text-decoration: none;
+        }
+
+        .bottom button {
+            width: 100%;
+            border: none;
+            padding: 14px;
+            background: #0099ff;
+            color: white;
+            font-size: 16px;
+        }
     </style>
 </head>
 
@@ -45,9 +69,11 @@
 
 <div id="container"></div>
 
-<!-- MOBILE BOTTOM NAV -->
-<div class="bottom-nav">
-    <a href="dashboard.html">Home</a>
+<!-- BACK TO DASHBOARD -->
+<div class="bottom">
+    <a href="dashboard.html">
+        <button>⬅️ Back to Dashboard</button>
+    </a>
 </div>
 
 <script>
@@ -56,7 +82,8 @@ const API = "https://mobile-wealth-api.onrender.com";
 
 const user = JSON.parse(localStorage.getItem("user"));
 
-if (!user || !user.id) {
+// safety check
+if (!user || !user.phone) {
     window.location.href = "login.html";
 }
 
@@ -64,17 +91,10 @@ async function loadMyInvestments() {
 
     try {
 
-        // ✅ FIX: use user.id instead of phone
-        const res = await fetch(`${API}/investments/user/${user.id}`);
+        const res = await fetch(`${API}/investments/user/${user.phone}`);
         const data = await res.json();
 
         const container = document.getElementById("container");
-
-        if (!container) {
-            console.log("Container not found");
-            return;
-        }
-
         container.innerHTML = "";
 
         if (!Array.isArray(data) || data.length === 0) {
@@ -84,16 +104,15 @@ async function loadMyInvestments() {
 
         data.forEach(inv => {
 
-            // ✅ SAFE status check
             const status = (inv.status || "").toLowerCase();
             const statusClass = status === "active" ? "active" : "inactive";
 
-            // ✅ SAFE number handling
             const amount = Number(inv.amount || 0);
             const interest = Number(inv.daily_interest || 0);
 
             container.innerHTML += `
                 <div class="card">
+                    <div class="row">📱 Phone: ${inv.phone}</div>
                     <div class="row">💰 Amount: ₦${amount.toFixed(2)}</div>
                     <div class="row">📈 Daily Interest: ₦${interest.toFixed(2)}</div>
                     <div class="row">📅 Start: ${new Date(inv.created_at).toLocaleString()}</div>

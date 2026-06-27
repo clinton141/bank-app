@@ -1611,7 +1611,7 @@ app.get("/investments/all", (req, res) => {
             i.created_at,
             i.end_date
         FROM investments i
-        INNER JOIN users u ON u.id = i.phone
+        INNER JOIN users u ON u.phone = i.phone
         ORDER BY i.created_at DESC
     `;
 
@@ -1626,9 +1626,9 @@ app.get("/investments/all", (req, res) => {
     });
 });
 // user active and inactive investment
-app.get("/investments/user/:id", (req, res) => {
+app.get("/investments/user/:phone", (req, res) => {
 
-    const id = req.params.id;
+    const phone = req.params.phone;
 
     const sql = `
         SELECT 
@@ -1644,7 +1644,7 @@ app.get("/investments/user/:id", (req, res) => {
         ORDER BY created_at DESC
     `;
 
-    db.query(sql, [id], (err, result) => {
+    db.query(sql, [phone], (err, result) => {
 
         if (err) {
             console.log("User investment error:", err);
