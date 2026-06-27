@@ -1723,7 +1723,7 @@ app.post("/chat/send", (req, res) => {
     );
 });
 //admin gets all message
-app.get("/ezeaguuy/chats", (req, res) => {
+app.get("/admin/chats", (req, res) => {
 
     db.query(
         `SELECT chat_messages.*, users.phone
@@ -1739,7 +1739,7 @@ app.get("/ezeaguuy/chats", (req, res) => {
     );
 });
 //admin reples
-app.post("/ezeaguuy/chat/reply", (req, res) => {
+app.post("/admin/chat/reply", (req, res) => {
 
     const { id, reply } = req.body;
 
