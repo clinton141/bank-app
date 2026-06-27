@@ -1626,6 +1626,35 @@ app.get("/investments/all", (req, res) => {
         return res.json(result);
     });
 });
+// user active and inactive investment
+app.get("/investments/user/:phone", (req, res) => {
+
+    const phone = req.params.phone;
+
+    const sql = `
+        SELECT 
+            i.id,
+            i.amount,
+            i.daily_interest,
+            i.status,
+            i.created_at,
+            i.end_date
+        FROM investments i
+        INNER JOIN users u ON u.id = i.user_id
+        WHERE u.phone = ?
+        ORDER BY i.created_at DESC
+    `;
+
+    db.query(sql, [phone], (err, result) => {
+
+        if (err) {
+            console.log("User investment error:", err);
+            return res.status(500).json([]);
+        }
+
+        return res.json(result || []);
+    });
+});
 // START SERVER
 const PORT = process.env.PORT || 3000;
 
