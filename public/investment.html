@@ -56,7 +56,7 @@ const API = "https://mobile-wealth-api.onrender.com";
 
 const user = JSON.parse(localStorage.getItem("user"));
 
-if (!user || !user.phone) {
+if (!user || !user.id) {
     window.location.href = "login.html";
 }
 
@@ -64,10 +64,17 @@ async function loadMyInvestments() {
 
     try {
 
-        const res = await fetch(`${API}/investments/user/${user.phone}`);
+        // ✅ FIX: use user.id instead of phone
+        const res = await fetch(`${API}/investments/user/${user.id}`);
         const data = await res.json();
 
         const container = document.getElementById("container");
+
+        if (!container) {
+            console.log("Container not found");
+            return;
+        }
+
         container.innerHTML = "";
 
         if (!Array.isArray(data) || data.length === 0) {
@@ -77,15 +84,23 @@ async function loadMyInvestments() {
 
         data.forEach(inv => {
 
-            const statusClass = inv.status === "active" ? "active" : "inactive";
+            // ✅ SAFE status check
+            const status = (inv.status || "").toLowerCase();
+            const statusClass = status === "active" ? "active" : "inactive";
+
+            // ✅ SAFE number handling
+            const amount = Number(inv.amount || 0);
+            const interest = Number(inv.daily_interest || 0);
 
             container.innerHTML += `
                 <div class="card">
-                    <div class="row">💰 Amount: ₦${Number(inv.amount).toFixed(2)}</div>
-                    <div class="row">📈 Daily Interest: ₦${Number(inv.daily_interest).toFixed(2)}</div>
+                    <div class="row">💰 Amount: ₦${amount.toFixed(2)}</div>
+                    <div class="row">📈 Daily Interest: ₦${interest.toFixed(2)}</div>
                     <div class="row">📅 Start: ${new Date(inv.created_at).toLocaleString()}</div>
                     <div class="row">⏳ End: ${inv.end_date ? new Date(inv.end_date).toLocaleString() : "N/A"}</div>
-                    <div class="row ${statusClass}">Status: ${inv.status}</div>
+                    <div class="row ${statusClass}">
+                        Status: ${status.toUpperCase()}
+                    </div>
                 </div>
             `;
         });
