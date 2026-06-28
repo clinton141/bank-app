@@ -541,12 +541,11 @@ async function claimBonus() {
 </script>
 
 <script>
-// PROMO POPUP CONTROLLER (USER-SPECIFIC)
+// PROMO POPUP CONTROLLER (SHOW ONLY ON LOGIN)
 
 (function () {
 
     const user = JSON.parse(localStorage.getItem("user"));
-    const STORAGE_KEY = user?.phone + "_promo_seen";
 
     function showPromo() {
         const modal = document.getElementById("promoModal");
@@ -561,21 +560,12 @@ async function claimBonus() {
         if (modal) {
             modal.style.display = "none";
         }
-
-        // SAVE PER USER (NOT GLOBAL)
-        if (user?.phone) {
-            localStorage.setItem(user.phone + "_promo_seen", "true");
-        }
-    }
-
-    function shouldShowPopup() {
-        return !localStorage.getItem(STORAGE_KEY);
     }
 
     window.addEventListener("load", () => {
 
-        // ONLY SHOW IF THIS USER HAS NOT SEEN IT
-        if (user?.phone && shouldShowPopup()) {
+        // SHOW ONLY IF USER IS LOGGED IN
+        if (user?.phone) {
             showPromo();
         }
     });
