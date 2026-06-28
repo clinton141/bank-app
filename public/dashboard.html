@@ -541,7 +541,7 @@ async function claimBonus() {
 </script>
 
 <script>
-// PROMO POPUP CONTROLLER (SHOW ONLY ON LOGIN)
+// PROMO POPUP CONTROLLER (ONLY AFTER LOGIN)
 
 (function () {
 
@@ -556,7 +556,6 @@ async function claimBonus() {
 
     function closePromo() {
         const modal = document.getElementById("promoModal");
-
         if (modal) {
             modal.style.display = "none";
         }
@@ -564,9 +563,15 @@ async function claimBonus() {
 
     window.addEventListener("load", () => {
 
-        // SHOW ONLY IF USER IS LOGGED IN
-        if (user?.phone) {
+        const justLoggedIn = localStorage.getItem("just_logged_in");
+
+        // ONLY SHOW ONCE AFTER LOGIN
+        if (user?.phone && justLoggedIn === "true") {
+
             showPromo();
+
+            // 🔥 REMOVE FLAG IMMEDIATELY AFTER SHOWING
+            localStorage.removeItem("just_logged_in");
         }
     });
 
