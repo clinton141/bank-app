@@ -541,11 +541,12 @@ async function claimBonus() {
 </script>
 
 <script>
-// PROMO POPUP CONTROLLER (ONLY AFTER LOGIN)
+// PROMO POPUP CONTROLLER (USER-SPECIFIC)
 
 (function () {
 
     const user = JSON.parse(localStorage.getItem("user"));
+    const STORAGE_KEY = user?.phone + "_promo_seen";
 
     function showPromo() {
         const modal = document.getElementById("promoModal");
@@ -556,22 +557,26 @@ async function claimBonus() {
 
     function closePromo() {
         const modal = document.getElementById("promoModal");
+
         if (modal) {
             modal.style.display = "none";
         }
+
+        // SAVE PER USER (NOT GLOBAL)
+        if (user?.phone) {
+            localStorage.setItem(user.phone + "_promo_seen", "true");
+        }
+    }
+
+    function shouldShowPopup() {
+        return !localStorage.getItem(STORAGE_KEY);
     }
 
     window.addEventListener("load", () => {
 
-        const justLoggedIn = localStorage.getItem("just_logged_in");
-
-        // ONLY SHOW ONCE AFTER LOGIN
-        if (user?.phone && justLoggedIn === "true") {
-
+        // ONLY SHOW IF THIS USER HAS NOT SEEN IT
+        if (user?.phone && shouldShowPopup()) {
             showPromo();
-
-            // 🔥 REMOVE FLAG IMMEDIATELY AFTER SHOWING
-            localStorage.removeItem("just_logged_in");
         }
     });
 
