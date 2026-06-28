@@ -153,88 +153,99 @@ function checkUserStatus(phone, cb) {
 
 // ================= DAILY INVESTMENT SYSTEM =================
 // runs every 12AM
-let isRunning = false;
-
 cron.schedule("0 0 * * *", () => {
-
-    if (isRunning) {
-        console.log("⚠️ Interest job already running. Skipped.");
-        return;
-    }
-
-    isRunning = true;
 
     console.log("🔥 DAILY INTEREST STARTED:", new Date().toString());
 
-    // 1. expire investments
+    // STEP 1: TRY GLOBAL LOCK (ONLY ONE SERVER CAN WIN)
     db.query(
-        "UPDATE investments SET status='expired' WHERE end_date <= NOW() AND status='active'",
-        (err) => {
-            if (err) console.log("Expire error:", err);
+        `INSERT INTO system_locks (lock_name, locked_at)
+         VALUES ('daily_interest', NOW())
+         ON DUPLICATE KEY UPDATE locked_at = locked_at`,
+        (lockErr, lockRes) => {
+
+            if (lockErr) {
+                console.log("Lock error:", lockErr);
+                return;
+            }
+
+            // ❌ IF LOCK ALREADY EXISTS → STOP EVERYTHING
+            if (lockRes.affectedRows === 0) {
+                console.log("⚠️ Job already running on another server. SKIPPED.");
+                return;
+            }
+
+            // STEP 2: EXPIRE INVESTMENTS
+            db.query(
+                "UPDATE investments SET status='expired' WHERE end_date <= NOW() AND status='active'"
+            );
+
+            // STEP 3: GET INVESTMENTS (PHONE BASED)
+            db.query(
+                `SELECT id, phone, amount, last_interest_time 
+                 FROM investments 
+                 WHERE status='active'`,
+                (err, results) => {
+
+                    if (err) {
+                        console.log("Interest fetch error:", err);
+                        return;
+                    }
+
+                    results.forEach(row => {
+
+                        const today = new Date();
+                        today.setHours(0,0,0,0);
+
+                        const last = row.last_interest_time
+                            ? new Date(row.last_interest_time)
+                            : null;
+
+                        // ❌ SKIP IF ALREADY TODAY
+                        if (last && last >= today) return;
+
+                        const interest = Number(row.amount) * 0.10;
+
+                        // STEP 4: ATOMIC UPDATE (SECOND SAFETY LAYER)
+                        db.query(
+                            `UPDATE investments 
+                             SET last_interest_time = NOW() 
+                             WHERE id=? 
+                             AND (last_interest_time IS NULL OR DATE(last_interest_time) < CURDATE())`,
+                            [row.id],
+                            (err2, result) => {
+
+                                if (result.affectedRows === 0) return;
+
+                                // CREDIT USER
+                                db.query(
+                                    `UPDATE users 
+                                     SET total_returns = total_returns + ? 
+                                     WHERE phone=?`,
+                                    [interest, row.phone]
+                                );
+
+                                // HISTORY
+                                db.query(
+                                    `INSERT INTO interest_history 
+                                     (phone, amount, interest)
+                                     VALUES (?, ?, ?)`,
+                                    [row.phone, row.amount, interest]
+                                );
+                            }
+                        );
+                    });
+
+                    // STEP 5: RELEASE LOCK (OPTIONAL SAFETY RESET)
+                    setTimeout(() => {
+                        db.query(`
+                            DELETE FROM system_locks WHERE lock_name='daily_interest'
+                        `);
+                    }, 1000 * 60); // 1 min later
+                }
+            );
         }
     );
-
-    // 2. ONLY GET INVESTMENTS NOT PROCESSED TODAY
-    const sql = `
-        SELECT id, phone, amount
-        FROM investments
-        WHERE status='active'
-        AND (last_interest_time IS NULL OR DATE(last_interest_time) < CURDATE())
-    `;
-
-    db.query(sql, (err, results) => {
-
-        if (err) {
-            console.log("Interest fetch error:", err);
-            isRunning = false;
-            return;
-        }
-
-        if (!results || results.length === 0) {
-            console.log("⚠️ No new investments to process");
-            isRunning = false;
-            return;
-        }
-
-        results.forEach(row => {
-
-            const interest = Number(row.amount) * 0.10;
-
-            // 1. UPDATE USER BALANCE
-            db.query(
-                `UPDATE users 
-                 SET total_returns = total_returns + ? 
-                 WHERE phone=?`,
-                [interest, row.phone],
-                (err2) => {
-                    if (err2) console.log("Update error:", err2);
-                }
-            );
-
-            // 2. SAVE HISTORY
-            db.query(
-                `INSERT INTO interest_history (phone, amount, interest)
-                 VALUES (?, ?, ?)`,
-                [row.phone, row.amount, interest],
-                (err3) => {
-                    if (err3) console.log("History error:", err3);
-                }
-            );
-
-            // 3. MARK AS PROCESSED (CRITICAL FIX)
-            db.query(
-    `UPDATE investments 
-        SET last_interest_time = NOW() 
-        WHERE id=?`,
-        [row.id],
-        (err) => {
-        if (err) console.log("Tracking error:", err);
-    }
-);
-        });
-
-        isRunning = false;
-    });
 
 }, {
     timezone: "Africa/Lagos"
