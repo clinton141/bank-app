@@ -537,6 +537,35 @@ async function claimBonus() {
     alert(msg);
 }
 </script>
+<script>
+// PROMO POPUP CONTROLLER
+
+(function () {
+
+    function showPromo() {
+        const modal = document.getElementById("promoModal");
+        if (modal) {
+            modal.style.display = "flex";
+        }
+    }
+
+    function closePromo() {
+        const modal = document.getElementById("promoModal");
+        if (modal) {
+            modal.style.display = "none";
+        }
+    }
+
+    // Show popup after page fully loads
+    window.addEventListener("load", () => {
+        showPromo();
+    });
+
+    // expose function globally so HTML button can access it
+    window.closePromo = closePromo;
+
+})();
+</script>
 
 </body>
 </html>
