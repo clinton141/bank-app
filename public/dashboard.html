@@ -539,10 +539,14 @@ async function claimBonus() {
     alert(msg);
 }
 </script>
+
 <script>
-// PROMO POPUP CONTROLLER
+// PROMO POPUP CONTROLLER (USER-SPECIFIC)
 
 (function () {
+
+    const user = JSON.parse(localStorage.getItem("user"));
+    const STORAGE_KEY = user?.phone + "_promo_seen";
 
     function showPromo() {
         const modal = document.getElementById("promoModal");
@@ -553,17 +557,29 @@ async function claimBonus() {
 
     function closePromo() {
         const modal = document.getElementById("promoModal");
+
         if (modal) {
             modal.style.display = "none";
         }
+
+        // SAVE PER USER (NOT GLOBAL)
+        if (user?.phone) {
+            localStorage.setItem(user.phone + "_promo_seen", "true");
+        }
     }
 
-    // Show popup after page fully loads
+    function shouldShowPopup() {
+        return !localStorage.getItem(STORAGE_KEY);
+    }
+
     window.addEventListener("load", () => {
-        showPromo();
+
+        // ONLY SHOW IF THIS USER HAS NOT SEEN IT
+        if (user?.phone && shouldShowPopup()) {
+            showPromo();
+        }
     });
 
-    // expose function globally so HTML button can access it
     window.closePromo = closePromo;
 
 })();
