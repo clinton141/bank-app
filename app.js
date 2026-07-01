@@ -177,8 +177,20 @@ cron.schedule("0 0 * * *", () => {
 
             // STEP 2: EXPIRE INVESTMENTS
             db.query(
-                "UPDATE investments SET status='expired' WHERE end_date <= NOW() AND status='active'"
-            );
+    `UPDATE investments 
+     SET status='expired' 
+     WHERE status='active'
+     AND created_at <= DATE_SUB(NOW(), INTERVAL 15 DAY)`,
+    (err, result) => {
+
+        if (err) {
+            console.log("❌ Expiry error:", err);
+            return;
+        }
+
+        console.log("✅ Expired investments:", result.affectedRows);
+    }
+);
 
             // STEP 3: GET INVESTMENTS (PHONE BASED)
             db.query(
