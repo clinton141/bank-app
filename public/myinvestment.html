@@ -87,7 +87,7 @@ async function loadInvestments() {
                         <p>📊 Status: ${inv.status}</p>
                         <p>📅 Started: ${inv.start_date}</p>
                         <p>📅 End: ${inv.end_date}</p>
-                📅 ${new Date(inv.created_at).toLocaleDateString()}
+                
             </div>
         `;
     });
@@ -103,6 +103,7 @@ async function loadInvestments() {
         expiredBox.innerHTML += `
             <div class="box expired">
                 💰 ₦${inv.amount}<br>
+                <p>📅 End: ${inv.end_date}</p>
                 ❌ Expired
             </div>
         `;
