@@ -1879,7 +1879,7 @@ app.post("/api/startup/invest", (req, res) => {
             });
         }
     );
-});s
+});
 
 //startup active investment
 app.get("/api/startup/active", (req, res) => {
