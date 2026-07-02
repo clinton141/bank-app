@@ -36,6 +36,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(bodyParser.json());
+app.use(express.urlencoded({ extended: true }));
 
 // STATIC FILES
 app.use(express.static(path.join(__dirname, "public")));
@@ -1892,14 +1893,14 @@ app.get("/api/startup/active", (req, res) => {
 
 // startup expired investment
 
-app.get("/api/startup/active", (req, res) => {
+app.get("/api/startup/expired", (req, res) => {
 
     const phone = req.query.phone;
 
     db.query(
         `SELECT * FROM investments
          WHERE phone=? 
-         AND status='active'
+         AND status='expired'
          AND plan_type='startup'
          AND end_date > NOW()`,
         [phone],
