@@ -1843,7 +1843,7 @@ app.get("/api/investments/active", (req, res) => {
 });
 
 //StartUP process
-app.post("/startup/invest", (req, res) => {
+app.post("/api/startup/invest", (req, res) => {
 
     const { phone } = req.body;
     const amount = 5000;
