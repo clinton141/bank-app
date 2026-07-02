@@ -45,6 +45,45 @@
             background: gray !important;
             cursor: not-allowed;
         }
+
+        .modal {
+    position: fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background: rgba(0,0,0,0.6);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.modal-box {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+}
+
+.modal-box button {
+    margin-top: 10px;
+    padding: 10px;
+    width: 100%;
+    border: none;
+    cursor: pointer;
+}
+
+.modal-box button:first-of-type {
+    background: green;
+    color: white;
+}
+
+.modal-box button:last-of-type {
+    background: red;
+    color: white;
+}
     </style>
 </head>
 
@@ -78,72 +117,114 @@
         Withdraw Earnings
     </button>
 
+    <!-- STARTUP INVESTMENT MODAL -->
+<div id="startupModal" class="modal" style="display:none;">
+
+    <div class="modal-box">
+
+        <h2>🚀 Startup Investment (₦5000 Plan)</h2>
+
+        <p><b>Bank:</b> Momo Payment Service Bank</p>
+        <p><b>Account:</b> 7061778390</p>
+
+        <p><b>Amount:</b> ₦5000</p>
+
+        <input type="hidden" id="startupAmount" value="5000" />
+
+        <label>Upload Payment Receipt</label>
+        <input type="file" id="receipt" />
+
+        <button onclick="submitStartup()">PROCEED</button>
+        <button onclick="closeStartup()">Cancel</button>
+
+    </div>
+</div>
 </div>
 
 <script>
 
+const API = "https://mobile-wealth-api.onrender.com";
+
 const user = JSON.parse(localStorage.getItem("user"));
 const phone = user?.phone;
 
+// ❌ STOP IF NO USER
+if (!phone) {
+    console.log("No user logged in");
+}
+
+// LOAD DATA
 async function loadStartup() {
 
-    const active = await fetch(`/api/startup/active?phone=${phone}`).then(r => r.json());
-    const expired = await fetch(`/api/startup/expired?phone=${phone}`).then(r => r.json());
-    const refData = await fetch(`/api/startup/referrals?phone=${phone}`).then(r => r.json());
+    if (!phone) return;
 
-    // ACTIVE
-    const activeBox = document.getElementById("activeList");
-    activeBox.innerHTML = "";
+    try {
 
-    active.forEach(inv => {
+        const active = await fetch(`${API}/api/startup/active?phone=${phone}`).then(r => r.json());
+        const expired = await fetch(`${API}/api/startup/expired?phone=${phone}`).then(r => r.json());
+        const refData = await fetch(`${API}/api/startup/referrals?phone=${phone}`).then(r => r.json());
 
-        const end = new Date(inv.end_date);
-        const now = new Date();
-        const daysLeft = Math.ceil((end - now) / (1000*60*60*24));
+        // ACTIVE
+        const activeBox = document.getElementById("activeList");
+        activeBox.innerHTML = "";
 
-        activeBox.innerHTML += `
-            <div class="card">
-                <p>Amount: ₦${inv.amount}</p>
-                <p>Daily Profit: 10%</p>
-                <p>Days Left: ${daysLeft}</p>
-            </div>
-        `;
-    });
+        active.forEach(inv => {
 
-    // EXPIRED
-    const expiredBox = document.getElementById("expiredList");
-    expiredBox.innerHTML = "";
+            const end = inv.end_date ? new Date(inv.end_date) : null;
 
-    expired.forEach(inv => {
+            const daysLeft = end
+                ? Math.ceil((end - new Date()) / (1000 * 60 * 60 * 24))
+                : "N/A";
 
-        expiredBox.innerHTML += `
-            <div class="card">
-                <p>Amount: ₦${inv.amount}</p>
-                <p>Status: Expired</p>
-                <p>Ended: ${inv.end_date}</p>
-            </div>
-        `;
-    });
+            activeBox.innerHTML += `
+                <div class="card">
+                    <p>Amount: ₦${inv.amount}</p>
+                    <p>Daily Profit: 10%</p>
+                    <p>Days Left: ${daysLeft}</p>
+                </div>
+            `;
+        });
 
-    // REFERRALS
-    const refs = refData.count || 0;
-    document.getElementById("refCount").innerText = "Referrals: " + refs;
+        // EXPIRED
+        const expiredBox = document.getElementById("expiredList");
+        expiredBox.innerHTML = "";
 
-    const withdrawBtn = document.getElementById("withdrawBtn");
+        expired.forEach(inv => {
 
-    if (refs >= 3) {
-        withdrawBtn.classList.remove("disabled");
-        document.getElementById("withdrawStatus").innerText = "Withdrawal Enabled";
-    } else {
-        withdrawBtn.classList.add("disabled");
-        document.getElementById("withdrawStatus").innerText = "Need 3 referrals to withdraw";
+            const end = inv.end_date ? new Date(inv.end_date).toLocaleString() : "N/A";
+
+            expiredBox.innerHTML += `
+                <div class="card">
+                    <p>Amount: ₦${inv.amount}</p>
+                    <p>Status: Expired</p>
+                    <p>Ended: ${end}</p>
+                </div>
+            `;
+        });
+
+        // REFERRALS
+        const refs = refData.count || 0;
+        document.getElementById("refCount").innerText = "Referrals: " + refs;
+
+        const withdrawBtn = document.getElementById("withdrawBtn");
+
+        if (refs >= 3) {
+            withdrawBtn.classList.remove("disabled");
+            document.getElementById("withdrawStatus").innerText = "Withdrawal Enabled";
+        } else {
+            withdrawBtn.classList.add("disabled");
+            document.getElementById("withdrawStatus").innerText = "Need 3 referrals to withdraw";
+        }
+
+    } catch (err) {
+        console.log("Startup load error:", err);
     }
 }
 
 // INVEST
 async function startInvestment() {
 
-    const res = await fetch("/api/startup/invest", {
+    const res = await fetch(`${API}/api/startup/invest`, {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({ phone })
@@ -160,6 +241,43 @@ window.onload = loadStartup;
 // auto refresh
 setInterval(loadStartup, 10000);
 
+// OPEN MODAL
+function openStartup() {
+    document.getElementById("startupModal").style.display = "flex";
+}
+
+// CLOSE MODAL
+function closeStartup() {
+    document.getElementById("startupModal").style.display = "none";
+}
+
+// SUBMIT STARTUP INVESTMENT
+async function submitStartup() {
+
+    const amount = document.getElementById("startupAmount").value;
+    const fileInput = document.getElementById("receipt");
+
+    if (!fileInput.files[0]) {
+        alert("Please upload receipt");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("phone", phone);
+    formData.append("amount", amount);
+    formData.append("receipt", fileInput.files[0]);
+
+    const res = await fetch(`${API}/api/startup/pending`, {
+        method: "POST",
+        body: formData
+    });
+
+    const data = await res.json();
+
+    alert(data.message);
+
+    closeStartup();
+}
 </script>
 
 </body>

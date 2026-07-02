@@ -1911,7 +1911,62 @@ app.get("/api/startup/active", (req, res) => {
         }
     );
 });
+//startup interest
+app.get("/api/startup/total-interest", (req, res) => {
 
+    const phone = req.query.phone;
+
+    db.query(
+        `SELECT SUM(interest) as total 
+         FROM interest_history 
+         WHERE phone=?`,
+        [phone],
+        (err, result) => {
+
+            if (err) return res.json({ total: 0 });
+
+            res.json({ total: result[0].total || 0 });
+        }
+    );
+});
+//start admin approve deposit
+app.post("/api/ezeaguuy/startup/approve", (req, res) => {
+
+    const { id } = req.body;
+
+    db.query(
+        `UPDATE startup_requests 
+         SET status='approved'
+         WHERE id=?`,
+        [id],
+        (err) => {
+
+            if (err) return res.status(500).json({ message: "Error" });
+
+            // MOVE TO ACTIVE INVESTMENTS
+            db.query(`
+                SELECT * FROM startup_requests WHERE id=?`,
+                [id],
+                (err2, result) => {
+
+                    const data = result[0];
+
+                    const end_date = new Date();
+                    end_date.setDate(end_date.getDate() + 21);
+
+                    db.query(
+                        `INSERT INTO investments 
+                        (phone, amount, interest_rate, status, start_date, end_date, plan_type)
+                        VALUES (?, ?, 10, 'active', NOW(), ?, 'startup')`,
+                        [data.phone, data.amount, end_date]
+                    );
+                }
+            );
+
+            res.json({ message: "Approved" });
+        }
+    );
+});
 // startup referral count
 app.get("/api/startup/referrals", (req, res) => {
 
@@ -1925,6 +1980,29 @@ app.get("/api/startup/referrals", (req, res) => {
             if (err) return res.json({ count: 0 });
 
             res.json({ count: result[0].count });
+        }
+    );
+});
+//pending approve deposit
+app.post("/api/startup/pending", upload.single("receipt"), (req, res) => {
+
+    const { phone, amount } = req.body;
+    const receipt = req.file.filename;
+
+    db.query(
+        `INSERT INTO startup_requests 
+        (phone, amount, receipt, status, created_at)
+        VALUES (?, ?, ?, 'pending', NOW())`,
+        [phone, amount, receipt],
+        (err) => {
+
+            if (err) {
+                return res.status(500).json({ message: "Request failed" });
+            }
+
+            res.json({
+                message: "Startup investment sent for admin approval"
+            });
         }
     );
 });
