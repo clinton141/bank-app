@@ -141,8 +141,10 @@ loadInvestments();
                 container.innerHTML += `
                     <div class="card active">
                         <p>💰 Amount: ₦${inv.amount}</p>
-                        <p>📊 Status: Active</p>
-                        <p>📅 Started: ${inv.created_at}</p>
+                         <p>💰 Interest: ₦${inv.interest_rate}</p>
+                        <p>📊 Status: ${inv.status}</p>
+                        <p>📅 Started: ${inv.start_date}</p>
+                        <p>📅 Ended: ${inv.end_date}</p>
                     </div>
                 `;
             });
