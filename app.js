@@ -1648,34 +1648,7 @@ app.get("/investments/all", (req, res) => {
     });
 });
 // user active and inactive investment
-app.get("/investments/user/:phone", (req, res) => {
 
-    const phone = req.params.phone;
-
-    const sql = `
-        SELECT 
-            id,
-            phone,
-            amount,
-            daily_interest,
-            status,
-            created_at,
-            end_date
-        FROM investments
-        WHERE phone = ?
-        ORDER BY created_at DESC
-    `;
-
-    db.query(sql, [phone], (err, result) => {
-
-        if (err) {
-            console.log("User investment error:", err);
-            return res.status(500).json([]);
-        }
-
-        return res.json(result || []);
-    });
-});
 //Ai chat
 const axios = require("axios");
 
