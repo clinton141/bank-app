@@ -1846,29 +1846,40 @@ app.get("/api/investments/active", (req, res) => {
 app.post("/api/startup/invest", (req, res) => {
 
     const { phone } = req.body;
-
     const amount = 5000;
-    const daily_interest = 10;
 
-    const created_at = new Date();
-    const end_date = new Date();
-    end_date.setDate(end_date.getDate() + 21);
+    if (!phone) {
+        return res.status(400).json({
+            success: false,
+            message: "Phone is required"
+        });
+    }
+
+    const endDate = new Date();
+    endDate.setDate(endDate.getDate() + 21);
 
     db.query(
-        `INSERT INTO investments 
-        (phone, amount, daily_interest, status, created_at, end_date, plan_type)
-        VALUES (?, ?, ?, 'active', ?, ?, 'startup')`,
-        [phone, amount, daily_interest, created_at, end_date],
-        (err) => {
+        `INSERT INTO startup_investments 
+        (phone, amount, status, created_at, end_date)
+        VALUES (?, ?, 'pending', NOW(), ?)`,
+        [phone, amount, endDate],
+        (err, result) => {
 
             if (err) {
-                return res.status(500).json({ message: "Error creating startup investment" });
+                console.log("STARTUP INSERT ERROR:", err); // 🔥 VERY IMPORTANT
+                return res.status(500).json({
+                    success: false,
+                    message: "Error creating startup investment"
+                });
             }
 
-            res.json({ message: "Startup investment activated successfully" });
+            return res.json({
+                success: true,
+                message: "Startup investment submitted successfully"
+            });
         }
     );
-});
+});s
 
 //startup active investment
 app.get("/api/startup/active", (req, res) => {
