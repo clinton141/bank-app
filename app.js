@@ -1648,7 +1648,34 @@ app.get("/investments/all", (req, res) => {
     });
 });
 // user active and inactive investment
+app.get("/investments/user/:phone", (req, res) => {
 
+    const phone = req.params.phone;
+
+    const sql = `
+        SELECT 
+            id,
+            phone,
+            amount,
+            daily_interest,
+            status,
+            created_at,
+            end_date
+        FROM investments
+        WHERE phone = ?
+        ORDER BY created_at DESC
+    `;
+
+    db.query(sql, [phone], (err, result) => {
+
+        if (err) {
+            console.log("User investment error:", err);
+            return res.status(500).json([]);
+        }
+
+        return res.json(result || []);
+    });
+});
 //Ai chat
 const axios = require("axios");
 
@@ -1755,17 +1782,32 @@ app.get("/api/investments/expired", (req, res) => {
 
     const phone = req.query.phone;
 
+    // 🔥 VALIDATION (IMPORTANT)
+    if (!phone) {
+        return res.status(400).json({
+            success: false,
+            message: "Phone is required"
+        });
+    }
+
     db.query(
-        `SELECT * 
+        `SELECT id, phone, amount, daily_interest, status, created_at, end_date
          FROM investments 
-         WHERE phone=? AND status='expired'
+         WHERE phone=? 
+         AND LOWER(status)='expired'
          ORDER BY created_at DESC`,
         [phone],
         (err, results) => {
 
-            if (err) return res.status(500).json(err);
+            if (err) {
+                console.log("Expired investments error:", err);
+                return res.status(500).json({
+                    success: false,
+                    message: "Database error"
+                });
+            }
 
-            res.json(results);
+            return res.json(results || []);
         }
     );
 });
@@ -1776,17 +1818,32 @@ app.get("/api/investments/active", (req, res) => {
 
     const phone = req.query.phone;
 
+    // 🔥 VALIDATION (VERY IMPORTANT)
+    if (!phone) {
+        return res.status(400).json({
+            success: false,
+            message: "Phone is required"
+        });
+    }
+
     db.query(
-        `SELECT * 
+        `SELECT id, phone, amount, daily_interest, status, created_at, end_date
          FROM investments 
-         WHERE phone=? AND status='active'
+         WHERE phone=? 
+         AND LOWER(status)='active'
          ORDER BY created_at DESC`,
         [phone],
         (err, results) => {
 
-            if (err) return res.status(500).json(err);
+            if (err) {
+                console.log("Active investments error:", err);
+                return res.status(500).json({
+                    success: false,
+                    message: "Database error"
+                });
+            }
 
-            res.json(results);
+            return res.json(results || []);
         }
     );
 });
