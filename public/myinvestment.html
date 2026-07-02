@@ -83,6 +83,10 @@ async function loadInvestments() {
         activeBox.innerHTML += `
             <div class="box active">
                 💰 ₦${inv.amount}<br>
+                <p>💰 Interest: ₦${inv.interest_rate}</p>
+                        <p>📊 Status: ${inv.status}</p>
+                        <p>📅 Started: ${inv.start_date}</p>
+                        <p>📅 End: ${inv.end_date}</p>
                 📅 ${new Date(inv.created_at).toLocaleDateString()}
             </div>
         `;
