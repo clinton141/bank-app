@@ -1629,7 +1629,7 @@ app.get("/investments/all", (req, res) => {
             i.id,
             phone,
             amount,
-            daily_interest,
+            total_returns,
             status,
             created_at,
             end_date
@@ -1774,6 +1774,46 @@ app.post("/admin/chat/reply", (req, res) => {
             if (err) return res.status(500).json({ error: "Failed" });
 
             res.json({ message: "Replied" });
+        }
+    );
+});
+//for users
+app.get("/api/investments/expired", (req, res) => {
+
+    const phone = req.query.phone;
+
+    db.query(
+        `SELECT * 
+         FROM investments 
+         WHERE phone=? AND status='expired'
+         ORDER BY created_at DESC`,
+        [phone],
+        (err, results) => {
+
+            if (err) return res.status(500).json(err);
+
+            res.json(results);
+        }
+    );
+});
+
+//active for users
+
+app.get("/api/investments/active", (req, res) => {
+
+    const phone = req.query.phone;
+
+    db.query(
+        `SELECT * 
+         FROM investments 
+         WHERE phone=? AND status='active'
+         ORDER BY created_at DESC`,
+        [phone],
+        (err, results) => {
+
+            if (err) return res.status(500).json(err);
+
+            res.json(results);
         }
     );
 });
