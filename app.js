@@ -1755,7 +1755,7 @@ app.get("/api/investments/expired", (req, res) => {
 
     const phone = req.query.phone;
 
-    // 🔥 VALIDATION (IMPORTANT)
+    // 🔥 VALIDATION
     if (!phone) {
         return res.status(400).json({
             success: false,
@@ -1764,16 +1764,27 @@ app.get("/api/investments/expired", (req, res) => {
     }
 
     db.query(
-        `SELECT id, phone, amount, daily_interest, status, created_at, end_date
+        `SELECT 
+            id,
+            phone,
+            amount,
+            interest_rate,
+            start_date,
+            end_date,
+            status
          FROM investments 
          WHERE phone=? 
-         AND LOWER(status)='expired'
-         ORDER BY created_at DESC`,
+         AND (
+                LOWER(TRIM(status)) = 'expired'
+                OR end_date <= NOW()
+             )
+         ORDER BY end_date DESC`,
         [phone],
         (err, results) => {
 
             if (err) {
-                console.log("Expired investments error:", err);
+                console.log("❌ Expired investments error:", err);
+
                 return res.status(500).json({
                     success: false,
                     message: "Database error"
@@ -1791,7 +1802,7 @@ app.get("/api/investments/active", (req, res) => {
 
     const phone = req.query.phone;
 
-    // 🔥 VALIDATION (VERY IMPORTANT)
+    // 🔥 SAFETY CHECK
     if (!phone) {
         return res.status(400).json({
             success: false,
@@ -1800,16 +1811,25 @@ app.get("/api/investments/active", (req, res) => {
     }
 
     db.query(
-        `SELECT id, phone, amount, daily_interest, status, created_at, end_date
-         FROM investments 
-         WHERE phone=? 
-         AND LOWER(status)='active'
-         ORDER BY created_at DESC`,
+        `SELECT 
+            id,
+            phone,
+            amount,
+            interest_rate,
+            start_date,
+            end_date,
+            status
+         FROM investments
+         WHERE phone = ?
+         AND LOWER(TRIM(status)) = 'active'
+         AND end_date > NOW()
+         ORDER BY start_date DESC`,
         [phone],
         (err, results) => {
 
             if (err) {
-                console.log("Active investments error:", err);
+                console.log("❌ ACTIVE INVESTMENT DB ERROR:", err);
+
                 return res.status(500).json({
                     success: false,
                     message: "Database error"
