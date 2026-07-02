@@ -1629,7 +1629,7 @@ app.get("/investments/all", (req, res) => {
             i.id,
             phone,
             amount,
-            total_returns,
+            daily_interest,
             status,
             created_at,
             end_date
