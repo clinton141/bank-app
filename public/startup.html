@@ -117,25 +117,21 @@
         Withdraw Earnings
     </button>
 
-    <!-- STARTUP INVESTMENT MODAL -->
-<div id="startupModal" class="modal" style="display:none;">
+    <div id="startupModal" class="modal">
+    <div class="modal-content">
 
-    <div class="modal-box">
-
-        <h2>🚀 Startup Investment (₦5000 Plan)</h2>
+        <h2>Startup Investment ₦5000</h2>
 
         <p><b>Bank:</b> Momo Payment Service Bank</p>
         <p><b>Account:</b> 7061778390</p>
 
-        <p><b>Amount:</b> ₦5000</p>
+        <p>Upload payment receipt below:</p>
 
-        <input type="hidden" id="startupAmount" value="5000" />
-
-        <label>Upload Payment Receipt</label>
-        <input type="file" id="receipt" />
+        <input type="file" id="receipt">
 
         <button onclick="submitStartup()">PROCEED</button>
-        <button onclick="closeStartup()">Cancel</button>
+
+        <button onclick="closeModal()">Cancel</button>
 
     </div>
 </div>
@@ -145,75 +141,99 @@
 
 const API = "https://mobile-wealth-api.onrender.com";
 
-const user = JSON.parse(localStorage.getItem("user"));
-const phone = user?.phone;
+// SAFE USER CHECK
+const user = JSON.parse(localStorage.getItem("user") || "null");
+const phone = user?.phone || null;
 
-// ❌ STOP IF NO USER
 if (!phone) {
     console.log("No user logged in");
 }
 
-// LOAD DATA
+// -------------------- LOAD STARTUP DATA --------------------
 async function loadStartup() {
 
     if (!phone) return;
 
     try {
 
-        const active = await fetch(`${API}/api/startup/active?phone=${phone}`).then(r => r.json());
-        const expired = await fetch(`${API}/api/startup/expired?phone=${phone}`).then(r => r.json());
-        const refData = await fetch(`${API}/api/startup/referrals?phone=${phone}`).then(r => r.json());
+        const [activeRes, expiredRes, refRes] = await Promise.all([
+            fetch(`${API}/api/startup/active?phone=${phone}`),
+            fetch(`${API}/api/startup/expired?phone=${phone}`),
+            fetch(`${API}/api/startup/referrals?phone=${phone}`)
+        ]);
 
-        // ACTIVE
+        const active = await activeRes.json();
+        const expired = await expiredRes.json();
+        const refData = await refRes.json();
+
+        // ---------------- ACTIVE ----------------
         const activeBox = document.getElementById("activeList");
-        activeBox.innerHTML = "";
+        if (activeBox) activeBox.innerHTML = "";
 
-        active.forEach(inv => {
+        (active || []).forEach(inv => {
 
             const end = inv.end_date ? new Date(inv.end_date) : null;
 
-            const daysLeft = end
-                ? Math.ceil((end - new Date()) / (1000 * 60 * 60 * 24))
+            const daysLeft = end && !isNaN(end)
+                ? Math.max(0, Math.ceil((end - new Date()) / (1000 * 60 * 60 * 24)))
                 : "N/A";
 
-            activeBox.innerHTML += `
-                <div class="card">
-                    <p>Amount: ₦${inv.amount}</p>
-                    <p>Daily Profit: 10%</p>
-                    <p>Days Left: ${daysLeft}</p>
-                </div>
-            `;
+            const amount = inv.amount || 0;
+            const rate = inv.daily_interest || 10;
+
+            if (activeBox) {
+                activeBox.innerHTML += `
+                    <div class="card">
+                        <p>Amount: ₦${amount}</p>
+                        <p>Daily Profit: ${rate}%</p>
+                        <p>Days Left: ${daysLeft}</p>
+                    </div>
+                `;
+            }
         });
 
-        // EXPIRED
+        // ---------------- EXPIRED ----------------
         const expiredBox = document.getElementById("expiredList");
-        expiredBox.innerHTML = "";
+        if (expiredBox) expiredBox.innerHTML = "";
 
-        expired.forEach(inv => {
+        (expired || []).forEach(inv => {
 
-            const end = inv.end_date ? new Date(inv.end_date).toLocaleString() : "N/A";
+            const end = inv.end_date
+                ? new Date(inv.end_date).toLocaleString()
+                : "N/A";
 
-            expiredBox.innerHTML += `
-                <div class="card">
-                    <p>Amount: ₦${inv.amount}</p>
-                    <p>Status: Expired</p>
-                    <p>Ended: ${end}</p>
-                </div>
-            `;
+            if (expiredBox) {
+                expiredBox.innerHTML += `
+                    <div class="card">
+                        <p>Amount: ₦${inv.amount || 0}</p>
+                        <p>Status: Expired</p>
+                        <p>Ended: ${end}</p>
+                    </div>
+                `;
+            }
         });
 
-        // REFERRALS
-        const refs = refData.count || 0;
-        document.getElementById("refCount").innerText = "Referrals: " + refs;
+        // ---------------- REFERRALS ----------------
+        const refs = refData?.count || 0;
+
+        const refEl = document.getElementById("refCount");
+        if (refEl) refEl.innerText = "Referrals: " + refs;
 
         const withdrawBtn = document.getElementById("withdrawBtn");
 
-        if (refs >= 3) {
-            withdrawBtn.classList.remove("disabled");
-            document.getElementById("withdrawStatus").innerText = "Withdrawal Enabled";
-        } else {
-            withdrawBtn.classList.add("disabled");
-            document.getElementById("withdrawStatus").innerText = "Need 3 referrals to withdraw";
+        if (withdrawBtn) {
+            if (refs >= 3) {
+                withdrawBtn.classList.remove("disabled");
+
+                const status = document.getElementById("withdrawStatus");
+                if (status) status.innerText = "Withdrawal Enabled";
+
+            } else {
+                withdrawBtn.classList.add("disabled");
+
+                const status = document.getElementById("withdrawStatus");
+                if (status) status.innerText = "Need 3 referrals to withdraw";
+            }
         }
 
     } catch (err) {
@@ -221,43 +241,31 @@ async function loadStartup() {
     }
 }
 
-// INVEST
-async function startInvestment() {
-
-    const res = await fetch(`${API}/api/startup/invest`, {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({ phone })
-    });
-
-    const data = await res.json();
-    alert(data.message);
-
-    loadStartup();
-}
-
-window.onload = loadStartup;
-
-// auto refresh
-setInterval(loadStartup, 10000);
-
-// OPEN MODAL
+// -------------------- MODAL CONTROL --------------------
 function openStartup() {
-    document.getElementById("startupModal").style.display = "flex";
+    const modal = document.getElementById("startupModal");
+    if (modal) modal.style.display = "flex";
 }
 
-// CLOSE MODAL
 function closeStartup() {
-    document.getElementById("startupModal").style.display = "none";
+    const modal = document.getElementById("startupModal");
+    if (modal) modal.style.display = "none";
 }
 
-// SUBMIT STARTUP INVESTMENT
+// -------------------- SUBMIT STARTUP INVESTMENT --------------------
 async function submitStartup() {
 
-    const amount = document.getElementById("startupAmount").value;
+    if (!phone) {
+        alert("User not logged in");
+        return;
+    }
+
+    const amountInput = document.getElementById("startupAmount");
     const fileInput = document.getElementById("receipt");
 
-    if (!fileInput.files[0]) {
+    const amount = amountInput ? amountInput.value : 5000;
+
+    if (!fileInput || !fileInput.files[0]) {
         alert("Please upload receipt");
         return;
     }
@@ -267,17 +275,32 @@ async function submitStartup() {
     formData.append("amount", amount);
     formData.append("receipt", fileInput.files[0]);
 
-    const res = await fetch(`${API}/api/startup/pending`, {
-        method: "POST",
-        body: formData
-    });
+    try {
 
-    const data = await res.json();
+        const res = await fetch(`${API}/api/startup/pending`, {
+            method: "POST",
+            body: formData
+        });
 
-    alert(data.message);
+        const data = await res.json();
 
-    closeStartup();
+        alert(data.message || "Submitted for admin approval");
+
+        closeStartup();
+        loadStartup();
+
+    } catch (err) {
+        console.log("Submit error:", err);
+        alert("Network error. Try again.");
+    }
 }
+
+// -------------------- INIT --------------------
+window.addEventListener("load", loadStartup);
+
+// auto refresh
+setInterval(loadStartup, 10000);
+
 </script>
 
 </body>
