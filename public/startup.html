@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Startup Investment</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial;
+            background: linear-gradient(135deg, #2b1055, #7597de);
+            color: white;
+        }
+
+        .container {
+            padding: 15px;
+        }
+
+        .card {
+            background: white;
+            color: black;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        .btn {
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .invest-btn {
+            background: #00c853;
+            color: white;
+        }
+
+        .withdraw-btn {
+            background: #2962ff;
+            color: white;
+        }
+
+        .disabled {
+            background: gray !important;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h2>🚀 Startup Investment (₦5000 Plan)</h2>
+
+    <div class="card">
+        <h3>Your Status</h3>
+        <p id="refCount">Referrals: 0</p>
+        <p id="withdrawStatus">Withdrawal: Checking...</p>
+    </div>
+
+    <div class="card">
+        <h3>Active Startup Investments</h3>
+        <div id="activeList"></div>
+    </div>
+
+    <div class="card">
+        <h3>Expired Investments</h3>
+        <div id="expiredList"></div>
+    </div>
+
+    <button class="btn invest-btn" onclick="startInvestment()">
+        Invest ₦5000 Startup Plan
+    </button>
+
+    <button id="withdrawBtn" class="btn withdraw-btn disabled">
+        Withdraw Earnings
+    </button>
+
+</div>
+
+<script>
+
+const user = JSON.parse(localStorage.getItem("user"));
+const phone = user?.phone;
+
+async function loadStartup() {
+
+    const active = await fetch(`/api/startup/active?phone=${phone}`).then(r => r.json());
+    const expired = await fetch(`/api/startup/expired?phone=${phone}`).then(r => r.json());
+    const refData = await fetch(`/api/startup/referrals?phone=${phone}`).then(r => r.json());
+
+    // ACTIVE
+    const activeBox = document.getElementById("activeList");
+    activeBox.innerHTML = "";
+
+    active.forEach(inv => {
+
+        const end = new Date(inv.end_date);
+        const now = new Date();
+        const daysLeft = Math.ceil((end - now) / (1000*60*60*24));
+
+        activeBox.innerHTML += `
+            <div class="card">
+                <p>Amount: ₦${inv.amount}</p>
+                <p>Daily Profit: 10%</p>
+                <p>Days Left: ${daysLeft}</p>
+            </div>
+        `;
+    });
+
+    // EXPIRED
+    const expiredBox = document.getElementById("expiredList");
+    expiredBox.innerHTML = "";
+
+    expired.forEach(inv => {
+
+        expiredBox.innerHTML += `
+            <div class="card">
+                <p>Amount: ₦${inv.amount}</p>
+                <p>Status: Expired</p>
+                <p>Ended: ${inv.end_date}</p>
+            </div>
+        `;
+    });
+
+    // REFERRALS
+    const refs = refData.count || 0;
+    document.getElementById("refCount").innerText = "Referrals: " + refs;
+
+    const withdrawBtn = document.getElementById("withdrawBtn");
+
+    if (refs >= 3) {
+        withdrawBtn.classList.remove("disabled");
+        document.getElementById("withdrawStatus").innerText = "Withdrawal Enabled";
+    } else {
+        withdrawBtn.classList.add("disabled");
+        document.getElementById("withdrawStatus").innerText = "Need 3 referrals to withdraw";
+    }
+}
+
+// INVEST
+async function startInvestment() {
+
+    const res = await fetch("/api/startup/invest", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ phone })
+    });
+
+    const data = await res.json();
+    alert(data.message);
+
+    loadStartup();
+}
+
+window.onload = loadStartup;
+
+// auto refresh
+setInterval(loadStartup, 10000);
+
+</script>
+
+</body>
+</html>

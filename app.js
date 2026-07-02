@@ -1840,6 +1840,94 @@ app.get("/api/investments/active", (req, res) => {
         }
     );
 });
+
+//StartUP process
+app.post("/api/startup/invest", (req, res) => {
+
+    const { phone } = req.body;
+
+    const amount = 5000;
+    const daily_interest = 10;
+
+    const created_at = new Date();
+    const end_date = new Date();
+    end_date.setDate(end_date.getDate() + 21);
+
+    db.query(
+        `INSERT INTO investments 
+        (phone, amount, daily_interest, status, created_at, end_date, plan_type)
+        VALUES (?, ?, ?, 'active', ?, ?, 'startup')`,
+        [phone, amount, daily_interest, created_at, end_date],
+        (err) => {
+
+            if (err) {
+                return res.status(500).json({ message: "Error creating startup investment" });
+            }
+
+            res.json({ message: "Startup investment activated successfully" });
+        }
+    );
+});
+
+//startup active investment
+app.get("/api/startup/active", (req, res) => {
+
+    const phone = req.query.phone;
+
+    db.query(
+        `SELECT * FROM investments
+         WHERE phone=? 
+         AND status='active'
+         AND plan_type='startup'
+         AND end_date > NOW()`,
+        [phone],
+        (err, result) => {
+
+            if (err) return res.json([]);
+
+            res.json(result || []);
+        }
+    );
+});
+
+// startup expired investment
+
+app.get("/api/startup/active", (req, res) => {
+
+    const phone = req.query.phone;
+
+    db.query(
+        `SELECT * FROM investments
+         WHERE phone=? 
+         AND status='active'
+         AND plan_type='startup'
+         AND end_date > NOW()`,
+        [phone],
+        (err, result) => {
+
+            if (err) return res.json([]);
+
+            res.json(result || []);
+        }
+    );
+});
+
+// startup referral count
+app.get("/api/startup/referrals", (req, res) => {
+
+    const phone = req.query.phone;
+
+    db.query(`
+        SELECT COUNT(*) AS count FROM referrals WHERE referrer=?`,
+        [phone],
+        (err, result) => {
+
+            if (err) return res.json({ count: 0 });
+
+            res.json({ count: result[0].count });
+        }
+    );
+});
 // START SERVER
 const PORT = process.env.PORT || 3000;
 
