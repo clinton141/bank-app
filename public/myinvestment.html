@@ -107,6 +107,99 @@ async function loadInvestments() {
 
 loadInvestments();
 </script>
+<script>
+// INVESTMENT PAGE CONTROLLER (CLEAN VERSION)
+
+(function () {
+
+    const user = JSON.parse(localStorage.getItem("user"));
+    const phone = user?.phone;
+
+    if (!phone) {
+        console.log("No user phone found");
+        return;
+    }
+
+    let intervalId = null;
+
+    async function loadActive() {
+        try {
+            const res = await fetch(`/api/investments/active?phone=${phone}`);
+            const data = await res.json();
+
+            const container = document.getElementById("activeInvestments");
+            if (!container) return;
+
+            container.innerHTML = "";
+
+            if (!data || data.length === 0) {
+                container.innerHTML = "<p>No active investments</p>";
+                return;
+            }
+
+            data.forEach(inv => {
+                container.innerHTML += `
+                    <div class="card active">
+                        <p>💰 Amount: ₦${inv.amount}</p>
+                        <p>📊 Status: Active</p>
+                        <p>📅 Started: ${inv.created_at}</p>
+                    </div>
+                `;
+            });
+
+        } catch (err) {
+            console.log("Active load error:", err);
+        }
+    }
+
+    async function loadExpired() {
+        try {
+            const res = await fetch(`/api/investments/expired?phone=${phone}`);
+            const data = await res.json();
+
+            const container = document.getElementById("expiredInvestments");
+            if (!container) return;
+
+            container.innerHTML = "";
+
+            if (!data || data.length === 0) {
+                container.innerHTML = "<p>No expired investments</p>";
+                return;
+            }
+
+            data.forEach(inv => {
+                container.innerHTML += `
+                    <div class="card expired">
+                        <p>💰 Amount: ₦${inv.amount}</p>
+                        <p>⛔ Status: Expired</p>
+                        <p>📅 Ended: ${inv.end_date}</p>
+                    </div>
+                `;
+            });
+
+        } catch (err) {
+            console.log("Expired load error:", err);
+        }
+    }
+
+    function loadAll() {
+        loadActive();
+        loadExpired();
+    }
+
+    // FIRST LOAD
+    window.addEventListener("load", loadAll);
+
+    // 🔥 OPTIONAL AUTO REFRESH (SAFE VERSION - EVERY 30 SECONDS)
+    intervalId = setInterval(loadAll, 30000);
+
+    // CLEANUP (VERY IMPORTANT)
+    window.addEventListener("beforeunload", () => {
+        if (intervalId) clearInterval(intervalId);
+    });
+
+})();
+</script>
 
 </body>
 </html>
