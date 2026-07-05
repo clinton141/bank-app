@@ -807,8 +807,8 @@ app.post("/withdraw", (req, res) => {
     }
 
     // STEP 1: MINIMUM WITHDRAWAL
-    if (withdrawAmount < 12500) {
-        return res.send("Minimum withdrawal is ₦12500");
+    if (withdrawAmount < 7000) {
+        return res.send("Minimum withdrawal is ₦7000");
     }
 
     // STEP 2: GET USER FIRST (IMPORTANT FIX)
@@ -833,7 +833,7 @@ app.post("/withdraw", (req, res) => {
          FROM transactions t
          WHERE t.type = 'deposit'
          AND t.status = 'success'
-         AND t.amount >= 10000
+         AND t.amount >= 5000
          AND t.user_id IN (
              SELECT id FROM users WHERE referred_by = ?
          )
@@ -851,7 +851,7 @@ app.post("/withdraw", (req, res) => {
 
         if (total < 2) {
             return res.status(403).send(
-                "You must refer at least 2 users with minimum ₦10,000 first deposit each (admin approved)"
+                "You must refer at least 2 users with minimum ₦5,000 first deposit each (admin approved)"
             );
         }
 
