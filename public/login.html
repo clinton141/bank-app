@@ -155,7 +155,7 @@ async function login() {
 
         if (res.status === 403) {
             msg.style.color = "red";
-            msg.innerText = data?.message || "Your account has been locked";
+            msg.innerText = data?.message || "Your account has been locked,for been inactive of investment,please contact company or send message to the whatsapp group team";
             return;
         }
 
