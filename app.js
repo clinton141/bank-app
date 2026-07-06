@@ -224,6 +224,8 @@ cron.schedule("0 0 * * *", () => {
                             `UPDATE investments 
                              SET last_interest_time = NOW() 
                              WHERE id=? 
+                             AND status='active'
+                             AND end_date > NOW()
                              AND (last_interest_time IS NULL OR DATE(last_interest_time) < CURDATE())`,
                             [row.id],
                             (err2, result) => {
