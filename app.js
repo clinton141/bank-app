@@ -195,9 +195,10 @@ cron.schedule("0 0 * * *", () => {
 
             // STEP 3: GET INVESTMENTS (PHONE BASED)
             db.query(
-                `SELECT id, phone, amount, last_interest_time 
+                `SELECT id, phone, amount, last_interest_time,end_date 
                  FROM investments 
-                 WHERE status='active'`,
+                 WHERE status='active'
+                 AND end_date >NOW()`,
                 (err, results) => {
 
                     if (err) {
