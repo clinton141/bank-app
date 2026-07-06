@@ -374,7 +374,7 @@ app.post("/login", (req, res) => {
             const user = result[0];
 
             if (user.status === "locked") {
-                return res.status(403).json({ message: "Your account has been locked" });
+                return res.status(403).json({ message: "Your account has been locked,for inactive investment,please contact the company,or sent message to the whatsapp team. thank you" });
             }
 
             if (user.password !== password) {
