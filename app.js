@@ -852,9 +852,9 @@ app.post("/withdraw", (req, res) => {
 
         const total = ref?.[0]?.total || 0;
 
-        if (total < 2) {
+        if (total < 3) {
             return res.status(403).send(
-                "You must refer at least 2 users with minimum ₦5,000 first deposit each (admin approved)"
+                "You must refer at least 3 users with minimum ₦5,000 first deposit each (admin approved)"
             );
         }
 
@@ -1082,7 +1082,7 @@ app.post("/ezeaguuy/approve-withdraw", (req, res) => {
                         `SELECT COUNT(*) AS total 
                          FROM users 
                          WHERE referred_by = ? 
-                         AND first_deposit >= 10000`,
+                         AND first_deposit >= 5000`,
                         [user.referral_code],   // ✅ FIXED HERE
                         (err3, ref) => {
 
@@ -1092,7 +1092,7 @@ app.post("/ezeaguuy/approve-withdraw", (req, res) => {
 
                             if (ref[0].total < 2) {
                                 return res.status(403).send(
-                                    "User not eligible for withdrawal (need 2 referrals)"
+                                    "User not eligible for withdrawal (need 3 referrals)"
                                 );
                             }
 
