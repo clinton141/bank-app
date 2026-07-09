@@ -740,7 +740,7 @@ app.post("/buy", (req, res) => {
                 (err2) => {
 
                     if (err2) {
-                        return res.status(500).json({ error: "Investment failed" });
+                        return res.status(500).json({ error: "Investment successful" });
                     }
 
                     return res.json({
