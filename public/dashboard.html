@@ -1,683 +1,1004 @@
 <!DOCTYPE html>
 <html>
 <head>
+
 <title>Dashboard</title>
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 
-body {
-    margin: 0;
-    font-family: Arial;
-    background: #f5f7fb;
-    overflow-x: hidden;
+*{
+    box-sizing:border-box;
 }
+
+body{
+    margin:0;
+    font-family:Arial, sans-serif;
+    background:#f5f7fb;
+    overflow-x:hidden;
+}
+
 
 /* HEADER */
-.header {
-    background: linear-gradient(135deg, #0099ff, #0066cc);
-    color: white;
-    padding: 18px;
-    font-size: 12px;
-    font-weight: bold;
+
+.header{
+
+    background:linear-gradient(135deg,#0099ff,#0066cc);
+    color:white;
+    padding:18px;
+
 }
+
+
+/* ADVERT BANNER */
+
+.dashboard-ad{
+
+    width:100%;
+    padding:10px 15px;
+
+}
+
+
+.dashboard-ad img{
+
+    width:100%;
+    max-height:220px;
+    object-fit:cover;
+    border-radius:15px;
+    box-shadow:0 5px 15px rgba(0,0,0,0.15);
+
+}
+
+
 
 /* CONTAINER */
-.container {
-    padding: 15px;
-    padding-bottom: 120px; /* space for bottom nav */
+
+.container{
+
+    padding:15px;
+    padding-bottom:100px;
+
 }
+
+
 
 /* GRID */
-.grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-top: 10px;
+
+.grid{
+
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:12px;
+
 }
 
-/* TOP TIME */
-.top-time {
-    position: fixed;
-    top: 6px;
-    right: 6px;
-    text-align: right;
-    background: rgba(255,255,255,0.8);
-    padding: 2px 5px;
-    border-radius: 8px;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-    z-index: 99;
-    font-size: 5px;
-    line-height: 1;
+
+.card{
+
+    background:skyblue;
+    padding:15px;
+    border-radius:15px;
+    box-shadow:0 5px 15px rgba(0,0,0,0.08);
+
 }
 
-/* CARDS */
-.card {
-    background: skyblue;
-    padding: 15px;
-    border-radius: 15px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+
+.full{
+
+    grid-column:span 2;
+
 }
 
-.full {
-    grid-column: span 2;
+
+
+.card h2{
+
+    font-size:14px;
+    color:#555;
+    margin:0;
+
 }
 
-/* TEXT */
-.card h2 {
-    font-size: 14px;
-    margin: 0;
-    color: #666;
+
+.value{
+
+    font-size:20px;
+    font-weight:bold;
+    margin-top:8px;
+
 }
 
-.value {
-    font-size: 20px;
-    font-weight: bold;
-    margin-top: 8px;
+
+#balance{
+
+    color:#8b4513;
+
 }
 
-/* COLORS */
-#balance { color: #8b4513; }
-#totalInvested { color: #d4af37; }
-.returns { color: #00c853; }
 
-/* BUTTONS */
-button {
-    width: 100%;
-    padding: 12px;
-    border: none;
-    border-radius: 10px;
-    background: #0099ff;
-    color: white;
-    font-size: 14px;
+#totalInvested{
+
+    color:#d4af37;
+
 }
+
+
+.returns{
+
+    color:#00c853;
+
+}
+
+
+
+/* BUTTON */
+
+button{
+
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:10px;
+    background:#0099ff;
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
+
+}
+
+
+
+/* REFERRAL */
+
+.ref-box{
+
+    background:white;
+    padding:10px;
+    margin-top:10px;
+    border-radius:10px;
+
+}
+
+
+.ref-box input{
+
+    width:100%;
+    padding:8px;
+
+}
+
+
+
+
+/* BONUS */
+
+#bonusBox{
+
+    position:fixed;
+    right:10px;
+    bottom:100px;
+
+    width:100px;
+
+    background:#fff3cd;
+
+    padding:10px;
+
+    border-radius:12px;
+
+    box-shadow:0 4px 12px rgba(0,0,0,0.2);
+
+    font-size:12px;
+
+    z-index:999;
+
+}
+
+
+
+
+/* FLOAT BUTTONS */
+
+
+.about-btn,
+.help-btn,
+.myinvestment-btn{
+
+
+    position:fixed;
+
+    padding:8px 12px;
+
+    border-radius:20px;
+
+    text-decoration:none;
+
+    color:white;
+
+    font-size:12px;
+
+    font-weight:bold;
+
+    z-index:999;
+
+
+}
+
+
+
+.about-btn{
+
+    bottom:100px;
+    left:10px;
+    background:#876026;
+
+}
+
+
+.help-btn{
+
+    top:60px;
+    right:10px;
+    background:#53ed6d;
+
+}
+
+
+.myinvestment-btn{
+
+    bottom:100px;
+    right:10px;
+    background:#53ed6d;
+
+}
+
+
+
 
 /* BOTTOM NAV */
-.bottom-nav {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: skyblue;
-    display: flex;
-    justify-content: space-around;
-    padding: 10px 0;
-    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-    z-index: 999;
-}
 
-.bottom-nav a {
-    text-decoration: none;
-    color: #333;
-    font-size: 11px;
-    text-align: center;
-}
 
-/* ABOUT BUTTON */
-.about-btn {
-    position: fixed;
-    top: 620px;
-    left: 20px;
-    padding: 6px 10px;
-    font-size: 12px;
-    background: #876026a1;
-    color: white;
-    border-radius: 6px;
-    text-decoration: none;
-    font-weight: bold;
-    z-index: 9999;
-}
-
-/* HELP BUTTON */
-.help-btn {
-    position: fixed;
-    top: 52px;
-    right: 10px;
-    padding: 6px 10px;
-    font-size: 12px;
-    background: #53ed6d;
-    color: white;
-    border-radius: 20px;
-    text-decoration: none;
-    font-weight: bold;
-    z-index: 9999;
-}
-/*myinvestment BUTTON */
-.myinvestment-btn {
-    position: fixed;
-    top: 585px;
-    right: 10px;
-    padding: 6px 10px;
-    font-size: 15px;
-    background: #53ed6d;
-    color: white;
-    border-radius: 25px;
-    text-decoration: none;
-    font-weight: bold;
-    z-index: 9999;
-    
-        padding: 5px 8px;
-}
-/* investment BUTTON */
-.investment-btn {
-    position: fixed;
-    top: 620px;
-    right: 20px;
-    padding: 6px 10px;
-    font-size: 12px;
-    background: #c6e65d68;
-    color: rgb(139, 148, 184);
-    border-radius: 6px;
-    text-decoration: none;
-    font-weight: bold;
-    z-index: 9999;
-}
-/* BONUS BOX */
-#bonusBox {
-    
-    position: fixed;
-    right: 10px;
-    top: 75%;
-    transform: translateY(-50%);
-    width: 75px;
-    background: #fff3cd;
-    padding: 10px;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    z-index: 9999;
-    font-size: 12px;
-}
-
-/* MOBILE FIX */
-@media (max-width: 768px) {
-
-    .grid {
-        grid-template-columns: 1fr;
-    }
-
-    .about-btn, .help-btn {
-        font-size: 10px;
-        padding: 5px 8px;
-    }
-
-    .bottom-nav {
-        font-size: 10px;
-    }
-}
 .bottom-nav{
+
     position:fixed;
+
     bottom:0;
+
     left:0;
+
     right:0;
+
     background:#bfc3ce;
+
     display:flex;
-    justify-content:space-between;
-    padding:4px 2px;
-    border-top:1px solid #ddd;
+
+    justify-content:space-around;
+
+    padding:5px;
+
     z-index:9999;
+
+
 }
+
 
 .bottom-nav a{
+
     flex:1;
-    text-decoration:none;
+
     text-align:center;
+
+    text-decoration:none;
+
+    color:#333;
+
     font-size:9px;
-    color:#37393b;
-    padding:6px 2px;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    gap:1px;
+
+
 }
 
-.bottom-nav a span{
+
+.bottom-nav span{
+
+    display:block;
+
     font-size:14px;
+
 }
 
-/* make spacing tighter on small screens */
-@media(max-width:480px){
-    .bottom-nav a{
-        font-size:8px;
-        padding:5px 1px;
-    }
 
-    .bottom-nav a span{
-        font-size:13px;
-    }
-}
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.7);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-}
 
-.modal-content {
-    width: 90%;
-    max-width: 420px;
-    background: #fff;
-    border-radius: 12px;
-    overflow: hidden;
-    text-align: center;
-    position: relative;
-    animation: pop 0.3s ease;
+/* TIME */
+
+.top-time{
+
+    position:fixed;
+
+    top:5px;
+
+    right:5px;
+
+    background:white;
+
+    padding:5px;
+
+    border-radius:8px;
+
+    font-size:10px;
+
+    z-index:999;
+
 }
 
-@keyframes pop {
-    from { transform: scale(0.8); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
+
+
+
+/* MOBILE */
+
+@media(max-width:600px){
+
+
+.grid{
+
+    grid-template-columns:1fr;
+
 }
 
-.promo-img {
-    width: 100%;
-    display: block;
+
+.full{
+
+    grid-column:span 1;
+
 }
 
-.close-btn {
-    width: 90%;
-    margin: 15px auto;
-    padding: 12px;
-    border: none;
-    background: hsla(106, 100%, 65%, 0.993);
-    color: white;
-    font-weight: bold;
-    border-radius: 8px;
-    cursor: pointer;
-}
-.ad-banner {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.6);
-    display: none;
-    justify-content: center;
-    align-items: flex-start;
-    z-index: 9999;
-}
 
-.ad-content {
-    margin-top: 20px;
-    width: 90%;
-    max-width: 500px;
-    background: linear-gradient(135deg, #6a11cb, #2575fc);
-    color: white;
-    padding: 20px;
-    border-radius: 15px;
-    text-align: center;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
 }
-
-.ad-content h2 {
-    margin: 0;
-    font-size: 22px;
-}
-
-.ad-content button {
-    margin-top: 15px;
-    padding: 10px 20px;
-    border: none;
-    background: white;
-    color: #6a11cb;
-    font-weight: bold;
-    border-radius: 10px;
-    cursor: pointer;
-}
-
 
 </style>
+
 </head>
 
+
 <body>
-    <!-- ADVERT BANNER -->
-<div id="adBanner" class="ad-banner">
-    <div class="ad-content">
 
-        <h2>BIG NEWS!</h2>
-        <p>New startup product of ₦5,000 Available now</p>
-        <p>Unlock your new earning opportunity</p>
 
-        <button onclick="closeAd()">Close</button>
+<!-- DASHBOARD ADVERT -->
 
-    </div>
+<div class="dashboard-ad">
+
+<img src="images/investment1.jpeg" alt="Mobile Wealth Advert">
+
 </div>
+
+
 
 <!-- HEADER -->
+
+
 <div class="header">
 
-    <!-- CARTOON AVATAR -->
-    <div style="text-align:left;">
-        <img src="https://cdn-icons-png.flaticon.com/512/4140/4140048.png"
-             style="width:20px;height:20px;border-radius:30%;background:#fff;padding:3px;">
-    </div>
 
-    <!-- WELCOME TEXT -->
-    <div style="text-align:left;margin-top:5px;font-size:14px;">
-        Welcome <span id="welcome"></span>
-    </div>
+<div>
+
+<img src="https://cdn-icons-png.flaticon.com/512/4140/4140048.png"
+
+style="width:35px;height:35px;background:white;border-radius:50%;padding:3px;">
 
 </div>
+
+
+<div style="margin-top:8px;font-size:15px;">
+
+Welcome <span id="welcome"></span>
+
+</div>
+
+
+</div>
+
+
 
 <div class="top-time">
-    <div id="date"></div>
-    <div id="time"></div>
+
+<div id="date"></div>
+
+<div id="time"></div>
+
 </div>
+
+
 
 <div class="container">
 
-    <div class="grid">
 
-        <div class="card">
-            <h2>Balance</h2>
-            <div class="value" id="balance">₦0</div>
-        </div>
+<div class="grid">
 
-        <div class="card">
-            <h2>Returns</h2>
-            <div class="value returns" id="returns">₦0</div>
-        </div>
 
-        <div class="card full">
-            <h2>Total Invested</h2>
-            <div class="value" id="totalInvested">₦0</div>
-        </div>
+<div class="card">
 
-        <div class="card full">
-            <button onclick="window.location.href='deposit.html'">Deposit</button>
-        </div>
+<h2>Balance</h2>
 
-        <div class="card full">
-            <button onclick="window.location.href='Withdraw.html'">Withdraw</button>
-        </div>
-
-    </div>
-
-    <!-- BONUS -->
-    <div id="bonusBox">
-        <b>🎁 Bonus</b><br>
-        <input id="bonusCode" placeholder="Enter code" style="width:75%;padding:5px;">
-        <button onclick="claimBonus()" style="margin-top:5px;">Accept</button>
-    </div>
-
-    <!-- REFERRAL -->
-    <div style="background:#fff;padding:5px;margin-top:5px;border-radius:5px;">
-        <h3>Your Referral Link</h3>
-
-        <input id="refLink" readonly style="width:50%;padding:5px;" />
-
-        <button onclick="copyLink()" style="margin-top:5px;width:50%;">
-            Copy Link
-        </button>
-    </div>
-
-</div>
-<!-- POPUP MODAL -->
-<div id="promoModal" class="modal-overlay" style="display:none;">
-    
-    <div class="modal-content">
-
-        <img src="/images/index8.jpeg" alt="Mobile Wealth Promo" class="promo-img">
-
-        <button class="close-btn" onclick="closePromo()">OK</button>
-
-    </div>
+<div class="value" id="balance">₦0</div>
 
 </div>
 
-<!-- BUTTONS -->
-<a href="about.html" class="about-btn">About</a>
-<a href="help.html" class="help-btn">Forum</a>
-<a href="myinvestment.html" class="myinvestment-btn">MY🛍️<BR>INVESTMENT</a>
+
+
+<div class="card">
+
+<h2>Returns</h2>
+
+<div class="value returns" id="returns">₦0</div>
+
+</div>
 
 
 
-<!-- BOTTOM NAV -->
+<div class="card full">
+
+<h2>Total Invested</h2>
+
+<div class="value" id="totalInvested">₦0</div>
+
+</div>
+
+
+
+<div class="card full">
+
+<button onclick="location.href='deposit.html'">
+
+Deposit
+
+</button>
+
+</div>
+
+
+
+<div class="card full">
+
+<button onclick="location.href='Withdraw.html'">
+
+Withdraw
+
+</button>
+
+</div>
+
+
+
+</div>
+
+
+
+<div id="bonusBox">
+
+<b>🎁 Bonus</b>
+
+<br>
+
+<input id="bonusCode" placeholder="Enter code">
+
+<button onclick="claimBonus()">Accept</button>
+
+</div>
+
+
+
+<div class="ref-box">
+
+<h3>Your Referral Link</h3>
+
+
+<input id="refLink" readonly>
+
+
+<button onclick="copyLink()">
+
+Copy Link
+
+</button>
+
+
+</div>
+
+
+</div>
+
+
+
+
+<a href="about.html" class="about-btn">
+
+About
+
+</a>
+
+
+
+<a href="help.html" class="help-btn">
+
+Forum
+
+</a>
+
+
+
+<a href="myinvestment.html" class="myinvestment-btn">
+
+MY 🛍️ INVESTMENT
+
+</a>
+
+
+
 <div class="bottom-nav">
 
-    <a href="deposit.html"><span>💰</span>DEP</a>
-    <a href="products.html"><span>🛍️</span>PRODUCT</a>
-    <a href="Transactions.html"><span>📊</span>HISTORY</a>
-    <a href="referral-commission.html"><span>🔗</span>REF</a>
-    <a href="Interest-history.html"><span>📈</span>INTEREST</a>
-    <a href="login.html"><span>🚪</span>Out</a>
+
+<a href="deposit.html">
+
+<span>💰</span>
+
+DEP
+
+</a>
+
+
+<a href="products.html">
+
+<span>🛍️</span>
+
+PRODUCT
+
+</a>
+
+
+<a href="Transactions.html">
+
+<span>📊</span>
+
+HISTORY
+
+</a>
+
+
+<a href="referral-commission.html">
+
+<span>🔗</span>
+
+REF
+
+</a>
+
+
+<a href="Interest-history.html">
+
+<span>📈</span>
+
+INTEREST
+
+</a>
+
+
+<a href="login.html">
+
+<span>🚪</span>
+
+OUT
+
+</a>
+
 
 </div>
-
-</body>
-
 <script>
+
 const API = "https://mobile-wealth-api.onrender.com";
-</script>
 
-<script>
-document.addEventListener("DOMContentLoaded", () => {
 
-    const user = JSON.parse(localStorage.getItem("user"));
+document.addEventListener("DOMContentLoaded",()=>{
 
-    if (!user || !user.phone) {
-        window.location.href = "login.html";
-        return;
-    }
 
-    document.getElementById("welcome").innerText = user.phone;
+const user = JSON.parse(localStorage.getItem("user"));
 
-    const balanceEl = document.getElementById("balance");
 
-    function loadBalance() {
-        fetch(`${API}/balance/${user.phone}`)
-        .then(res => res.json())
-        .then(data => {
-            balanceEl.innerText = "₦" + (data.balance || 0);
-        });
-    }
+if(!user || !user.phone){
 
-    function loadReturns() {
-        fetch(`${API}/returns/${user.phone}`)
-        .then(res => res.json())
-        .then(data => {
-            document.getElementById("returns").innerText =
-                "₦" + (data.returns || data.total || 0);
-        });
-    }
+    window.location.href="login.html";
+    return;
 
-    function loadInvested() {
-        fetch(`${API}/total-invested/${user.phone}`)
-        .then(res => res.json())
-        .then(data => {
-            document.getElementById("totalInvested").innerText =
-                "₦" + (data.total || 0);
-        });
-    }
-
-    loadBalance();
-    loadReturns();
-    loadInvested();
-
-    if (typeof checkInvestment === "function") {
-        checkInvestment(user.phone);
-    }
-
-    setInterval(loadBalance, 3000);
-    setInterval(loadReturns, 5000);
-    setInterval(loadInvested, 5000);
-});
-</script>
-
-<!-- REFERRAL -->
-<script>
-const userRef = JSON.parse(localStorage.getItem("user"));
-
-if (!userRef || !userRef.phone) {
-    window.location.href = "login.html";
 }
 
-const referralCode = userRef.referral_code;
 
-const link = `${location.origin}/signup.html?ref=${referralCode}`;
+
+document.getElementById("welcome").innerText=user.phone;
+
+
+
+// ================= BALANCE =================
+
+
+async function loadBalance(){
+
+try{
+
+const res = await fetch(`${API}/balance/${user.phone}`);
+
+const data = await res.json();
+
+
+document.getElementById("balance").innerText =
+"₦"+(data.balance || 0);
+
+
+
+}catch(err){
+
+console.log(err);
+
+}
+
+}
+
+
+
+
+
+// ================= RETURNS =================
+
+
+async function loadReturns(){
+
+try{
+
+
+const res = await fetch(`${API}/returns/${user.phone}`);
+
+const data = await res.json();
+
+
+document.getElementById("returns").innerText =
+"₦"+(data.returns || data.total || 0);
+
+
+
+}catch(err){
+
+console.log(err);
+
+}
+
+}
+
+
+
+
+
+// ================= TOTAL INVESTED =================
+
+
+async function loadInvested(){
+
+try{
+
+
+const res = await fetch(`${API}/total-invested/${user.phone}`);
+
+const data = await res.json();
+
+
+document.getElementById("totalInvested").innerText =
+"₦"+(data.total || 0);
+
+
+
+}catch(err){
+
+console.log(err);
+
+}
+
+
+}
+
+
+
+
+
+loadBalance();
+loadReturns();
+loadInvested();
+
+
+
+setInterval(loadBalance,5000);
+
+setInterval(loadReturns,5000);
+
+setInterval(loadInvested,5000);
+
+
+
+});
+
+</script>
+
+
+
+
+
+<!-- REFERRAL SCRIPT -->
+
+
+<script>
+
+
+const referralUser =
+JSON.parse(localStorage.getItem("user"));
+
+
+
+if(referralUser && referralUser.phone){
+
+
+const code = referralUser.referral_code;
+
+
+const link =
+`${location.origin}/signup.html?ref=${code}`;
+
+
 
 document.getElementById("refLink").value = link;
 
-function copyLink() {
-    const input = document.getElementById("refLink");
-    input.select();
-    document.execCommand("copy");
-    alert("Copied!");
+
+
 }
+
+
+
+function copyLink(){
+
+
+const input=document.getElementById("refLink");
+
+
+input.select();
+
+
+document.execCommand("copy");
+
+
+alert("Referral link copied");
+
+}
+
+
+
 </script>
 
-<!-- TIME -->
+
+
+
+
+
+
+<!-- TIME SCRIPT -->
+
+
 <script>
-function updateTime() {
 
-    const now = new Date();
 
-    const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-    const months = [
-        "January","February","March","April","May","June",
-        "July","August","September","October","November","December"
-    ];
+function updateTime(){
 
-    const dayName = days[now.getDay()];
-    const day = now.getDate();
-    const month = months[now.getMonth()];
-    const year = now.getFullYear();
 
-    function suffix(d) {
-        if (d > 3 && d < 21) return "th";
-        switch (d % 10) {
-            case 1: return "st";
-            case 2: return "nd";
-            case 3: return "rd";
-            default: return "th";
-        }
-    }
 
-    let hours = now.getHours();
-    let minutes = now.getMinutes();
-    let ampm = hours >= 12 ? "pm" : "am";
+const now=new Date();
 
-    hours = hours % 12 || 12;
-    minutes = minutes < 10 ? "0" + minutes : minutes;
 
-    document.getElementById("date").innerText =
-        `${dayName}, ${day}${suffix(day)} ${month}, ${year}
-${hours}:${minutes} ${ampm}`;
+
+const days=[
+"Sunday",
+"Monday",
+"Tuesday",
+"Wednesday",
+"Thursday",
+"Friday",
+"Saturday"
+];
+
+
+const months=[
+"January",
+"February",
+"March",
+"April",
+"May",
+"June",
+"July",
+"August",
+"September",
+"October",
+"November",
+"December"
+];
+
+
+
+let day=now.getDate();
+
+
+let suffix="th";
+
+
+if(day%10===1 && day!==11)
+suffix="st";
+
+else if(day%10===2 && day!==12)
+suffix="nd";
+
+else if(day%10===3 && day!==13)
+suffix="rd";
+
+
+
+let hours=now.getHours();
+
+let minutes=now.getMinutes();
+
+
+let ampm=hours>=12?"pm":"am";
+
+
+hours=hours%12 || 12;
+
+
+minutes=
+minutes<10?
+"0"+minutes:
+minutes;
+
+
+
+document.getElementById("date").innerText =
+`${days[now.getDay()]}, ${day}${suffix} ${months[now.getMonth()]} ${now.getFullYear()}`;
+
+
+
+document.getElementById("time").innerText =
+`${hours}:${minutes} ${ampm}`;
+
+
+
 }
+
+
 
 updateTime();
-setInterval(updateTime, 1000);
+
+
+setInterval(updateTime,1000);
+
+
+
 </script>
 
-<!-- INVESTMENT CHECK + BONUS -->
+
+
+
+
+
+<!-- BONUS CHECK -->
+
+
 <script>
-async function checkInvestment(phone) {
 
-    try {
-        const res = await fetch(`${API}/user/has-active-investment/${phone}`);
-        const data = await res.json();
 
-        document.getElementById("bonusBox").style.display =
-            data.active ? "block" : "none";
+async function checkInvestment(phone){
 
-    } catch (err) {
-        console.log(err);
-    }
+
+try{
+
+
+const res =
+await fetch(`${API}/user/has-active-investment/${phone}`);
+
+
+
+const data =
+await res.json();
+
+
+
+document.getElementById("bonusBox").style.display =
+data.active ? "block" : "none";
+
+
+
+}catch(err){
+
+console.log(err);
+
 }
 
-async function claimBonus() {
 
-    const code = document.getElementById("bonusCode").value;
-    const user = JSON.parse(localStorage.getItem("user"));
 
-    const res = await fetch(`${API}/claim-bonus`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            userId: user.id,
-            code
-        })
-    });
-
-    const msg = await res.text();
-    alert(msg);
 }
+
+
+
+
+async function claimBonus(){
+
+
+
+const code =
+document.getElementById("bonusCode").value;
+
+
+
+const user =
+JSON.parse(localStorage.getItem("user"));
+
+
+
+try{
+
+
+const res =
+await fetch(`${API}/claim-bonus`,{
+
+
+method:"POST",
+
+
+headers:{
+"Content-Type":"application/json"
+},
+
+
+body:JSON.stringify({
+
+userId:user.id,
+
+code:code
+
+})
+
+
+});
+
+
+
+const msg =
+await res.text();
+
+
+
+alert(msg);
+
+
+
+}catch(err){
+
+alert("Bonus error");
+
+}
+
+
+
+}
+
+
+
 </script>
 
-<script>
-// PROMO POPUP CONTROLLER (SHOW EVERY TIME)
 
-(function () {
 
-    const user = JSON.parse(localStorage.getItem("user"));
 
-    function showPromo() {
-        const modal = document.getElementById("promoModal");
-        if (modal) {
-            modal.style.display = "flex";
-        }
-    }
-
-    function closePromo() {
-        const modal = document.getElementById("promoModal");
-
-        if (modal) {
-            modal.style.display = "none";
-        }
-    }
-
-    // SHOW EVERY TIME DASHBOARD LOADS
-    window.addEventListener("load", () => {
-
-        if (user?.phone) {
-            showPromo();
-        }
-    });
-
-    window.closePromo = closePromo;
-
-})();
-</script>
-
-<script>
-(function () {
-
-    function showAd() {
-        const ad = document.getElementById("adBanner");
-        if (ad) {
-            ad.style.display = "flex";
-        }
-    }
-
-    function closeAd() {
-        const ad = document.getElementById("adBanner");
-        if (ad) {
-            ad.style.display = "none";
-        }
-    }
-
-    // expose close button globally
-    window.closeAd = closeAd;
-
-    // show immediately when dashboard loads
-    window.addEventListener("load", () => {
-        showAd();
-    });
-
-    // show every 2 minutes (120000ms)
-    setInterval(() => {
-        showAd();
-    }, 120000);
-
-})();
-</script>
 
 </body>
+
 </html>
