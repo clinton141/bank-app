@@ -180,6 +180,7 @@ button:active{
 </div>
 
 <script>
+
 const API = "https://mobile-wealth-api.onrender.com";
 
 const user = JSON.parse(localStorage.getItem("user"));
@@ -188,9 +189,11 @@ if (!user || !user.phone) {
     window.location.href = "login.html";
 }
 
+
 async function buyProduct(amount) {
 
     try {
+
         const res = await fetch(`${API}/buy`, {
             method: "POST",
             headers: {
@@ -202,20 +205,33 @@ async function buyProduct(amount) {
             })
         });
 
+
         const data = await res.json();
 
-        alert(data.message || "investment successful");
+
+        if (!res.ok) {
+            alert(data.error || "Investment failed");
+            return;
+        }
+
+
+        alert(data.message || "Investment successful");
+
 
     } catch (err) {
-        console.log(err);
-        alert("Transaction failed");
+
+        console.log("BUY ERROR:", err);
+
+        alert("Server connection failed");
+
     }
 }
+
 
 function goDashboard() {
     window.location.href = "dashboard.html";
 }
-</script>
 
+</script>
 </body>
 </html>
