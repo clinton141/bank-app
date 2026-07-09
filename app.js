@@ -734,13 +734,13 @@ app.post("/buy", (req, res) => {
             );
 
             db.query(
-                `INSERT INTO investments (phone,amount,created_at, status, end_date)
+                `INSERT INTO investments (phone,amount, status, end_date)
                  VALUES (?, ?, 'active', DATE_ADD(NOW(), INTERVAL 15 DAY))`,
                 [phone, investAmount],
                 (err2) => {
 
                     if (err2) {
-                        return res.status(500).json({ error: "Investment successful" });
+                        return res.status(500).json({ error: "Investment faileds" });
                     }
 
                     return res.json({
