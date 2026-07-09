@@ -31,7 +31,6 @@ body{
 }
 
 
-
 /* ADVERT */
 
 .dashboard-ad{
@@ -54,18 +53,17 @@ body{
 
 
 
-
-
 /* CONTAINER */
 
 .container{
 
+    width:100%;
+    max-width:600px;
+    margin:auto;
     padding:15px;
     padding-bottom:130px;
 
 }
-
-
 
 
 
@@ -78,8 +76,6 @@ body{
     gap:12px;
 
 }
-
-
 
 
 
@@ -101,8 +97,6 @@ body{
 
 
 
-
-
 .card h2{
 
     font-size:14px;
@@ -110,7 +104,6 @@ body{
     color:#555;
 
 }
-
 
 
 
@@ -124,7 +117,6 @@ body{
 
 
 
-
 #balance{
 
     color:#8b4513;
@@ -132,13 +124,11 @@ body{
 }
 
 
-
 #totalInvested{
 
     color:#d4af37;
 
 }
-
 
 
 .returns{
@@ -149,11 +139,10 @@ body{
 
 
 
-
+/* GENERAL BUTTON */
 
 button{
 
-    width:100%;
     padding:12px;
     border:none;
     border-radius:10px;
@@ -166,6 +155,57 @@ button{
 
 
 
+/* DEPOSIT & WITHDRAW BUTTON AREA */
+
+.action-buttons{
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:15px;
+    margin:20px 0;
+
+}
+
+
+.action-buttons button{
+
+    width:130px;
+    height:60px;
+    border-radius:15px;
+    font-size:14px;
+
+}
+
+
+
+/* BONUS BOX */
+
+#bonusBox{
+
+    width:180px;
+    margin:15px auto;
+
+    background:#fff3cd;
+
+    padding:12px;
+
+    border-radius:12px;
+
+    box-shadow:0 4px 12px rgba(0,0,0,.2);
+
+    font-size:12px;
+
+}
+
+
+#bonusBox input{
+
+    width:100%;
+    padding:6px;
+
+}
+
 
 
 
@@ -174,12 +214,19 @@ button{
 
 .ref-box{
 
+    width:90%;
+    max-width:400px;
+
+    margin:15px auto;
+
     background:white;
-    padding:10px;
-    margin-top:15px;
+
+    padding:12px;
+
     border-radius:10px;
 
 }
+
 
 
 .ref-box input{
@@ -193,37 +240,15 @@ button{
 
 
 
+/* NORMAL BUTTON LINKS */
 
 
-/* BONUS BOX */
+.action-links{
 
-#bonusBox{
-
-    position:relative;
-
-    width:100%;
-
-    margin-top:15px;
-
-    background:#fff3cd;
-
+    text-align:center;
     padding:10px;
 
-    border-radius:12px;
-
-    box-shadow:0 4px 12px rgba(0,0,0,.2);
-
-    font-size:12px;
-
 }
-
-
-
-
-
-
-
-/* NORMAL BUTTON LINKS */
 
 
 .about-btn,
@@ -244,10 +269,9 @@ button{
 
     font-weight:bold;
 
-    margin:10px 5px;
+    margin:5px;
 
 }
-
 
 
 
@@ -259,7 +283,6 @@ button{
 
 
 
-
 .help-btn{
 
     background:#53ed6d;
@@ -268,32 +291,11 @@ button{
 
 
 
-
 .myinvestment-btn{
 
     background:#53ed6d;
 
 }
-
-
-
-
-
-
-
-/* BUTTON AREA */
-
-.action-links{
-
-    text-align:center;
-
-    padding:10px;
-
-}
-
-
-
-
 
 
 
@@ -325,7 +327,6 @@ button{
 
 
 
-
 .bottom-nav a{
 
     flex:1;
@@ -342,7 +343,6 @@ button{
 
 
 
-
 .bottom-nav span{
 
     display:block;
@@ -350,10 +350,6 @@ button{
     font-size:14px;
 
 }
-
-
-
-
 
 
 
@@ -382,16 +378,9 @@ button{
 
 
 
-
-
-
-
-
 /* MOBILE */
 
-
 @media(max-width:600px){
-
 
 .grid{
 
@@ -400,14 +389,11 @@ button{
 }
 
 
-
 .full{
 
     grid-column:span 1;
 
 }
-
-
 
 .dashboard-ad img{
 
@@ -416,25 +402,24 @@ button{
 }
 
 
+.action-buttons button{
 
-.about-btn,
-.help-btn,
-.myinvestment-btn{
-
-    font-size:11px;
-
-    padding:7px 10px;
+    width:120px;
+    height:55px;
 
 }
 
+.container{
+
+    padding:10px;
 
 }
 
+}
 </style>
 </head>
 
 <body>
-
 
 <!-- HEADER -->
 
@@ -444,7 +429,6 @@ button{
         <img src="https://cdn-icons-png.flaticon.com/512/4140/4140048.png"
         style="width:35px;height:35px;background:white;border-radius:50%;padding:3px;">
     </div>
-
 
     <div style="margin-top:8px;font-size:15px;">
         Welcome <span id="welcome"></span>
@@ -462,7 +446,6 @@ button{
 alt="Mobile Wealth Advert">
 
 </div>
-
 
 
 
@@ -503,6 +486,7 @@ alt="Mobile Wealth Advert">
 
 
 
+
 <div class="card full">
 
 <h2>Total Invested</h2>
@@ -512,27 +496,22 @@ alt="Mobile Wealth Advert">
 </div>
 
 
+</div>
 
 
-<div class="card full">
+
+<!-- DEPOSIT AND WITHDRAW -->
+
+<div class="action-buttons">
 
 <button onclick="location.href='deposit.html'">
-Deposit
+💰 Deposit
 </button>
 
-</div>
-
-
-
-
-<div class="card full">
 
 <button onclick="location.href='Withdraw.html'">
-Withdraw
+💸 Withdraw
 </button>
-
-</div>
-
 
 </div>
 
@@ -546,11 +525,13 @@ Withdraw
 
 <b>🎁 Bonus</b>
 
-<br>
+<br><br>
 
 <input id="bonusCode"
-placeholder="Enter code"
-style="width:100%;padding:5px;">
+placeholder="Enter code">
+
+
+<br><br>
 
 <button onclick="claimBonus()">
 Accept
@@ -562,15 +543,17 @@ Accept
 
 
 
+
 <!-- REFERRAL -->
 
 <div class="ref-box">
 
 <h3>Your Referral Link</h3>
 
-
 <input id="refLink" readonly>
 
+
+<br><br>
 
 <button onclick="copyLink()">
 Copy Link
@@ -580,8 +563,8 @@ Copy Link
 </div>
 
 
-
 </div>
+
 
 
 
@@ -597,11 +580,9 @@ About
 </a>
 
 
-
 <a href="help.html" class="help-btn">
 Forum
 </a>
-
 
 
 <a href="myinvestment.html" class="myinvestment-btn">
@@ -610,6 +591,7 @@ MY 🛍️ INVESTMENT
 
 
 </div>
+
 
 
 
@@ -677,7 +659,6 @@ OUT
 
 
 
-
 <script>
 
 const API="https://mobile-wealth-api.onrender.com";
@@ -706,7 +687,6 @@ document.getElementById("welcome").innerText=user.phone;
 
 
 
-
 function formatMoney(amount){
 
 return Number(amount || 0).toLocaleString();
@@ -717,13 +697,9 @@ return Number(amount || 0).toLocaleString();
 
 
 
-
-// BALANCE
-
 async function loadBalance(){
 
 try{
-
 
 const res=await fetch(`${API}/balance/${user.phone}`);
 
@@ -732,7 +708,6 @@ const data=await res.json();
 
 document.getElementById("balance").innerText=
 "₦"+formatMoney(data.balance);
-
 
 
 }catch(err){
@@ -747,23 +722,17 @@ console.log("Balance error:",err);
 
 
 
-
-// RETURNS
-
 async function loadReturns(){
 
 try{
-
 
 const res=await fetch(`${API}/returns/${user.phone}`);
 
 const data=await res.json();
 
 
-
 document.getElementById("returns").innerText=
 "₦"+formatMoney(data.returns || data.total);
-
 
 
 }catch(err){
@@ -778,24 +747,17 @@ console.log("Returns error:",err);
 
 
 
-
-
-// INVESTED
-
 async function loadInvested(){
 
 try{
-
 
 const res=await fetch(`${API}/total-invested/${user.phone}`);
 
 const data=await res.json();
 
 
-
 document.getElementById("totalInvested").innerText=
 "₦"+formatMoney(data.total);
-
 
 
 }catch(err){
@@ -825,7 +787,6 @@ setInterval(loadReturns,5000);
 setInterval(loadInvested,5000);
 
 
-
 });
 
 
@@ -834,16 +795,13 @@ setInterval(loadInvested,5000);
 
 
 
-
-// REFERRAL LINK
+// REFERRAL
 
 
 const userRef=JSON.parse(localStorage.getItem("user"));
 
 
-
 if(userRef && userRef.referral_code){
-
 
 const ref=document.getElementById("refLink");
 
@@ -855,10 +813,7 @@ ref.value=
 
 }
 
-
 }
-
-
 
 
 
@@ -866,21 +821,15 @@ ref.value=
 
 function copyLink(){
 
-
 const input=document.getElementById("refLink");
-
 
 input.select();
 
-
 navigator.clipboard.writeText(input.value);
-
 
 alert("Referral link copied");
 
-
 }
-
 
 
 
@@ -892,7 +841,6 @@ alert("Referral link copied");
 
 
 function updateTime(){
-
 
 const now=new Date();
 
@@ -906,16 +854,12 @@ document.getElementById("time").innerText=
 now.toLocaleTimeString();
 
 
-
 }
-
 
 
 updateTime();
 
-
 setInterval(updateTime,1000);
-
 
 
 
@@ -961,7 +905,6 @@ code
 });
 
 
-
 const msg=await res.text();
 
 
@@ -971,9 +914,7 @@ alert(msg);
 
 }catch(err){
 
-
 alert("Bonus failed");
-
 
 }
 
@@ -983,7 +924,6 @@ alert("Bonus failed");
 
 
 </script>
-
 
 
 </body>
