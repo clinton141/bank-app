@@ -14,7 +14,7 @@
 
 body{
     margin:0;
-    font-family:Arial, sans-serif;
+    font-family:Arial,sans-serif;
     background:#f5f7fb;
     overflow-x:hidden;
 }
@@ -31,7 +31,8 @@ body{
 }
 
 
-/* ADVERT BANNER */
+
+/* ADVERT */
 
 .dashboard-ad{
 
@@ -44,12 +45,13 @@ body{
 .dashboard-ad img{
 
     width:100%;
-    max-height:220px;
+    height:170px;
     object-fit:cover;
     border-radius:15px;
-    box-shadow:0 5px 15px rgba(0,0,0,0.15);
+    box-shadow:0 5px 15px rgba(0,0,0,.15);
 
 }
+
 
 
 
@@ -58,9 +60,10 @@ body{
 .container{
 
     padding:15px;
-    padding-bottom:100px;
+    padding-bottom:150px;
 
 }
+
 
 
 
@@ -75,12 +78,13 @@ body{
 }
 
 
+
 .card{
 
     background:skyblue;
     padding:15px;
     border-radius:15px;
-    box-shadow:0 5px 15px rgba(0,0,0,0.08);
+    box-shadow:0 5px 15px rgba(0,0,0,.08);
 
 }
 
@@ -93,11 +97,12 @@ body{
 
 
 
+
 .card h2{
 
     font-size:14px;
-    color:#555;
     margin:0;
+    color:#555;
 
 }
 
@@ -111,10 +116,9 @@ body{
 }
 
 
+
 #balance{
-
     color:#8b4513;
-
 }
 
 
@@ -133,7 +137,6 @@ body{
 
 
 
-/* BUTTON */
 
 button{
 
@@ -144,19 +147,19 @@ button{
     background:#0099ff;
     color:white;
     font-weight:bold;
-    cursor:pointer;
 
 }
 
 
 
-/* REFERRAL */
+
+/* REFERRAL BOX */
 
 .ref-box{
 
     background:white;
     padding:10px;
-    margin-top:10px;
+    margin-top:15px;
     border-radius:10px;
 
 }
@@ -178,9 +181,9 @@ button{
 
     position:fixed;
     right:10px;
-    bottom:100px;
+    bottom:150px;
 
-    width:100px;
+    width:90px;
 
     background:#fff3cd;
 
@@ -188,7 +191,7 @@ button{
 
     border-radius:12px;
 
-    box-shadow:0 4px 12px rgba(0,0,0,0.2);
+    box-shadow:0 4px 12px rgba(0,0,0,.2);
 
     font-size:12px;
 
@@ -206,7 +209,6 @@ button{
 .help-btn,
 .myinvestment-btn{
 
-
     position:fixed;
 
     padding:8px 12px;
@@ -223,14 +225,13 @@ button{
 
     z-index:999;
 
-
 }
 
 
 
 .about-btn{
 
-    bottom:100px;
+    bottom:85px;
     left:10px;
     background:#876026;
 
@@ -248,12 +249,11 @@ button{
 
 .myinvestment-btn{
 
-    bottom:100px;
+    bottom:85px;
     right:10px;
     background:#53ed6d;
 
 }
-
 
 
 
@@ -280,8 +280,8 @@ button{
 
     z-index:9999;
 
-
 }
+
 
 
 .bottom-nav a{
@@ -296,8 +296,8 @@ button{
 
     font-size:9px;
 
-
 }
+
 
 
 .bottom-nav span{
@@ -307,6 +307,7 @@ button{
     font-size:14px;
 
 }
+
 
 
 
@@ -339,7 +340,6 @@ button{
 
 @media(max-width:600px){
 
-
 .grid{
 
     grid-template-columns:1fr;
@@ -354,47 +354,44 @@ button{
 }
 
 
+.dashboard-ad img{
+
+    height:150px;
+
 }
 
+
+}
 </style>
 
 </head>
 
-
 <body>
+
+
+<!-- HEADER -->
+
+<div class="header">
+
+    <div>
+        <img src="https://cdn-icons-png.flaticon.com/512/4140/4140048.png"
+        style="width:35px;height:35px;background:white;border-radius:50%;padding:3px;">
+    </div>
+
+    <div style="margin-top:8px;font-size:15px;">
+        Welcome <span id="welcome"></span>
+    </div>
+
+</div>
+
 
 
 <!-- DASHBOARD ADVERT -->
 
 <div class="dashboard-ad">
 
-<img src="images/investment1.jpeg" alt="Mobile Wealth Advert">
-
-</div>
-
-
-
-<!-- HEADER -->
-
-
-<div class="header">
-
-
-<div>
-
-<img src="https://cdn-icons-png.flaticon.com/512/4140/4140048.png"
-
-style="width:35px;height:35px;background:white;border-radius:50%;padding:3px;">
-
-</div>
-
-
-<div style="margin-top:8px;font-size:15px;">
-
-Welcome <span id="welcome"></span>
-
-</div>
-
+<img src="images/investment1.jpeg" 
+alt="Mobile Wealth Advert">
 
 </div>
 
@@ -449,9 +446,7 @@ Welcome <span id="welcome"></span>
 <div class="card full">
 
 <button onclick="location.href='deposit.html'">
-
 Deposit
-
 </button>
 
 </div>
@@ -461,18 +456,18 @@ Deposit
 <div class="card full">
 
 <button onclick="location.href='Withdraw.html'">
-
 Withdraw
-
 </button>
 
 </div>
 
 
-
 </div>
 
 
+
+
+<!-- BONUS -->
 
 <div id="bonusBox">
 
@@ -480,60 +475,62 @@ Withdraw
 
 <br>
 
-<input id="bonusCode" placeholder="Enter code">
+<input id="bonusCode" placeholder="Enter code"
+style="width:100%;padding:5px;">
 
-<button onclick="claimBonus()">Accept</button>
+<button onclick="claimBonus()">
+Accept
+</button>
 
 </div>
 
 
+
+
+<!-- REFERRAL -->
 
 <div class="ref-box">
 
 <h3>Your Referral Link</h3>
 
-
 <input id="refLink" readonly>
 
-
 <button onclick="copyLink()">
-
 Copy Link
-
 </button>
 
+</div>
+
+
 
 </div>
 
 
-</div>
 
 
+
+<!-- FLOAT BUTTONS -->
 
 
 <a href="about.html" class="about-btn">
-
 About
-
 </a>
-
 
 
 <a href="help.html" class="help-btn">
-
 Forum
-
 </a>
-
 
 
 <a href="myinvestment.html" class="myinvestment-btn">
-
 MY 🛍️ INVESTMENT
-
 </a>
 
 
+
+
+
+<!-- BOTTOM NAV -->
 
 <div class="bottom-nav">
 
@@ -541,7 +538,6 @@ MY 🛍️ INVESTMENT
 <a href="deposit.html">
 
 <span>💰</span>
-
 DEP
 
 </a>
@@ -550,7 +546,6 @@ DEP
 <a href="products.html">
 
 <span>🛍️</span>
-
 PRODUCT
 
 </a>
@@ -559,7 +554,6 @@ PRODUCT
 <a href="Transactions.html">
 
 <span>📊</span>
-
 HISTORY
 
 </a>
@@ -568,7 +562,6 @@ HISTORY
 <a href="referral-commission.html">
 
 <span>🔗</span>
-
 REF
 
 </a>
@@ -577,7 +570,6 @@ REF
 <a href="Interest-history.html">
 
 <span>📈</span>
-
 INTEREST
 
 </a>
@@ -586,28 +578,33 @@ INTEREST
 <a href="login.html">
 
 <span>🚪</span>
-
 OUT
 
 </a>
 
 
 </div>
+
+
+
+
 <script>
 
-const API = "https://mobile-wealth-api.onrender.com";
+const API="https://mobile-wealth-api.onrender.com";
+
 
 
 document.addEventListener("DOMContentLoaded",()=>{
 
 
-const user = JSON.parse(localStorage.getItem("user"));
+const user=JSON.parse(localStorage.getItem("user"));
 
 
 if(!user || !user.phone){
 
-    window.location.href="login.html";
-    return;
+window.location.href="login.html";
+
+return;
 
 }
 
@@ -617,98 +614,88 @@ document.getElementById("welcome").innerText=user.phone;
 
 
 
-// ================= BALANCE =================
-
+// BALANCE
 
 async function loadBalance(){
 
 try{
 
-const res = await fetch(`${API}/balance/${user.phone}`);
+const res=await fetch(`${API}/balance/${user.phone}`);
 
-const data = await res.json();
+const data=await res.json();
 
 
-document.getElementById("balance").innerText =
+document.getElementById("balance").innerText=
 "₦"+(data.balance || 0);
 
 
+}catch(e){
 
-}catch(err){
-
-console.log(err);
-
-}
+console.log(e);
 
 }
 
+}
 
 
 
 
-// ================= RETURNS =================
 
+// RETURNS
 
 async function loadReturns(){
 
 try{
 
+const res=await fetch(`${API}/returns/${user.phone}`);
 
-const res = await fetch(`${API}/returns/${user.phone}`);
-
-const data = await res.json();
+const data=await res.json();
 
 
-document.getElementById("returns").innerText =
+document.getElementById("returns").innerText=
 "₦"+(data.returns || data.total || 0);
 
 
+}catch(e){
 
-}catch(err){
-
-console.log(err);
-
-}
+console.log(e);
 
 }
 
+}
 
 
 
 
-// ================= TOTAL INVESTED =================
-
+// TOTAL INVESTED
 
 async function loadInvested(){
 
 try{
 
+const res=await fetch(`${API}/total-invested/${user.phone}`);
 
-const res = await fetch(`${API}/total-invested/${user.phone}`);
-
-const data = await res.json();
+const data=await res.json();
 
 
-document.getElementById("totalInvested").innerText =
+document.getElementById("totalInvested").innerText=
 "₦"+(data.total || 0);
 
 
+}catch(e){
 
-}catch(err){
-
-console.log(err);
-
-}
-
+console.log(e);
 
 }
 
-
+}
 
 
 
 loadBalance();
+
 loadReturns();
+
 loadInvested();
 
 
@@ -723,37 +710,19 @@ setInterval(loadInvested,5000);
 
 });
 
-</script>
 
 
 
 
+// REFERRAL LINK
 
-<!-- REFERRAL SCRIPT -->
-
-
-<script>
+const userRef=JSON.parse(localStorage.getItem("user"));
 
 
-const referralUser =
-JSON.parse(localStorage.getItem("user"));
+if(userRef && userRef.referral_code){
 
-
-
-if(referralUser && referralUser.phone){
-
-
-const code = referralUser.referral_code;
-
-
-const link =
-`${location.origin}/signup.html?ref=${code}`;
-
-
-
-document.getElementById("refLink").value = link;
-
-
+document.getElementById("refLink").value=
+`${location.origin}/signup.html?ref=${userRef.referral_code}`;
 
 }
 
@@ -761,15 +730,11 @@ document.getElementById("refLink").value = link;
 
 function copyLink(){
 
-
 const input=document.getElementById("refLink");
-
 
 input.select();
 
-
 document.execCommand("copy");
-
 
 alert("Referral link copied");
 
@@ -777,193 +742,63 @@ alert("Referral link copied");
 
 
 
-</script>
 
 
-
-
-
-
-
-<!-- TIME SCRIPT -->
-
-
-<script>
-
+// TIME
 
 function updateTime(){
-
 
 
 const now=new Date();
 
 
-
-const days=[
-"Sunday",
-"Monday",
-"Tuesday",
-"Wednesday",
-"Thursday",
-"Friday",
-"Saturday"
-];
+document.getElementById("date").innerText=
+now.toLocaleDateString();
 
 
-const months=[
-"January",
-"February",
-"March",
-"April",
-"May",
-"June",
-"July",
-"August",
-"September",
-"October",
-"November",
-"December"
-];
-
-
-
-let day=now.getDate();
-
-
-let suffix="th";
-
-
-if(day%10===1 && day!==11)
-suffix="st";
-
-else if(day%10===2 && day!==12)
-suffix="nd";
-
-else if(day%10===3 && day!==13)
-suffix="rd";
-
-
-
-let hours=now.getHours();
-
-let minutes=now.getMinutes();
-
-
-let ampm=hours>=12?"pm":"am";
-
-
-hours=hours%12 || 12;
-
-
-minutes=
-minutes<10?
-"0"+minutes:
-minutes;
-
-
-
-document.getElementById("date").innerText =
-`${days[now.getDay()]}, ${day}${suffix} ${months[now.getMonth()]} ${now.getFullYear()}`;
-
-
-
-document.getElementById("time").innerText =
-`${hours}:${minutes} ${ampm}`;
-
+document.getElementById("time").innerText=
+now.toLocaleTimeString();
 
 
 }
 
 
-
 updateTime();
-
 
 setInterval(updateTime,1000);
 
 
 
-</script>
 
 
-
-
-
-
-<!-- BONUS CHECK -->
-
-
-<script>
-
-
-async function checkInvestment(phone){
-
-
-try{
-
-
-const res =
-await fetch(`${API}/user/has-active-investment/${phone}`);
-
-
-
-const data =
-await res.json();
-
-
-
-document.getElementById("bonusBox").style.display =
-data.active ? "block" : "none";
-
-
-
-}catch(err){
-
-console.log(err);
-
-}
-
-
-
-}
-
-
-
+// BONUS
 
 async function claimBonus(){
 
 
-
-const code =
-document.getElementById("bonusCode").value;
+const code=document.getElementById("bonusCode").value;
 
 
-
-const user =
-JSON.parse(localStorage.getItem("user"));
+const user=JSON.parse(localStorage.getItem("user"));
 
 
 
 try{
 
 
-const res =
-await fetch(`${API}/claim-bonus`,{
-
+const res=await fetch(`${API}/claim-bonus`,{
 
 method:"POST",
-
 
 headers:{
 "Content-Type":"application/json"
 },
 
-
 body:JSON.stringify({
 
 userId:user.id,
 
-code:code
+code
 
 })
 
@@ -971,22 +806,16 @@ code:code
 });
 
 
-
-const msg =
-await res.text();
-
-
+const msg=await res.text();
 
 alert(msg);
 
 
+}catch(e){
 
-}catch(err){
-
-alert("Bonus error");
+alert("Bonus failed");
 
 }
-
 
 
 }
@@ -994,8 +823,6 @@ alert("Bonus error");
 
 
 </script>
-
-
 
 
 
