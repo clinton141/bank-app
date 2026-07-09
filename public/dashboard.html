@@ -55,14 +55,16 @@ body{
 
 
 
+
 /* CONTAINER */
 
 .container{
 
     padding:15px;
-    padding-bottom:150px;
+    padding-bottom:130px;
 
 }
+
 
 
 
@@ -76,6 +78,8 @@ body{
     gap:12px;
 
 }
+
+
 
 
 
@@ -98,6 +102,7 @@ body{
 
 
 
+
 .card h2{
 
     font-size:14px;
@@ -105,6 +110,8 @@ body{
     color:#555;
 
 }
+
+
 
 
 .value{
@@ -117,9 +124,13 @@ body{
 
 
 
+
 #balance{
+
     color:#8b4513;
+
 }
+
 
 
 #totalInvested{
@@ -129,11 +140,13 @@ body{
 }
 
 
+
 .returns{
 
     color:#00c853;
 
 }
+
 
 
 
@@ -147,13 +160,17 @@ button{
     background:#0099ff;
     color:white;
     font-weight:bold;
+    cursor:pointer;
 
 }
 
 
 
 
+
+
 /* REFERRAL BOX */
+
 
 .ref-box{
 
@@ -175,15 +192,18 @@ button{
 
 
 
-/* BONUS */
+
+
+
+/* BONUS BOX */
 
 #bonusBox{
 
-    position:fixed;
-    right:10px;
-    bottom:150px;
+    position:relative;
 
-    width:90px;
+    width:100%;
+
+    margin-top:15px;
 
     background:#fff3cd;
 
@@ -195,21 +215,22 @@ button{
 
     font-size:12px;
 
-    z-index:999;
-
 }
 
 
 
 
-/* FLOAT BUTTONS */
+
+
+
+/* NORMAL BUTTON LINKS */
 
 
 .about-btn,
 .help-btn,
 .myinvestment-btn{
 
-    position:fixed;
+    display:inline-block;
 
     padding:8px 12px;
 
@@ -223,37 +244,57 @@ button{
 
     font-weight:bold;
 
-    z-index:999;
+    margin:10px 5px;
 
 }
+
 
 
 
 .about-btn{
 
-    bottom:85px;
-    left:10px;
     background:#876026;
 
 }
 
 
+
+
 .help-btn{
 
-    top:60px;
-    right:10px;
     background:#53ed6d;
 
 }
+
+
 
 
 .myinvestment-btn{
 
-    bottom:85px;
-    right:10px;
     background:#53ed6d;
 
 }
+
+
+
+
+
+
+
+/* BUTTON AREA */
+
+.action-links{
+
+    text-align:center;
+
+    padding:10px;
+
+}
+
+
+
+
+
 
 
 
@@ -284,6 +325,7 @@ button{
 
 
 
+
 .bottom-nav a{
 
     flex:1;
@@ -300,6 +342,7 @@ button{
 
 
 
+
 .bottom-nav span{
 
     display:block;
@@ -311,7 +354,11 @@ button{
 
 
 
+
+
+
 /* TIME */
+
 
 .top-time{
 
@@ -336,15 +383,22 @@ button{
 
 
 
+
+
+
+
 /* MOBILE */
 
+
 @media(max-width:600px){
+
 
 .grid{
 
     grid-template-columns:1fr;
 
 }
+
 
 
 .full{
@@ -354,6 +408,7 @@ button{
 }
 
 
+
 .dashboard-ad img{
 
     height:150px;
@@ -361,9 +416,21 @@ button{
 }
 
 
-}
-</style>
 
+.about-btn,
+.help-btn,
+.myinvestment-btn{
+
+    font-size:11px;
+
+    padding:7px 10px;
+
+}
+
+
+}
+
+</style>
 </head>
 
 <body>
@@ -378,6 +445,7 @@ button{
         style="width:35px;height:35px;background:white;border-radius:50%;padding:3px;">
     </div>
 
+
     <div style="margin-top:8px;font-size:15px;">
         Welcome <span id="welcome"></span>
     </div>
@@ -390,10 +458,11 @@ button{
 
 <div class="dashboard-ad">
 
-<img src="images/investment1.jpeg" 
+<img src="images/investment1.jpeg"
 alt="Mobile Wealth Advert">
 
 </div>
+
 
 
 
@@ -404,6 +473,7 @@ alt="Mobile Wealth Advert">
 <div id="time"></div>
 
 </div>
+
 
 
 
@@ -443,6 +513,7 @@ alt="Mobile Wealth Advert">
 
 
 
+
 <div class="card full">
 
 <button onclick="location.href='deposit.html'">
@@ -450,6 +521,7 @@ Deposit
 </button>
 
 </div>
+
 
 
 
@@ -467,6 +539,7 @@ Withdraw
 
 
 
+
 <!-- BONUS -->
 
 <div id="bonusBox">
@@ -475,7 +548,8 @@ Withdraw
 
 <br>
 
-<input id="bonusCode" placeholder="Enter code"
+<input id="bonusCode"
+placeholder="Enter code"
 style="width:100%;padding:5px;">
 
 <button onclick="claimBonus()">
@@ -487,29 +561,35 @@ Accept
 
 
 
+
 <!-- REFERRAL -->
 
 <div class="ref-box">
 
 <h3>Your Referral Link</h3>
 
+
 <input id="refLink" readonly>
+
 
 <button onclick="copyLink()">
 Copy Link
 </button>
 
-</div>
-
-
 
 </div>
 
 
 
+</div>
 
 
-<!-- FLOAT BUTTONS -->
+
+
+
+<!-- NORMAL BUTTON AREA -->
+
+<div class="action-links">
 
 
 <a href="about.html" class="about-btn">
@@ -517,14 +597,21 @@ About
 </a>
 
 
+
 <a href="help.html" class="help-btn">
 Forum
 </a>
 
 
+
 <a href="myinvestment.html" class="myinvestment-btn">
 MY 🛍️ INVESTMENT
 </a>
+
+
+</div>
+
+
 
 
 
@@ -588,6 +675,9 @@ OUT
 
 
 
+
+
+
 <script>
 
 const API="https://mobile-wealth-api.onrender.com";
@@ -598,6 +688,7 @@ document.addEventListener("DOMContentLoaded",()=>{
 
 
 const user=JSON.parse(localStorage.getItem("user"));
+
 
 
 if(!user || !user.phone){
@@ -614,11 +705,25 @@ document.getElementById("welcome").innerText=user.phone;
 
 
 
+
+
+function formatMoney(amount){
+
+return Number(amount || 0).toLocaleString();
+
+}
+
+
+
+
+
+
 // BALANCE
 
 async function loadBalance(){
 
 try{
+
 
 const res=await fetch(`${API}/balance/${user.phone}`);
 
@@ -626,16 +731,18 @@ const data=await res.json();
 
 
 document.getElementById("balance").innerText=
-"₦"+(data.balance || 0);
+"₦"+formatMoney(data.balance);
 
 
-}catch(e){
 
-console.log(e);
+}catch(err){
+
+console.log("Balance error:",err);
 
 }
 
 }
+
 
 
 
@@ -647,18 +754,21 @@ async function loadReturns(){
 
 try{
 
+
 const res=await fetch(`${API}/returns/${user.phone}`);
 
 const data=await res.json();
 
 
+
 document.getElementById("returns").innerText=
-"₦"+(data.returns || data.total || 0);
+"₦"+formatMoney(data.returns || data.total);
 
 
-}catch(e){
 
-console.log(e);
+}catch(err){
+
+console.log("Returns error:",err);
 
 }
 
@@ -667,28 +777,36 @@ console.log(e);
 
 
 
-// TOTAL INVESTED
+
+
+
+// INVESTED
 
 async function loadInvested(){
 
 try{
+
 
 const res=await fetch(`${API}/total-invested/${user.phone}`);
 
 const data=await res.json();
 
 
+
 document.getElementById("totalInvested").innerText=
-"₦"+(data.total || 0);
+"₦"+formatMoney(data.total);
 
 
-}catch(e){
 
-console.log(e);
+}catch(err){
+
+console.log("Investment error:",err);
 
 }
 
 }
+
+
 
 
 
@@ -714,37 +832,64 @@ setInterval(loadInvested,5000);
 
 
 
+
+
+
 // REFERRAL LINK
+
 
 const userRef=JSON.parse(localStorage.getItem("user"));
 
 
+
 if(userRef && userRef.referral_code){
 
-document.getElementById("refLink").value=
+
+const ref=document.getElementById("refLink");
+
+
+if(ref){
+
+ref.value=
 `${location.origin}/signup.html?ref=${userRef.referral_code}`;
 
 }
 
 
+}
+
+
+
+
+
+
 
 function copyLink(){
 
+
 const input=document.getElementById("refLink");
+
 
 input.select();
 
-document.execCommand("copy");
+
+navigator.clipboard.writeText(input.value);
+
 
 alert("Referral link copied");
 
+
 }
+
+
+
 
 
 
 
 
 // TIME
+
 
 function updateTime(){
 
@@ -756,14 +901,18 @@ document.getElementById("date").innerText=
 now.toLocaleDateString();
 
 
+
 document.getElementById("time").innerText=
 now.toLocaleTimeString();
+
 
 
 }
 
 
+
 updateTime();
+
 
 setInterval(updateTime,1000);
 
@@ -771,7 +920,12 @@ setInterval(updateTime,1000);
 
 
 
+
+
+
+
 // BONUS
+
 
 async function claimBonus(){
 
@@ -794,6 +948,7 @@ headers:{
 "Content-Type":"application/json"
 },
 
+
 body:JSON.stringify({
 
 userId:user.id,
@@ -806,14 +961,19 @@ code
 });
 
 
+
 const msg=await res.text();
+
 
 alert(msg);
 
 
-}catch(e){
+
+}catch(err){
+
 
 alert("Bonus failed");
+
 
 }
 
