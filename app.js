@@ -734,7 +734,7 @@ app.post("/buy", (req, res) => {
             );
 
             db.query(
-                `INSERT INTO investments (phone,amount,created_at status, end_date)
+                `INSERT INTO investments (phone,amount,start_date status, end_date)
                  VALUES (?, ?, 'active', DATE_ADD(NOW(), INTERVAL 15 DAY))`,
                 [phone, investAmount],
                 (err2) => {
