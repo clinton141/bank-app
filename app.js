@@ -854,7 +854,7 @@ app.post("/withdraw", (req, res) => {
 
         if (total < 3) {
             return res.status(403).send(
-                "You must refer at least 3 users with minimum ₦5,000 first deposit each (admin approved)"
+                "You must refer at least 2 users with minimum ₦5,000 first deposit each (admin approved)"
             );
         }
 
@@ -1357,7 +1357,7 @@ app.post("/ezeaguuy/users", (req, res) => {
             }
 
             db.query(
-                "SELECT id, phone, balance, status FROM users ORDER BY id DESC",
+                "SELECT id, phone, balance,total_invested,total_returns, status FROM users ORDER BY id DESC",
                 (err2, users) => {
 
                     if (err2) {
