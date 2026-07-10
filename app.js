@@ -1635,7 +1635,7 @@ app.get("/investments/all", (req, res) => {
             amount,
             daily_interest,
             status,
-            created_at,
+            start_date,
             end_date
         FROM investments 
         ORDER BY created_at DESC
