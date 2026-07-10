@@ -1633,9 +1633,9 @@ app.get("/investments/all", (req, res) => {
             id,
             phone,
             amount,
-            daily_interest,
+            interest_rate,
             status,
-            created_at,
+            start_date,
             end_date
         FROM investments 
         ORDER BY created_at DESC

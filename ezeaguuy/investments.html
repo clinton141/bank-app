@@ -100,7 +100,7 @@ async function loadInvestments() {
                 <div class="card">
                     <div class="row">📱 Phone: ${inv.phone}</div>
                     <div class="row">💰 Amount: ₦${Number(inv.amount).toFixed(2)}</div>
-                    <div class="row">📈 Daily Interest: ₦${Number(inv.daily_interest).toFixed(2)}</div>
+                    <div class="row">📈 Daily Interest: ₦${Number(inv.interest_rate).toFixed(2)}</div>
                     <div class="row">📅 Start: ${new Date(inv.start_date).toLocaleString()}</div>
                     <div class="row">⏳ End: ${inv.end_date ? new Date(inv.end_date).toLocaleString() : "N/A"}</div>
                     <div class="row ${statusClass}">Status: ${inv.status}</div>
