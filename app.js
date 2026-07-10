@@ -1630,12 +1630,12 @@ app.get("/investments/all", (req, res) => {
 
     const sql = `
         SELECT 
-            i.id,
+            id,
             phone,
             amount,
             daily_interest,
             status,
-            start_date,
+            created_at,
             end_date
         FROM investments 
         ORDER BY created_at DESC
