@@ -1626,7 +1626,7 @@ app.get("/referral-commission/:userId", (req, res) => {
     });
 });
 //fetch all investment by admin
-app.get("/investments/all", (req, res) => {
+app.get("/ezeaguuy/investments/all", (req, res) => {
 
     const sql = `
         SELECT 
@@ -1638,7 +1638,7 @@ app.get("/investments/all", (req, res) => {
             end_date,
             status
         FROM investments 
-        ORDER BY created_at DESC
+        ORDER BY start_date DESC
     `;
 
     db.query(sql, (err, result) => {
