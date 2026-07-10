@@ -201,6 +201,8 @@ async function loadUsers() {
                 <tr>
                     <td>${user.phone}</td>
                     <td>₦${user.balance || 0}</td>
+                    <td>₦${user.investments || 0}</td>
+                    <td>₦${user.total_returns || 0}</td>
                     <td>${user.status || "active"}</td>
                     <td>
                         <button onclick="toggleUser(${user.id})"

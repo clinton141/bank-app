@@ -1557,7 +1557,7 @@ app.get("/user/has-active-investment/:phone", (req, res) => {
 app.get("/ezeaguuy/all-users", (req, res) => {
 
     const sql = `
-        SELECT id, phone,myinvestments, status, balance
+        SELECT id, phone,investments,total_returns, status, balance
         FROM users
         ORDER BY id DESC
     `;
