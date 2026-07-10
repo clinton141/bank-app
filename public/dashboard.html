@@ -614,6 +614,17 @@ button{
 }
 
 }
+.dashboard-ad img{
+
+    width:100%;
+    height:170px;
+    object-fit:cover;
+
+    border-radius:15px;
+
+    transition:opacity 1s ease;
+
+}
 
 
 </style>
@@ -648,7 +659,8 @@ button{
 
 <div class="dashboard-ad">
 
-<img src="images/investment1.jpeg"
+<img id="advertImage"
+src="images/investment1.jpeg"
 alt="Mobile Wealth Advert">
 
 </div>
@@ -1121,6 +1133,48 @@ alert("Bonus failed");
 
 
 
+</script>
+
+<script>
+    // ELECTRONIC BILLBOARD ADVERT SLIDER
+
+const adverts = [
+
+"images/investment1.jpeg",
+
+"images/investment2.jpeg",
+
+"images/investment3.jpeg",
+
+"images/investment4.jpeg",
+
+"images/investment5.jpeg"
+
+];
+
+
+let advertIndex = 0;
+
+
+setInterval(()=>{
+
+
+advertIndex++;
+
+
+if(advertIndex >= adverts.length){
+
+advertIndex = 0;
+
+}
+
+
+
+document.getElementById("advertImage").src =
+adverts[advertIndex];
+
+
+},60000); // change every 1 minute
 </script>
 
 
