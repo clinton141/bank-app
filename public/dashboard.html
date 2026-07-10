@@ -30,6 +30,94 @@ body{
 
 }
 
+/* 3D WELCOME DESIGN */
+
+.welcome-box{
+
+    margin-top:12px;
+
+    font-size:22px;
+
+    font-weight:bold;
+
+    letter-spacing:1px;
+
+    text-shadow:
+    2px 2px 0px rgba(0,0,0,0.25),
+    4px 4px 8px rgba(0,0,0,0.25);
+
+}
+
+
+.welcome-text{
+
+    color:#ffffff;
+
+}
+
+
+
+.user-number{
+
+    display:inline-block;
+
+    margin-left:5px;
+
+    font-weight:bold;
+
+    font-size:22px;
+
+    background:linear-gradient(
+        45deg,
+        #fff3a0,
+        #ffcc00,
+        #ffffff
+    );
+
+    /* Standard property */
+    background-clip:text;
+
+    /* Chrome, Safari */
+    -webkit-background-clip:text;
+
+    -webkit-text-fill-color:transparent;
+
+    text-shadow:
+    2px 3px 5px rgba(0,0,0,0.35);
+
+    letter-spacing:1px;
+
+}
+
+
+/* MOBILE SIZE */
+
+@media(max-width:600px){
+
+.welcome-box{
+
+    font-size:20px;
+
+}
+
+}
+
+.welcome-box{
+    animation: welcomeGlow 2s infinite alternate;
+}
+
+
+@keyframes welcomeGlow{
+
+from{
+transform:translateY(0);
+}
+
+to{
+transform:translateY(-3px);
+}
+
+}
 
 /* ADVERT */
 
@@ -513,6 +601,7 @@ button{
 
 }
 
+
 .container{
 
     padding: bottom 80px;
@@ -520,6 +609,8 @@ button{
 }
 
 }
+
+
 </style>
 </head>
 
@@ -534,9 +625,15 @@ button{
         style="width:35px;height:35px;background:white;border-radius:50%;padding:3px;">
     </div>
 
-    <div style="margin-top:8px;font-size:15px;">
-        Welcome <span id="welcome"></span>
-    </div>
+    <div class="welcome-box">
+
+    <span class="welcome-text">
+        Welcome
+    </span>
+
+    <span id="welcome" class="user-number"></span>
+
+</div>
 
 </div>
 
