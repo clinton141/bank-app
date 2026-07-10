@@ -1357,7 +1357,7 @@ app.post("/ezeaguuy/users", (req, res) => {
             }
 
             db.query(
-                "SELECT id, phone, balance,total_invested,total_returns, status FROM users ORDER BY id DESC",
+                "SELECT id, phone, balance, status FROM users ORDER BY id DESC",
                 (err2, users) => {
 
                     if (err2) {
