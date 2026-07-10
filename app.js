@@ -1626,7 +1626,7 @@ app.get("/referral-commission/:userId", (req, res) => {
     });
 });
 //fetch all investment by admin
-app.get("/ezeaguuy/investments/all", (req, res) => {
+app.get("/investments/all", (req, res) => {
 
     const sql = `
         SELECT 
