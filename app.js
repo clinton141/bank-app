@@ -2047,9 +2047,1222 @@ app.post("/api/startup/pending", upload.single("receipt"), (req, res) => {
         }
     );
 });
-// START SERVER
-const PORT = process.env.PORT || 3000;
+// ===============================
+// AVIATOR GAME MODULE
+// ===============================
 
-app.listen(PORT, () => {
-    console.log(`Server running on ${PORT}`);
+
+// ===============================
+// SOCKET.IO SERVER
+// ===============================
+
+const http = require("http");
+
+const server = http.createServer(app);
+
+const { Server } = require("socket.io");
+
+
+const io = new Server(server,{
+
+    cors:{
+        origin:"*"
+    }
+
+});
+
+
+
+
+// ===============================
+// AVIATOR VARIABLES
+// ===============================
+
+let currentRound = null;
+
+let currentRoundId = null;
+
+let multiplier = 1.00;
+
+let gameRunning = false;
+
+
+
+// ===============================
+// GENERATE CRASH POINT
+// ===============================
+
+function generateCrashPoint(){
+
+    let crash = (Math.random() * 9) + 1.5;
+
+    return Number(crash.toFixed(2));
+
+}
+
+
+
+
+
+// ===============================
+// START AVIATOR ROUND
+// ===============================
+
+function startAviatorRound(){
+
+
+    const crashPoint = generateCrashPoint();
+
+
+    const roundCode = 
+    "AVT-" + Date.now();
+
+
+
+
+    // Save round in database
+
+    db.query(
+
+    `
+    INSERT INTO aviator_rounds
+
+    (
+    round_code,
+    crash_point,
+    status
+    )
+
+    VALUES(?,?,?)
+
+    `,
+
+    [
+
+    roundCode,
+
+    crashPoint,
+
+    "running"
+
+    ],
+
+
+
+    (err,result)=>{
+
+
+        if(err){
+
+            console.log(
+            "Round creation error:",
+            err
+            );
+
+            return;
+
+        }
+
+
+
+        currentRoundId = result.insertId;
+
+
+
+        currentRound = {
+
+
+            id: currentRoundId,
+
+            roundCode: roundCode,
+
+            crashPoint: crashPoint,
+
+            multiplier:1.00
+
+
+        };
+
+
+
+        multiplier = 1.00;
+
+
+        gameRunning = true;
+
+
+
+        console.log(
+
+        "NEW AVIATOR ROUND:",
+
+        currentRoundId,
+
+        "CRASH:",
+
+        crashPoint
+
+        );
+
+
+
+
+        io.emit("gameStart",{
+
+
+            roundId:currentRoundId,
+
+            roundCode:roundCode,
+
+            multiplier:"1.00x"
+
+
+        });
+
+
+
+
+        startMultiplier(crashPoint);
+
+
+
+    });
+
+
+}
+
+
+
+
+
+// ===============================
+// MULTIPLIER ENGINE
+// ===============================
+
+function startMultiplier(crashPoint){
+
+
+
+const interval = setInterval(()=>{
+
+
+    multiplier += 0.01;
+
+
+
+    currentRound.multiplier =
+    Number(multiplier.toFixed(2));
+
+
+
+    io.emit("multiplier",{
+
+
+        value:
+        multiplier.toFixed(2)+"x"
+
+
+    });
+
+
+
+
+
+    if(multiplier >= crashPoint){
+
+
+
+        clearInterval(interval);
+
+
+
+        gameRunning = false;
+
+
+
+
+        // Update crashed round
+
+        db.query(
+
+        `
+        UPDATE aviator_rounds
+
+        SET
+
+        status='crashed',
+
+        crashed_at=NOW()
+
+        WHERE id=?
+
+        `,
+
+        [
+
+        currentRoundId
+
+        ]
+
+        );
+
+
+
+
+
+        // Mark unfinished bets as lost
+
+        db.query(
+
+        `
+        UPDATE aviator_bets
+
+        SET status='lost'
+
+        WHERE round_id=?
+
+        AND status='active'
+
+        `,
+
+        [
+
+        currentRoundId
+
+        ]
+
+        );
+
+
+
+
+
+        io.emit("crashed",{
+
+
+            value:
+            crashPoint+"x"
+
+
+        });
+
+
+
+
+        console.log(
+
+        "CRASHED AT:",
+
+        crashPoint
+
+        );
+
+
+
+
+
+        setTimeout(()=>{
+
+
+            startAviatorRound();
+
+
+        },5000);
+
+
+
+
+    }
+
+
+
+},100);
+
+
+
+}
+
+// ===============================
+// FUND AVIATOR GAME WALLET
+// ===============================
+
+
+app.post("/aviator/fund",(req,res)=>{
+
+
+const {phone,amount}=req.body;
+
+
+
+if(!phone || !amount){
+
+return res.status(400).json({
+
+success:false,
+
+message:"Phone and amount are required"
+
+});
+
+}
+
+
+
+const fundAmount = Number(amount);
+
+
+
+if(fundAmount <= 0){
+
+return res.status(400).json({
+
+success:false,
+
+message:"Invalid amount"
+
+});
+
+}
+
+
+
+
+db.beginTransaction((err)=>{
+
+
+if(err){
+
+return res.status(500).json({
+
+success:false,
+
+message:"Transaction error"
+
+});
+
+}
+
+
+
+
+// Remove from main wallet
+
+db.query(
+
+`
+UPDATE users
+
+SET balance = balance - ?
+
+WHERE phone=?
+
+AND balance >= ?
+
+`,
+
+[
+fundAmount,
+phone,
+fundAmount
+],
+
+
+(err,result)=>{
+
+
+if(err){
+
+return db.rollback(()=>{
+
+res.status(500).json({
+
+success:false,
+
+message:"Wallet update failed"
+
+});
+
+});
+
+}
+
+
+
+
+if(result.affectedRows===0){
+
+return db.rollback(()=>{
+
+res.status(400).json({
+
+success:false,
+
+message:"Insufficient balance"
+
+});
+
+});
+
+}
+
+
+
+
+// Add to game wallet
+
+db.query(
+
+`
+INSERT INTO game_wallet
+
+(phone,balance)
+
+VALUES(?,?)
+
+ON DUPLICATE KEY UPDATE
+
+balance = balance + ?
+
+`,
+
+[
+phone,
+fundAmount,
+fundAmount
+],
+
+
+(err)=>{
+
+
+if(err){
+
+return db.rollback(()=>{
+
+res.status(500).json({
+
+success:false,
+
+message:"Game wallet failed"
+
+});
+
+});
+
+}
+
+
+
+
+
+// Save transaction
+
+db.query(
+
+`
+INSERT INTO game_transactions
+
+(phone,type,amount,status)
+
+VALUES(?,?,?,?)
+
+`,
+
+[
+phone,
+"fund",
+fundAmount,
+"success"
+],
+
+
+(err)=>{
+
+
+if(err){
+
+return db.rollback(()=>{
+
+res.status(500).json({
+
+success:false,
+
+message:"History error"
+
+});
+
+});
+
+}
+
+
+
+
+db.commit((err)=>{
+
+
+if(err){
+
+return db.rollback(()=>{
+
+res.status(500).json({
+
+success:false,
+
+message:"Commit failed"
+
+});
+
+});
+
+}
+
+
+
+res.json({
+
+success:true,
+
+message:"Game wallet funded",
+
+amount:fundAmount
+
+});
+
+
+
+});
+
+
+});
+
+
+});
+
+
+});
+
+
+});
+
+
+});
+
+
+// ===============================
+// PLACE BET
+// ===============================
+
+
+app.post("/aviator/bet",(req,res)=>{
+
+
+const {phone,amount}=req.body;
+
+
+
+if(!phone || !amount){
+
+return res.status(400).json({
+
+success:false,
+
+message:"Phone and amount required"
+
+});
+
+}
+
+
+
+if(!gameRunning){
+
+return res.status(400).json({
+
+success:false,
+
+message:"Round not running"
+
+});
+
+}
+
+
+
+
+db.beginTransaction((err)=>{
+
+
+if(err){
+
+return res.status(500).json({
+
+success:false,
+
+message:"Transaction error"
+
+});
+
+}
+
+
+
+
+
+db.query(
+
+`
+UPDATE game_wallet
+
+SET balance=balance-?
+
+WHERE phone=?
+
+AND balance>=?
+
+`,
+
+[
+amount,
+phone,
+amount
+],
+
+
+(err,result)=>{
+
+
+if(err){
+
+return db.rollback(()=>{
+
+res.status(500).json({
+
+success:false,
+
+message:"Wallet error"
+
+});
+
+});
+
+}
+
+
+
+
+
+if(result.affectedRows===0){
+
+return db.rollback(()=>{
+
+res.status(400).json({
+
+success:false,
+
+message:"Insufficient game balance"
+
+});
+
+});
+
+}
+
+
+
+
+
+db.query(
+
+`
+INSERT INTO aviator_bets
+
+(phone,amount,round_id)
+
+VALUES(?,?,?)
+
+`,
+
+[
+phone,
+amount,
+currentRoundId
+],
+
+
+(err)=>{
+
+
+if(err){
+
+return db.rollback(()=>{
+
+res.status(500).json({
+
+success:false,
+
+message:"Bet failed"
+
+});
+
+});
+
+}
+
+
+
+
+
+db.commit((err)=>{
+
+
+if(err){
+
+return db.rollback(()=>{
+
+res.status(500).json({
+
+success:false,
+
+message:"Commit failed"
+
+});
+
+});
+
+}
+
+
+
+
+res.json({
+
+success:true,
+
+message:"Bet placed",
+
+roundId:currentRoundId
+
+});
+
+
+
+});
+
+
+
+});
+
+
+});
+
+
+});
+
+
+});
+
+
+
+
+
+
+// ===============================
+// SOCKET CONNECTION
+// ===============================
+
+
+io.on("connection",(socket)=>{
+
+
+console.log(
+
+"Player connected:",
+
+socket.id
+
+);
+
+
+
+socket.on("disconnect",()=>{
+
+
+console.log(
+
+"Player disconnected:",
+
+socket.id
+
+);
+
+
+});
+
+
+});
+
+
+
+
+
+// ===============================
+// CASHOUT
+// ===============================
+
+
+app.post("/aviator/cashout",(req,res)=>{
+
+
+const {phone}=req.body;
+
+
+
+if(!phone){
+
+return res.status(400).json({
+
+success:false,
+
+message:"Phone required"
+
+});
+
+}
+
+
+
+if(!gameRunning){
+
+return res.status(400).json({
+
+success:false,
+
+message:"Round crashed"
+
+});
+
+}
+
+
+
+
+
+db.query(
+
+`
+SELECT *
+
+FROM aviator_bets
+
+WHERE phone=?
+
+AND round_id=?
+
+AND status='active'
+
+LIMIT 1
+
+`,
+
+[
+phone,
+currentRoundId
+],
+
+
+(err,result)=>{
+
+
+if(err){
+
+return res.status(500).json({
+
+success:false,
+
+message:"Database error"
+
+});
+
+}
+
+
+
+if(result.length===0){
+
+return res.status(400).json({
+
+success:false,
+
+message:"No active bet"
+
+});
+
+}
+
+
+
+const bet=result[0];
+
+
+
+const cashoutMultiplier =
+Number(multiplier.toFixed(2));
+
+
+
+const winAmount =
+Number((bet.amount * cashoutMultiplier).toFixed(2));
+
+
+
+
+
+db.beginTransaction((err)=>{
+
+
+if(err){
+
+return res.status(500).json({
+
+success:false,
+
+message:"Transaction error"
+
+});
+
+}
+
+
+
+
+
+db.query(
+
+`
+UPDATE aviator_bets
+
+SET
+
+cashout_multiplier=?,
+
+profit=?,
+
+status='won'
+
+WHERE id=?
+
+AND status='active'
+
+`,
+
+[
+cashoutMultiplier,
+winAmount,
+bet.id
+],
+
+
+(err,update)=>{
+
+
+if(err){
+
+return db.rollback(()=>{
+
+res.status(500).json({
+
+success:false,
+
+message:"Bet update failed"
+
+});
+
+});
+
+}
+
+
+
+
+if(update.affectedRows===0){
+
+return db.rollback(()=>{
+
+res.status(400).json({
+
+success:false,
+
+message:"Already cashed out"
+
+});
+
+});
+
+}
+
+
+
+
+
+db.query(
+
+`
+UPDATE game_wallet
+
+SET balance=balance+?
+
+WHERE phone=?
+
+`,
+
+[
+winAmount,
+phone
+],
+
+
+(err)=>{
+
+
+if(err){
+
+return db.rollback(()=>{
+
+res.status(500).json({
+
+success:false,
+
+message:"Wallet update failed"
+
+});
+
+});
+
+}
+
+
+
+
+db.query(
+
+`
+INSERT INTO game_transactions
+
+(phone,type,amount,status)
+
+VALUES(?,?,?,?)
+
+`,
+
+[
+phone,
+"win",
+winAmount,
+"success"
+],
+
+
+(err)=>{
+
+
+if(err){
+
+return db.rollback(()=>{
+
+res.status(500).json({
+
+success:false,
+
+message:"History failed"
+
+});
+
+});
+
+}
+
+
+
+
+db.commit((err)=>{
+
+
+if(err){
+
+return db.rollback(()=>{
+
+res.status(500).json({
+
+success:false,
+
+message:"Commit failed"
+
+});
+
+});
+
+}
+
+
+res.json({
+
+success:true,
+
+message:"Cashout successful",
+
+data:{
+
+betAmount:bet.amount,
+
+multiplier:cashoutMultiplier+"x",
+
+winningAmount:winAmount
+
+}
+
+});
+
+
+
+});
+
+
+
+});
+
+
+});
+
+
+});
+
+
+});
+
+
+});
+
+
+});
+
+
+
+
+
+// ===============================
+// START AVIATOR + SERVER
+// ===============================
+
+
+startAviatorRound();
+
+
+
+server.listen(PORT,()=>{
+
+
+console.log("Server running");
+
+
 });
