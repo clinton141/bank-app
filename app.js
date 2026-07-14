@@ -2098,7 +2098,7 @@ function generateCrashPoint(){
 
     let crash;
 
-    if(random < 0.00){
+    if(random < 100){
 
         // 60% chance: low multiplier
         crash = 1.25 + Math.random() * 1.02;
@@ -2199,14 +2199,14 @@ function startAviatorRound(){
 
             crashPoint: crashPoint,
 
-            multiplier:1.00
+            multiplier:0.005
 
 
         };
 
 
 
-        multiplier = 1.00;
+        multiplier = 0.005;
 
 
         gameRunning = true;
@@ -2235,7 +2235,7 @@ function startAviatorRound(){
 
             roundCode:roundCode,
 
-            multiplier:"1.00x"
+            multiplier:"0.005x"
 
 
         });
@@ -2267,7 +2267,7 @@ function startMultiplier(crashPoint){
 const interval = setInterval(()=>{
 
 
-    multiplier += 0.01;
+    multiplier += 0.005;
 
 
 
