@@ -1,3 +1,4 @@
+process.env.TZ = "Africa/Lagos";
 const express = require("express");
 
 const cors = require("cors");
@@ -854,7 +855,7 @@ app.post("/withdraw", (req, res) => {
 
         if (total < 3) {
             return res.status(403).send(
-                "You must refer at least 2 users with minimum ₦5,000 first deposit each (admin approved)"
+                "You must refer at least 3 users with minimum ₦5,000 first deposit each (admin approved)"
             );
         }
 
@@ -882,20 +883,45 @@ app.post("/withdraw", (req, res) => {
                                 return res.send("Insufficient returns balance");
                             }
 
-                            // STEP 7: WEEKLY LIMIT
-                            db.query(
-                                `SELECT id FROM transactions 
-                                 WHERE user_id=? 
-                                 AND type='withdraw' 
-                                 AND created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)`,
-                                [user.id],
-                                (err3, existing) => {
+                            // STEP 7: FRIDAY WITHDRAWAL LIMIT
+const now = new Date();
 
-                                    if (err3) return res.status(500).send("DB error");
+const day = now.getDay(); // Sunday=0, Monday=1 ... Friday=5
+const hour = now.getHours();
+const minute = now.getMinutes();
 
-                                    if (existing.length > 0) {
-                                        return res.send("You can only withdraw once per week");
-                                    }
+
+// Check if today is Friday
+if (day !== 5) {
+    return res.send("Withdrawal is only available every Friday.");
+}
+
+
+// Check time window: 10:00 AM - 3:00 PM
+const currentMinutes = (hour * 60) + minute;
+const startTime = 10 * 60; // 10:00 AM
+const endTime = 15 * 60;   // 3:00 PM
+
+
+if (currentMinutes < startTime || currentMinutes > endTime) {
+    return res.send("Withdrawal is available every Friday from 10:00 AM to 3:00 PM.");
+}
+
+
+// Check if user already withdrew this Friday
+db.query(
+    `SELECT id FROM transactions 
+     WHERE user_id=? 
+     AND type='withdraw'
+     AND YEARWEEK(created_at, 1)=YEARWEEK(NOW(), 1)`,
+    [user.id],
+    (err3, existing) => {
+
+        if (err3) return res.status(500).send("DB error");
+
+        if (existing.length > 0) {
+            return res.send("You can only withdraw once every Friday.");
+        }
 
                                     // STEP 8: TAX CALCULATION
                                     const tax = withdrawAmount * 0.03;
