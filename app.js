@@ -2094,12 +2094,33 @@ let gameRunning = false;
 
 function generateCrashPoint(){
 
-    let crash = (Math.random() * 9) + 1.5;
+    let random = Math.random();
+
+    let crash;
+
+    if(random < 0.85){
+
+        // 60% chance: low multiplier
+        crash = 1 + Math.random() * 1.2;
+
+    } 
+    else if(random < 0.90){
+
+        // 30% chance: medium multiplier
+        crash = 2.5 + Math.random() * 3;
+
+    } 
+    else {
+
+        // 10% chance: high multiplier
+        crash = 5.5 + Math.random() * 5;
+
+    }
+
 
     return Number(crash.toFixed(2));
 
 }
-
 
 
 
