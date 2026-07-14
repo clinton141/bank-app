@@ -2104,7 +2104,7 @@ function generateCrashPoint(){
         crash = 1 + Math.random() * 1.2;
 
     } 
-    else if(random < 0.90){
+    else if(random < 0.95){
 
         // 30% chance: medium multiplier
         crash = 2.5 + Math.random() * 3;
