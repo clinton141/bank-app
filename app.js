@@ -2101,19 +2101,19 @@ function generateCrashPoint(){
     if(random < 0.00){
 
         // 60% chance: low multiplier
-        crash = 1.25 + Math.random() * 1.2;
+        crash = 1.25 + Math.random() * 1.02;
 
     } 
     else if(random < 0.95){
 
         // 30% chance: medium multiplier
-        crash = 2 + Math.random() * 1.2;
+        crash = 2 + Math.random() * 1.02;
 
     } 
     else {
 
         // 10% chance: high multiplier
-        crash = 1.10 + Math.random() * 5;
+        crash = 1.10 + Math.random() * 0.5;
 
     }
 
