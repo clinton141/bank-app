@@ -2098,7 +2098,7 @@ function generateCrashPoint(){
 
     let crash;
 
-    if(random < 0.85){
+    if(random > 0.22){
 
         // 60% chance: low multiplier
         crash = 1 + Math.random() * 1.2;
