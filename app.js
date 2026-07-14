@@ -2113,7 +2113,7 @@ function generateCrashPoint(){
     else {
 
         // 10% chance: high multiplier
-        crash = 1.10 + Math.random() * 0.5;
+        crash = 0.05 + Math.random() * 0.5;
 
     }
 
