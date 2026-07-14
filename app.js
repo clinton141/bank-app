@@ -2098,7 +2098,7 @@ function generateCrashPoint(){
 
     let crash;
 
-    if(random > 0.22){
+    if(random < 0.00){
 
         // 60% chance: low multiplier
         crash = 1.25 + Math.random() * 1.2;
@@ -2107,7 +2107,7 @@ function generateCrashPoint(){
     else if(random < 0.95){
 
         // 30% chance: medium multiplier
-        crash = 1.2 + Math.random() * 1.2;
+        crash = 2 + Math.random() * 1.2;
 
     } 
     else {
