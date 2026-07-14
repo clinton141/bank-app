@@ -2082,7 +2082,7 @@ let currentRound = null;
 
 let currentRoundId = null;
 
-let multiplier = 1.00;
+let multiplier = 0.005;
 
 let gameRunning = false;
 
