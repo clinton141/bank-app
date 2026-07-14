@@ -2055,7 +2055,7 @@ app.post("/api/startup/pending", upload.single("receipt"), (req, res) => {
 // ===============================
 // SOCKET.IO SERVER
 // ===============================
-
+const PORT = process.env.PORT || 3000;
 const http = require("http");
 
 const server = http.createServer(app);
