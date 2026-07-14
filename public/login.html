@@ -167,6 +167,8 @@ async function login() {
 
         localStorage.setItem("user", JSON.stringify(data.user || data));
 
+        localStorage.setItem("phone", data.user?.phone || data.phone);
+
         if (data.token) {
             localStorage.setItem("token", data.token);
         }
