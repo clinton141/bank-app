@@ -2105,7 +2105,7 @@ function generateCrashPoint(){
     let crash;
 
 
-    if(random < 0.15){
+    if(random < 0.30){
 
         // Low multiplier
         crash = 1.20 + Math.random() * 0.005;
@@ -2115,14 +2115,14 @@ function generateCrashPoint(){
     else if(random < 0.95){
 
         // Medium multiplier
-        crash = 2.50 + Math.random() * 0.005;
+        crash = 2.50 + Math.random() * 0.05;
 
 
     } 
     else {
 
         // High multiplier
-        crash = 5 + Math.random() * 0.001;
+        crash = 5 + Math.random() * 0.01;
 
     }
 
