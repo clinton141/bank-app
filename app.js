@@ -2131,13 +2131,9 @@ function generateCrashPoint(){
 
 }
 
-
-
-
-
 // ===============================
 // START AVIATOR ROUND
-// 15 SECOND BETTING COUNTDOWN
+// WITH 15 SECOND BETTING TIME
 // ===============================
 
 function startAviatorRound(){
@@ -2145,32 +2141,85 @@ function startAviatorRound(){
 
     gameRunning = false;
 
-    bettingOpen = true;
-
-
-    let countdown = 15;
+    bettingOpen = false;
 
 
 
-    io.emit("bettingStart",{
+    const crashPoint = generateCrashPoint();
 
-        seconds: countdown
-
-    });
+    const roundCode = "AVT-" + Date.now();
 
 
 
+    db.query(
 
-    const countdownTimer = setInterval(()=>{
+    `
+    INSERT INTO aviator_rounds
+
+    (
+    round_code,
+    crash_point,
+    status
+    )
+
+    VALUES(?,?,?)
+
+    `,
+
+    [
+    roundCode,
+    crashPoint,
+    "waiting"
+    ],
 
 
-        countdown--;
+    (err,result)=>{
+
+
+        if(err){
+
+            console.log(
+            "Round creation error:",
+            err
+            );
+
+            return;
+
+        }
 
 
 
-        io.emit("bettingCountdown",{
+        currentRoundId = result.insertId;
 
-            seconds: countdown
+
+
+        currentRound = {
+
+            id: currentRoundId,
+
+            roundCode: roundCode,
+
+            crashPoint: crashPoint,
+
+            multiplier:1.00
+
+        };
+
+
+
+        let countdown = 15;
+
+
+
+        bettingOpen = true;
+
+
+
+        io.emit("bettingStart",{
+
+            roundId:currentRoundId,
+
+            seconds:countdown
 
         });
 
@@ -2178,99 +2227,87 @@ function startAviatorRound(){
 
 
 
-        if(countdown <= 0){
+        const countdownTimer = setInterval(()=>{
 
 
-            clearInterval(countdownTimer);
-
-
-            bettingOpen = false;
-
-
-            createRunningRound();
-
-
-        }
+            countdown--;
 
 
 
-    },1000);
+            io.emit("bettingCountdown",{
+
+                seconds:countdown
+
+            });
+
+
+
+
+
+            if(countdown <= 0){
+
+
+                clearInterval(countdownTimer);
+
+
+                bettingOpen = false;
+
+
+                createRunningRound();
+
+
+            }
+
+
+
+        },1000);
+
+
+
+    });
 
 
 }
 
+
+
+
+
 // ===============================
-// CREATE RUNNING ROUND
+// START FLIGHT AFTER BETTING
 // ===============================
 
 function createRunningRound(){
-
-
-const crashPoint = generateCrashPoint();
-
-
-const roundCode = "AVT-" + Date.now();
-
 
 
 
 db.query(
 
 `
-INSERT INTO aviator_rounds
+UPDATE aviator_rounds
 
-(
-round_code,
-crash_point,
-status
-)
+SET status='running'
 
-VALUES(?,?,?)
+WHERE id=?
 
 `,
 
 [
-roundCode,
-crashPoint,
-"running"
+currentRoundId
+
 ],
 
 
-(err,result)=>{
+(err)=>{
 
 
 if(err){
 
-console.log(
-"Round creation error:",
-err
-);
+console.log(err);
 
 return;
 
 }
-
-
-
-
-
-currentRoundId = result.insertId;
-
-
-
-currentRound = {
-
-
-id: currentRoundId,
-
-roundCode: roundCode,
-
-crashPoint: crashPoint,
-
-multiplier: 1.00
-
-
-};
 
 
 
@@ -2280,8 +2317,8 @@ multiplier = 1.00;
 
 gameRunning = true;
 
-bettingOpen = false;
 
+bettingOpen = false;
 
 
 
@@ -2293,7 +2330,7 @@ currentRoundId,
 
 "CRASH:",
 
-crashPoint
+currentRound.crashPoint
 
 );
 
@@ -2304,9 +2341,9 @@ crashPoint
 io.emit("gameStart",{
 
 
-roundId: currentRoundId,
+roundId:currentRoundId,
 
-roundCode: roundCode,
+roundCode:currentRound.roundCode,
 
 multiplier:"1.00x"
 
@@ -2317,7 +2354,7 @@ multiplier:"1.00x"
 
 
 
-startMultiplier(crashPoint);
+startMultiplier(currentRound.crashPoint);
 
 
 
@@ -2325,10 +2362,6 @@ startMultiplier(crashPoint);
 
 
 }
-
-
-
-
 
 // ===============================
 // MULTIPLIER ENGINE
