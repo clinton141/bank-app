@@ -2312,7 +2312,7 @@ return;
 
 
 
-multiplier = 1;
+multiplier = 1.00;
 
 
 gameRunning = true;
@@ -2383,7 +2383,7 @@ return;
 
 
 
-multiplier += 0.01;
+multiplier += 1;
 
 
 
