@@ -2108,21 +2108,21 @@ function generateCrashPoint(){
     if(random < 0.70){
 
         // Low multiplier
-        crash = 1.20 + Math.random() * 1.30;
+        crash = 1.20 + Math.random() * 0.005;
 
 
     } 
     else if(random < 0.95){
 
         // Medium multiplier
-        crash = 2.50 + Math.random() * 3;
+        crash = 2.50 + Math.random() * 0.005;
 
 
     } 
     else {
 
         // High multiplier
-        crash = 5 + Math.random() * 5;
+        crash = 5 + Math.random() * 0.001;
 
     }
 
@@ -2201,7 +2201,7 @@ function startAviatorRound(){
 
             crashPoint: crashPoint,
 
-            multiplier:1.00
+            multiplier:0.005
 
         };
 
@@ -2312,7 +2312,7 @@ return;
 
 
 
-multiplier = 1.00;
+multiplier = 0.005;
 
 
 gameRunning = true;
@@ -2383,7 +2383,7 @@ return;
 
 
 
-multiplier += 0.01;
+multiplier += 0.0001;
 
 
 
