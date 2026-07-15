@@ -331,7 +331,7 @@ data.value;
 // move plane
 
 let move =
-parseFloat(data.value)*20;
+parseFloat(data.value)*50;
 
 
 document.getElementById("plane").style.left =
@@ -493,7 +493,80 @@ data.message
 }
 
 
+// FUND AVIATOR GAME WALLET
+
+function fundAviatorWallet(){
+
+
+let amount = document.getElementById("fundAmount").value;
+
+
+if(!phone){
+
+alert("User not logged in");
+
+return;
+
+}
+
+
+
+if(!amount || amount <= 0){
+
+alert("Enter valid amount");
+
+return;
+
+}
+
+
+
+fetch(API + "/aviator/fund",{
+
+method:"POST",
+
+headers:{
+
+"Content-Type":"application/json"
+
+},
+
+body:JSON.stringify({
+
+phone: phone,
+
+amount: Number(amount)
+
+})
+
+})
+
+
+.then(res=>res.json())
+
+.then(data=>{
+
+
+alert(data.message || "Fund completed");
+
+
+})
+
+
+.catch(err=>{
+
+
+console.log(err);
+
+alert("Network error");
+
+
+});
+
+
+}
 </script>
+
 
 </body>
 
