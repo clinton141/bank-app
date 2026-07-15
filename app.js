@@ -2337,8 +2337,16 @@ startMultiplier(crashPoint);
 function startMultiplier(crashPoint){
 
 
-
 const interval = setInterval(()=>{
+
+
+if(!gameRunning){
+
+clearInterval(interval);
+
+return;
+
+}
 
 
 
@@ -2383,8 +2391,6 @@ bettingOpen = false;
 
 
 
-// Update crashed round
-
 db.query(
 
 `
@@ -2410,8 +2416,6 @@ currentRoundId
 
 
 
-
-// Mark active bets as lost
 
 db.query(
 
@@ -2483,7 +2487,6 @@ startAviatorRound();
 
 
 }
-
 // ===============================
 // FUND AVIATOR GAME WALLET
 // ===============================
@@ -2530,10 +2533,31 @@ message:"Invalid amount"
 
 
 
-db.beginTransaction((err)=>{
+db.getConnection((err,connection)=>{
 
 
 if(err){
+
+return res.status(500).json({
+
+success:false,
+
+message:"Database connection error"
+
+});
+
+}
+
+
+
+
+
+connection.beginTransaction((err)=>{
+
+
+if(err){
+
+connection.release();
 
 return res.status(500).json({
 
@@ -2551,7 +2575,7 @@ message:"Transaction error"
 
 // Remove from main wallet
 
-db.query(
+connection.query(
 
 `
 UPDATE users
@@ -2576,7 +2600,9 @@ fundAmount
 
 if(err){
 
-return db.rollback(()=>{
+return connection.rollback(()=>{
+
+connection.release();
 
 res.status(500).json({
 
@@ -2596,7 +2622,9 @@ message:"Wallet update failed"
 
 if(result.affectedRows===0){
 
-return db.rollback(()=>{
+return connection.rollback(()=>{
+
+connection.release();
 
 res.status(400).json({
 
@@ -2616,7 +2644,7 @@ message:"Insufficient balance"
 
 // Add to game wallet
 
-db.query(
+connection.query(
 
 `
 INSERT INTO game_wallet
@@ -2643,7 +2671,9 @@ fundAmount
 
 if(err){
 
-return db.rollback(()=>{
+return connection.rollback(()=>{
+
+connection.release();
 
 res.status(500).json({
 
@@ -2663,7 +2693,7 @@ message:"Game wallet failed"
 
 // Save transaction history
 
-db.query(
+connection.query(
 
 `
 INSERT INTO game_transactions
@@ -2687,7 +2717,9 @@ fundAmount,
 
 if(err){
 
-return db.rollback(()=>{
+return connection.rollback(()=>{
+
+connection.release();
 
 res.status(500).json({
 
@@ -2705,12 +2737,14 @@ message:"History failed"
 
 
 
-db.commit((err)=>{
+connection.commit((err)=>{
 
 
 if(err){
 
-return db.rollback(()=>{
+return connection.rollback(()=>{
+
+connection.release();
 
 res.status(500).json({
 
@@ -2724,6 +2758,11 @@ message:"Commit failed"
 
 }
 
+
+
+
+
+connection.release();
 
 
 
@@ -2757,10 +2796,11 @@ amount:fundAmount
 });
 
 
+});
+
 // ===============================
 // PLACE BET
 // ===============================
-
 
 app.post("/aviator/bet",(req,res)=>{
 
@@ -2821,10 +2861,31 @@ message:"Invalid bet amount"
 
 
 
-db.beginTransaction((err)=>{
+db.getConnection((err,connection)=>{
 
 
 if(err){
+
+return res.status(500).json({
+
+success:false,
+
+message:"Database connection error"
+
+});
+
+}
+
+
+
+
+
+connection.beginTransaction((err)=>{
+
+
+if(err){
+
+connection.release();
 
 return res.status(500).json({
 
@@ -2842,7 +2903,7 @@ message:"Transaction error"
 
 // Deduct from game wallet
 
-db.query(
+connection.query(
 
 `
 UPDATE game_wallet
@@ -2867,7 +2928,9 @@ betAmount
 
 if(err){
 
-return db.rollback(()=>{
+return connection.rollback(()=>{
+
+connection.release();
 
 res.status(500).json({
 
@@ -2887,7 +2950,9 @@ message:"Wallet error"
 
 if(result.affectedRows===0){
 
-return db.rollback(()=>{
+return connection.rollback(()=>{
+
+connection.release();
 
 res.status(400).json({
 
@@ -2907,7 +2972,7 @@ message:"Insufficient game balance"
 
 // Save bet
 
-db.query(
+connection.query(
 
 `
 INSERT INTO aviator_bets
@@ -2935,7 +3000,9 @@ currentRoundId
 
 if(err){
 
-return db.rollback(()=>{
+return connection.rollback(()=>{
+
+connection.release();
 
 res.status(500).json({
 
@@ -2953,12 +3020,14 @@ message:"Bet save failed"
 
 
 
-db.commit((err)=>{
+connection.commit((err)=>{
 
 
 if(err){
 
-return db.rollback(()=>{
+return connection.rollback(()=>{
+
+connection.release();
 
 res.status(500).json({
 
@@ -2973,6 +3042,10 @@ message:"Commit failed"
 }
 
 
+
+
+
+connection.release();
 
 
 
@@ -3003,6 +3076,8 @@ roundId:currentRoundId
 
 });
 
+
+});
 // ===============================
 // SOCKET CONNECTION
 // ===============================
@@ -3175,10 +3250,31 @@ Number(
 
 
 
-db.beginTransaction((err)=>{
+db.getConnection((err,connection)=>{
 
 
 if(err){
+
+return res.status(500).json({
+
+success:false,
+
+message:"Database connection error"
+
+});
+
+}
+
+
+
+
+
+connection.beginTransaction((err)=>{
+
+
+if(err){
+
+connection.release();
 
 return res.status(500).json({
 
@@ -3196,7 +3292,7 @@ message:"Transaction error"
 
 // Update bet status
 
-db.query(
+connection.query(
 
 `
 UPDATE aviator_bets
@@ -3228,7 +3324,9 @@ bet.id
 
 if(err){
 
-return db.rollback(()=>{
+return connection.rollback(()=>{
+
+connection.release();
 
 res.status(500).json({
 
@@ -3248,7 +3346,9 @@ message:"Bet update failed"
 
 if(update.affectedRows===0){
 
-return db.rollback(()=>{
+return connection.rollback(()=>{
+
+connection.release();
 
 res.status(400).json({
 
@@ -3268,7 +3368,7 @@ message:"Already cashed out"
 
 // Add winnings
 
-db.query(
+connection.query(
 
 `
 UPDATE game_wallet
@@ -3291,7 +3391,9 @@ phone
 
 if(err){
 
-return db.rollback(()=>{
+return connection.rollback(()=>{
+
+connection.release();
 
 res.status(500).json({
 
@@ -3311,7 +3413,7 @@ message:"Wallet update failed"
 
 // Save win history
 
-db.query(
+connection.query(
 
 `
 INSERT INTO game_transactions
@@ -3327,6 +3429,7 @@ phone,
 "win",
 winAmount,
 "success"
+
 ],
 
 
@@ -3336,7 +3439,9 @@ winAmount,
 
 if(err){
 
-return db.rollback(()=>{
+return connection.rollback(()=>{
+
+connection.release();
 
 res.status(500).json({
 
@@ -3354,12 +3459,14 @@ message:"History failed"
 
 
 
-db.commit((err)=>{
+connection.commit((err)=>{
 
 
 if(err){
 
-return db.rollback(()=>{
+return connection.rollback(()=>{
+
+connection.release();
 
 res.status(500).json({
 
@@ -3374,6 +3481,10 @@ message:"Commit failed"
 }
 
 
+
+
+
+connection.release();
 
 
 
@@ -3428,6 +3539,7 @@ winAmount
 });
 
 
+});
 // ===============================
 // START AVIATOR + SERVER
 // ===============================
