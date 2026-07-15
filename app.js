@@ -2047,6 +2047,7 @@ app.post("/api/startup/pending", upload.single("receipt"), (req, res) => {
         }
     );
 });
+
 // ===============================
 // AVIATOR GAME MODULE
 // ===============================
@@ -2055,7 +2056,9 @@ app.post("/api/startup/pending", upload.single("receipt"), (req, res) => {
 // ===============================
 // SOCKET.IO SERVER
 // ===============================
+
 const PORT = process.env.PORT || 3000;
+
 const http = require("http");
 
 const server = http.createServer(app);
@@ -2063,7 +2066,7 @@ const server = http.createServer(app);
 const { Server } = require("socket.io");
 
 
-const io = new Server(server,{
+const io = new Server(server, {
 
     cors:{
         origin:"*"
@@ -2082,9 +2085,11 @@ let currentRound = null;
 
 let currentRoundId = null;
 
-let multiplier = 0.005;
+let multiplier = 1.00;
 
 let gameRunning = false;
+
+
 
 
 
@@ -2098,22 +2103,23 @@ function generateCrashPoint(){
 
     let crash;
 
-    if(random < 100){
 
-        // 60% chance: low multiplier
-        crash = 1.25 + Math.random() * 1.02;
+    if(random < 0.70){
 
-    } 
-    else if(random < 0.95){
+        // 70% low multiplier
+        crash = 1.20 + Math.random() * 1.30;
 
-        // 30% chance: medium multiplier
-        crash = 2 + Math.random() * 1.02;
 
-    } 
-    else {
+    } else if(random < 0.95){
 
-        // 10% chance: high multiplier
-        crash = 0.05 + Math.random() * 0.5;
+        // 25% medium multiplier
+        crash = 2.50 + Math.random() * 3;
+
+
+    } else {
+
+        // 5% high multiplier
+        crash = 5 + Math.random() * 5;
 
     }
 
@@ -2125,132 +2131,204 @@ function generateCrashPoint(){
 
 
 
+
 // ===============================
 // START AVIATOR ROUND
+// WITH 15 SECOND BETTING TIME
 // ===============================
 
 function startAviatorRound(){
 
 
-    const crashPoint = generateCrashPoint();
+    gameRunning = false;
 
 
-    const roundCode = 
-    "AVT-" + Date.now();
+    let countdown = 15;
 
 
-
-
-    // Save round in database
-
-    db.query(
-
-    `
-    INSERT INTO aviator_rounds
-
-    (
-    round_code,
-    crash_point,
-    status
-    )
-
-    VALUES(?,?,?)
-
-    `,
-
-    [
-
-    roundCode,
-
-    crashPoint,
-
-    "running"
-
-    ],
+    currentRoundId = Date.now();
 
 
 
-    (err,result)=>{
+    io.emit("bettingStart",{
 
+        roundId:currentRoundId,
 
-        if(err){
+        seconds:countdown
 
-            console.log(
-            "Round creation error:",
-            err
-            );
-
-            return;
-
-        }
-
-
-
-        currentRoundId = result.insertId;
-
-
-
-        currentRound = {
-
-
-            id: currentRoundId,
-
-            roundCode: roundCode,
-
-            crashPoint: crashPoint,
-
-            multiplier:0.005
-
-
-        };
-
-
-
-        multiplier = 0.005;
-
-
-        gameRunning = true;
-
-
-
-        console.log(
-
-        "NEW AVIATOR ROUND:",
-
-        currentRoundId,
-
-        "CRASH:",
-
-        crashPoint
-
-        );
+    });
 
 
 
 
-        io.emit("gameStart",{
+    const countdownTimer = setInterval(()=>{
 
 
-            roundId:currentRoundId,
+        countdown--;
 
-            roundCode:roundCode,
 
-            multiplier:"0.005x"
 
+        io.emit("bettingCountdown",{
+
+            seconds:countdown
 
         });
 
 
 
 
-        startMultiplier(crashPoint);
+
+        if(countdown <= 0){
+
+
+            clearInterval(countdownTimer);
 
 
 
-    });
+            createRunningRound();
+
+
+        }
+
+
+
+    },1000);
 
 
 }
+
+
+
+
+
+
+// ===============================
+// CREATE RUNNING ROUND
+// ===============================
+
+function createRunningRound(){
+
+
+
+const crashPoint = generateCrashPoint();
+
+
+const roundCode = "AVT-" + Date.now();
+
+
+
+
+db.query(
+
+`
+INSERT INTO aviator_rounds
+
+(
+round_code,
+crash_point,
+status
+)
+
+VALUES(?,?,?)
+
+`,
+
+[
+roundCode,
+crashPoint,
+"running"
+],
+
+
+(err,result)=>{
+
+
+if(err){
+
+console.log(
+"Round creation error:",
+err
+);
+
+return;
+
+}
+
+
+
+
+
+currentRoundId = result.insertId;
+
+
+
+currentRound = {
+
+
+id:currentRoundId,
+
+roundCode:roundCode,
+
+crashPoint:crashPoint,
+
+multiplier:1.00
+
+
+};
+
+
+
+
+multiplier = 1.00;
+
+
+gameRunning = true;
+
+
+
+
+console.log(
+
+"NEW ROUND:",
+
+currentRoundId,
+
+"CRASH:",
+
+crashPoint
+
+);
+
+
+
+
+
+io.emit("gameStart",{
+
+
+roundId:currentRoundId,
+
+roundCode:roundCode,
+
+multiplier:"1.00x"
+
+
+});
+
+
+
+
+
+startMultiplier(crashPoint);
+
+
+
+});
+
+
+}
+
+
 
 
 
@@ -2267,133 +2345,133 @@ function startMultiplier(crashPoint){
 const interval = setInterval(()=>{
 
 
-    multiplier += 0.005;
 
+multiplier += 0.01;
 
 
-    currentRound.multiplier =
-    Number(multiplier.toFixed(2));
 
+currentRound.multiplier =
+Number(multiplier.toFixed(2));
 
 
-    io.emit("multiplier",{
 
 
-        value:
-        multiplier.toFixed(2)+"x"
+io.emit("multiplier",{
 
 
-    });
+value:
 
+multiplier.toFixed(2)+"x"
 
 
+});
 
 
-    if(multiplier >= crashPoint){
 
 
 
-        clearInterval(interval);
+if(multiplier >= crashPoint){
 
 
 
-        gameRunning = false;
+clearInterval(interval);
 
 
 
+gameRunning=false;
 
-        // Update crashed round
 
-        db.query(
 
-        `
-        UPDATE aviator_rounds
 
-        SET
 
-        status='crashed',
+db.query(
 
-        crashed_at=NOW()
+`
+UPDATE aviator_rounds
 
-        WHERE id=?
+SET
 
-        `,
+status='crashed',
 
-        [
+crashed_at=NOW()
 
-        currentRoundId
+WHERE id=?
 
-        ]
+`,
 
-        );
+[
+currentRoundId
+]
 
+);
 
 
 
 
-        // Mark unfinished bets as lost
 
-        db.query(
 
-        `
-        UPDATE aviator_bets
+db.query(
 
-        SET status='lost'
+`
+UPDATE aviator_bets
 
-        WHERE round_id=?
+SET status='lost'
 
-        AND status='active'
+WHERE round_id=?
 
-        `,
+AND status='active'
 
-        [
+`,
 
-        currentRoundId
+[
+currentRoundId
+]
 
-        ]
+);
 
-        );
 
 
 
 
+io.emit("crashed",{
 
-        io.emit("crashed",{
 
+value:
 
-            value:
-            crashPoint+"x"
+crashPoint+"x"
 
 
-        });
+});
 
 
 
 
-        console.log(
 
-        "CRASHED AT:",
+console.log(
 
-        crashPoint
+"CRASHED AT:",
 
-        );
+crashPoint
 
+);
 
 
 
 
-        setTimeout(()=>{
 
 
-            startAviatorRound();
+setTimeout(()=>{
 
 
-        },5000);
+startAviatorRound();
 
 
+},5000);
 
 
-    }
+
+
+}
 
 
 
@@ -2448,6 +2526,7 @@ message:"Invalid amount"
 
 
 
+
 db.beginTransaction((err)=>{
 
 
@@ -2466,7 +2545,8 @@ message:"Transaction error"
 
 
 
-// Remove from main wallet
+
+// Deduct main wallet
 
 db.query(
 
@@ -2529,7 +2609,8 @@ message:"Insufficient balance"
 
 
 
-// Add to game wallet
+
+// Add game wallet
 
 db.query(
 
@@ -2576,7 +2657,7 @@ message:"Game wallet failed"
 
 
 
-// Save transaction
+// Save history
 
 db.query(
 
@@ -2608,13 +2689,14 @@ res.status(500).json({
 
 success:false,
 
-message:"History error"
+message:"History failed"
 
 });
 
 });
 
 }
+
 
 
 
@@ -2637,6 +2719,7 @@ message:"Commit failed"
 });
 
 }
+
 
 
 
@@ -2670,6 +2753,14 @@ amount:fundAmount
 });
 
 
+
+
+
+
+
+
+
+
 // ===============================
 // PLACE BET
 // ===============================
@@ -2696,13 +2787,36 @@ message:"Phone and amount required"
 
 
 
+
+// Betting only allowed before flight
+
 if(!gameRunning){
 
 return res.status(400).json({
 
 success:false,
 
-message:"Round not running"
+message:"Betting closed"
+
+});
+
+}
+
+
+
+
+
+const betAmount = Number(amount);
+
+
+
+if(betAmount <=0){
+
+return res.status(400).json({
+
+success:false,
+
+message:"Invalid amount"
 
 });
 
@@ -2744,9 +2858,9 @@ AND balance>=?
 `,
 
 [
-amount,
+betAmount,
 phone,
-amount
+betAmount
 ],
 
 
@@ -2789,24 +2903,20 @@ message:"Insufficient game balance"
 
 }
 
-
-
-
-
 db.query(
 
 `
 INSERT INTO aviator_bets
 
-(phone,amount,round_id)
+(phone,amount,round_id,status)
 
-VALUES(?,?,?)
+VALUES(?,?,?,'active')
 
 `,
 
 [
 phone,
-amount,
+betAmount,
 currentRoundId
 ],
 
@@ -2883,11 +2993,6 @@ roundId:currentRoundId
 
 });
 
-
-
-
-
-
 // ===============================
 // SOCKET CONNECTION
 // ===============================
@@ -2927,6 +3032,7 @@ socket.id
 
 
 
+
 // ===============================
 // CASHOUT
 // ===============================
@@ -2953,13 +3059,14 @@ message:"Phone required"
 
 
 
+
 if(!gameRunning){
 
 return res.status(400).json({
 
 success:false,
 
-message:"Round crashed"
+message:"Round already crashed"
 
 });
 
@@ -3009,6 +3116,8 @@ message:"Database error"
 
 
 
+
+
 if(result.length===0){
 
 return res.status(400).json({
@@ -3023,17 +3132,33 @@ message:"No active bet"
 
 
 
-const bet=result[0];
+
+
+const bet = result[0];
+
+
 
 
 
 const cashoutMultiplier =
+
 Number(multiplier.toFixed(2));
 
 
 
+
+
 const winAmount =
-Number((bet.amount * cashoutMultiplier).toFixed(2));
+
+Number(
+
+(bet.amount * cashoutMultiplier)
+
+.toFixed(2)
+
+);
+
+
 
 
 
@@ -3057,6 +3182,8 @@ message:"Transaction error"
 
 
 
+
+// Update bet
 
 db.query(
 
@@ -3084,6 +3211,7 @@ bet.id
 ],
 
 
+
 (err,update)=>{
 
 
@@ -3102,6 +3230,7 @@ message:"Bet update failed"
 });
 
 }
+
 
 
 
@@ -3126,12 +3255,14 @@ message:"Already cashed out"
 
 
 
+// Add winning amount
+
 db.query(
 
 `
 UPDATE game_wallet
 
-SET balance=balance+?
+SET balance = balance + ?
 
 WHERE phone=?
 
@@ -3141,6 +3272,7 @@ WHERE phone=?
 winAmount,
 phone
 ],
+
 
 
 (err)=>{
@@ -3165,6 +3297,9 @@ message:"Wallet update failed"
 
 
 
+
+// Save win history
+
 db.query(
 
 `
@@ -3182,6 +3317,7 @@ phone,
 winAmount,
 "success"
 ],
+
 
 
 (err)=>{
@@ -3206,6 +3342,7 @@ message:"History failed"
 
 
 
+
 db.commit((err)=>{
 
 
@@ -3226,6 +3363,9 @@ message:"Commit failed"
 }
 
 
+
+
+
 res.json({
 
 success:true,
@@ -3234,17 +3374,20 @@ message:"Cashout successful",
 
 data:{
 
+
 betAmount:bet.amount,
 
-multiplier:cashoutMultiplier+"x",
 
-winningAmount:winAmount
+multiplier:
+cashoutMultiplier+"x",
+
+
+winningAmount:
+winAmount
+
 
 }
 
-});
-
-
 
 });
 
@@ -3252,8 +3395,6 @@ winningAmount:winAmount
 
 });
 
-
-});
 
 
 });
@@ -3266,6 +3407,13 @@ winningAmount:winAmount
 
 
 });
+
+
+});
+
+
+});
+
 
 
 
@@ -3283,7 +3431,13 @@ startAviatorRound();
 server.listen(PORT,()=>{
 
 
-console.log("Server running");
+console.log(
+
+"Server running on port",
+
+PORT
+
+);
 
 
 });
