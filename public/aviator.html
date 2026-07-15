@@ -449,7 +449,7 @@ amount:Number(amount)
 
 
 alert(data.message || data);
-
+loadGameWallet();
 
 
 });
@@ -492,9 +492,7 @@ phone:phone
 .then(data=>{
 
 
-alert(
-data.message
-);
+loadGameWallet();
 
 
 });
@@ -559,6 +557,8 @@ amount: Number(amount)
 
 alert(data.message || "Fund completed");
 
+loadGameWallet();
+
 
 })
 
@@ -604,6 +604,7 @@ async function loadGameWallet(){
     }
 
 }
+loadGameWallet();
 </script>
 
 
