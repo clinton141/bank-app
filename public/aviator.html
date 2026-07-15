@@ -236,19 +236,17 @@ Waiting for round...
 
 
 <script>
-
-
 // Your Render API
-
 const API = 
 "https://mobile-wealth-api.onrender.com";
 
-
-
 // Replace with logged in user phone later
 
-const phone =
-localStorage.getItem("phone");
+// Get logged in user phone
+
+const user = JSON.parse(localStorage.getItem("user"));
+
+const phone = user ? user.phone : null;
 
 
 
@@ -274,12 +272,7 @@ document.getElementById("status").innerHTML =
 document.getElementById("multiplier").innerHTML =
 "1.00x";
 
-
 });
-
-
-
-
 
 // Multiplier update
 
@@ -303,13 +296,7 @@ parseFloat(data.value)*20;
 document.getElementById("plane").style.left =
 move+"px";
 
-
-
 });
-
-
-
-
 
 // Crash
 
@@ -329,14 +316,7 @@ document.getElementById("multiplier").className =
 document.getElementById("status").innerHTML =
 "CRASHED";
 
-
-
 });
-
-
-
-
-
 
 
 // Place bet
@@ -347,7 +327,10 @@ function placeBet(){
 let amount =
 document.getElementById("amount").value;
 
-
+console.log({
+    phone: phone,
+    amount: amount
+});
 
 fetch(API+"/aviator/bet",{
 
@@ -383,11 +366,6 @@ alert(data.message || data);
 
 
 }
-
-
-
-
-
 
 
 // Cashout
@@ -429,10 +407,6 @@ data.message
 
 
 }
-
-
-
-
 
 </script>
 
