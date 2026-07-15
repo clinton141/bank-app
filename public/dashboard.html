@@ -645,6 +645,113 @@ button{
 }
 
 
+/* AVIATOR TOP BUTTON */
+
+.aviator-top-banner{
+
+    width:220px;
+    height:55px;
+
+    margin:8px auto;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:12px;
+
+    border-radius:18px;
+
+    background:
+    linear-gradient(
+    135deg,
+    rgba(255,255,255,0.35),
+    rgba(0,180,255,0.15)
+    );
+
+    border:1px solid rgba(255,255,255,0.5);
+
+    box-shadow:
+    0 8px 25px rgba(0,0,0,0.35),
+    inset 0 0 15px rgba(255,255,255,0.4);
+
+    backdrop-filter:blur(10px);
+
+    cursor:pointer;
+
+    overflow:hidden;
+
+}
+
+
+
+.crystal-cube{
+
+    width:45px;
+    height:45px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:25px;
+
+    border-radius:12px;
+
+    background:
+
+    linear-gradient(
+    145deg,
+    #ffffff,
+    #00bfff,
+    #0066ff
+    );
+
+    box-shadow:
+
+    inset 5px 5px 10px rgba(255,255,255,.8),
+    inset -5px -5px 10px rgba(0,0,0,.3),
+    0 0 20px #00bfff;
+
+}
+
+
+
+.aviator-text{
+
+    display:flex;
+    flex-direction:column;
+    text-align:left;
+
+}
+
+
+.aviator-text strong{
+
+    color:#ffd700;
+
+    font-size:16px;
+
+}
+
+
+.aviator-text span{
+
+    color:white;
+
+    font-size:11px;
+
+}
+
+
+
+.aviator-top-banner:hover{
+
+    transform:scale(1.03);
+
+    transition:.3s;
+
+}
+
 </style>
 </head>
 
@@ -682,6 +789,24 @@ button{
 
 
     </div>
+
+    <!-- AVIATOR GAME BUTTON -->
+<div class="aviator-top-banner" onclick="openAviator()">
+
+    <div class="crystal-cube">
+
+        ✈️
+
+    </div>
+
+    <div class="aviator-text">
+
+        <strong>Aviator</strong>
+        <span>Play Game & Earn Money</span>
+
+    </div>
+
+</div>
 
 
 <!-- DASHBOARD ADVERT -->
@@ -1161,7 +1286,11 @@ alert("Bonus failed");
 }
 
 
+function openAviator(){
 
+    window.location.href="aviator.html";
+
+}
 </script>
 
 <script>
