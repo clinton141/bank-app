@@ -2089,6 +2089,8 @@ let multiplier = 1.00;
 
 let gameRunning = false;
 
+let bettingOpen = false;
+
 
 
 
@@ -2142,6 +2144,8 @@ function startAviatorRound(){
 
     gameRunning = false;
 
+    bettingOpen = true;
+
 
     let countdown = 15;
 
@@ -2185,6 +2189,9 @@ function startAviatorRound(){
 
 
 
+            bettingOpen = false;
+
+
             createRunningRound();
 
 
@@ -2196,11 +2203,6 @@ function startAviatorRound(){
 
 
 }
-
-
-
-
-
 
 // ===============================
 // CREATE RUNNING ROUND
@@ -2753,14 +2755,6 @@ amount:fundAmount
 });
 
 
-
-
-
-
-
-
-
-
 // ===============================
 // PLACE BET
 // ===============================
@@ -2790,7 +2784,7 @@ message:"Phone and amount required"
 
 // Betting only allowed before flight
 
-if(!gameRunning){
+if(!bettingOpen){
 
 return res.status(400).json({
 
@@ -3027,10 +3021,6 @@ socket.id
 
 
 });
-
-
-
-
 
 
 // ===============================
