@@ -231,16 +231,12 @@ Waiting for round...
 
 </div>
 
-
-
-
-
 <script>
+
 // Your Render API
 const API = 
 "https://mobile-wealth-api.onrender.com";
 
-// Replace with logged in user phone later
 
 // Get logged in user phone
 
@@ -258,11 +254,53 @@ const socket = io(API);
 
 let currentMultiplier = 1;
 
+let bettingOpen = false;
+
+
+
+
+// Betting countdown started
+
+socket.on("bettingStart",(data)=>{
+
+
+bettingOpen = true;
+
+
+document.getElementById("status").innerHTML =
+"Betting open: " + data.seconds + "s";
+
+
+});
+
+
+
+
+
+// Betting countdown update
+
+socket.on("bettingCountdown",(data)=>{
+
+
+bettingOpen = true;
+
+
+document.getElementById("status").innerHTML =
+"Place bet: " + data.seconds + "s";
+
+
+});
+
+
+
 
 
 // Game started
 
 socket.on("gameStart",(data)=>{
+
+
+bettingOpen = false;
 
 
 document.getElementById("status").innerHTML =
@@ -273,6 +311,9 @@ document.getElementById("multiplier").innerHTML =
 "1.00x";
 
 });
+
+
+
 
 // Multiplier update
 
@@ -298,9 +339,15 @@ move+"px";
 
 });
 
+
+
+
 // Crash
 
 socket.on("crashed",(data)=>{
+
+
+bettingOpen = false;
 
 
 document.getElementById("multiplier").innerHTML =
@@ -319,18 +366,51 @@ document.getElementById("status").innerHTML =
 });
 
 
+
+
+
 // Place bet
 
 function placeBet(){
 
 
+
+if(!phone){
+
+alert("User not logged in");
+
+return;
+
+}
+
+
+
 let amount =
 document.getElementById("amount").value;
 
+
+
 console.log({
-    phone: phone,
-    amount: amount
+
+phone: phone,
+
+amount: amount
+
 });
+
+
+
+if(!amount || amount <= 0){
+
+alert("Enter amount");
+
+return;
+
+}
+
+
+
+
 
 fetch(API+"/aviator/bet",{
 
@@ -346,7 +426,7 @@ body:JSON.stringify({
 
 phone:phone,
 
-amount:amount
+amount:Number(amount)
 
 })
 
@@ -366,6 +446,10 @@ alert(data.message || data);
 
 
 }
+
+
+
+
 
 
 // Cashout
@@ -408,8 +492,8 @@ data.message
 
 }
 
-</script>
 
+</script>
 
 </body>
 
