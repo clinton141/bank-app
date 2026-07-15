@@ -2105,7 +2105,7 @@ function generateCrashPoint(){
     let crash;
 
 
-    if(random < 0.70){
+    if(random < 0.15){
 
         // Low multiplier
         crash = 1.20 + Math.random() * 0.005;
@@ -2201,7 +2201,7 @@ function startAviatorRound(){
 
             crashPoint: crashPoint,
 
-            multiplier:0.005
+            multiplier:1
 
         };
 
@@ -2312,7 +2312,7 @@ return;
 
 
 
-multiplier = 0.005;
+multiplier = 1;
 
 
 gameRunning = true;
@@ -2383,7 +2383,7 @@ return;
 
 
 
-multiplier += 0.0001;
+multiplier += 0.01;
 
 
 
