@@ -172,8 +172,8 @@ Game Wallet:
 
 </div>
 
-<div id="gameBalance">
-₦0.00
+<div class="game-wallet">
+    Aviator Wallet: ₦<span id="gameBalance">0.00</span>
 </div>
 
 
@@ -576,22 +576,32 @@ alert("Network error");
 
 }
 
-function loadGameWallet(){
+async function loadGameWallet(){
+
+    if(!phone){
+        return;
+    }
 
 
-fetch(API + "/aviator/wallet/" + phone)
+    try{
 
-.then(res=>res.json())
-
-.then(data=>{
-
-
-document.getElementById("gameBalance").innerHTML =
-"₦" + Number(data.balance).toFixed(2);
+        const res = await fetch(
+            API + "/aviator/wallet/" + phone
+        );
 
 
-});
+        const data = await res.json();
 
+
+        document.getElementById("gameBalance").innerHTML =
+        Number(data.balance || 0).toFixed(2);
+
+
+    }catch(err){
+
+        console.log("Wallet loading error:",err);
+
+    }
 
 }
 </script>
