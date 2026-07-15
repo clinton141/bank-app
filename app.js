@@ -3573,6 +3573,65 @@ winAmount
 
 
 });
+
+app.get("/aviator/wallet/:phone",(req,res)=>{
+
+const phone = req.params.phone;
+
+
+db.query(
+
+`
+SELECT balance 
+FROM game_wallet
+WHERE phone=?
+
+`,
+
+[phone],
+
+(err,result)=>{
+
+
+if(err){
+
+return res.status(500).json({
+
+success:false,
+
+message:"Database error"
+
+});
+
+}
+
+
+if(result.length===0){
+
+return res.json({
+
+success:true,
+
+balance:0
+
+});
+
+}
+
+
+res.json({
+
+success:true,
+
+balance:result[0].balance
+
+});
+
+
+});
+
+
+});
 // ===============================
 // START AVIATOR + SERVER
 // ===============================
