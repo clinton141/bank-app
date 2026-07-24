@@ -484,8 +484,8 @@ app.post("/deposit", upload.single("receipt"), (req, res) => {
     }
     const depositAmount = Number(amount);
 
-    if (depositAmount < 5000) {
-    return res.status(400).send("Minimum deposit is ₦5,000");
+    if (depositAmount < 10000) {
+    return res.status(400).send("Minimum deposit is ₦10000");
 }
     db.query(
         "SELECT id FROM users WHERE phone = ? LIMIT 1",
@@ -837,7 +837,7 @@ app.post("/withdraw", (req, res) => {
          FROM transactions t
          WHERE t.type = 'deposit'
          AND t.status = 'success'
-         AND t.amount >= 5000
+         AND t.amount >= 10000
          AND t.user_id IN (
              SELECT id FROM users WHERE referred_by = ?
          )
@@ -855,7 +855,7 @@ app.post("/withdraw", (req, res) => {
 
         if (total < 3) {
             return res.status(403).send(
-                "You must refer at least 3 users with minimum ₦5,000 first deposit each (admin approved)"
+                "You must refer at least 3 users with minimum ₦10,000 first deposit each (admin approved)"
             );
         }
 
@@ -924,7 +924,7 @@ db.query(
         }
 
                                     // STEP 8: TAX CALCULATION
-                                    const tax = withdrawAmount * 0.03;
+                                    const tax = withdrawAmount * 0.05;
                                     const finalAmount = withdrawAmount - tax;
 
                                     // STEP 9: INSERT WITHDRAWAL
