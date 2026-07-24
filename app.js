@@ -855,7 +855,7 @@ app.post("/withdraw", (req, res) => {
 
         if (total < 3) {
             return res.status(403).send(
-                "You must refer at least 3 users with minimum ₦10,000 first deposit each (admin approved)"
+                "You have to refer at least 3 users with deposit"
             );
         }
 
