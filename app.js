@@ -484,8 +484,8 @@ app.post("/deposit", upload.single("receipt"), (req, res) => {
     }
     const depositAmount = Number(amount);
 
-    if (depositAmount < 10000) {
-    return res.status(400).send("Minimum deposit is ₦10000");
+    if (depositAmount < 5000) {
+    return res.status(400).send("Minimum deposit is ₦5000");
 }
     db.query(
         "SELECT id FROM users WHERE phone = ? LIMIT 1",
@@ -837,7 +837,7 @@ app.post("/withdraw", (req, res) => {
          FROM transactions t
          WHERE t.type = 'deposit'
          AND t.status = 'success'
-         AND t.amount >= 10000
+         AND t.amount >= 5000
          AND t.user_id IN (
              SELECT id FROM users WHERE referred_by = ?
          )
