@@ -153,6 +153,81 @@ function checkUserStatus(phone, cb) {
     );
 }
 
+// ================= LOGIN ROUTE =================
+app.post("/login", (req, res) => {
+
+    const { phone, password } = req.body;
+
+
+    // VALIDATE INPUT
+    if (!phone || !password) {
+        return res.status(400).json({
+            error: "Phone and password are required"
+        });
+    }
+
+
+    // FIND USER
+    db.query(
+        "SELECT * FROM users WHERE phone=?",
+        [phone],
+        (err, result) => {
+
+            if (err) {
+                console.log("LOGIN DB ERROR:", err);
+                return res.status(500).json({
+                    error: "Database error"
+                });
+            }
+
+
+            if (!result || result.length === 0) {
+                return res.status(401).json({
+                    error: "User not found"
+                });
+            }
+
+
+            const user = result[0];
+
+
+            // CHECK PASSWORD
+            if (user.password !== password) {
+                return res.status(401).json({
+                    error: "Invalid password"
+                });
+            }
+
+
+            // CHECK ACCOUNT STATUS
+            if (user.status !== "active") {
+                return res.status(403).json({
+                    error: "Account is not active"
+                });
+            }
+
+
+            // SUCCESS
+            res.json({
+                message: "Login successful",
+                user: {
+                    id: user.id,
+                    phone: user.phone,
+                    balance: user.balance,
+                    withdrawable_balance: user.withdrawable_balance,
+                    total_invested: user.total_invested,
+                    total_returns: user.total_returns,
+                    referral_code: user.referral_code,
+                    role: user.role
+                }
+            });
+
+
+        }
+    );
+
+});
+
 
 // ================= DAILY INVESTMENT INTEREST SYSTEM =================
 // Runs every 12AM Africa/Lagos
