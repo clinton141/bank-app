@@ -155,96 +155,177 @@ function checkUserStatus(phone, cb) {
 
 
 
-// ================= RECOVER MISSED INTEREST =================
+// ================= RECOVER MISSED INTEREST (ONE TIME) =================
+
 app.get("/admin/recover-interest", (req, res) => {
 
-    const startDate = "2026-07-25";
 
+    // CHECK IF RECOVERY HAS ALREADY RUN
     db.query(
         `
-        SELECT id, phone, amount
-        FROM investments
-        WHERE status='active'
-        AND end_date > NOW()
+        SELECT * 
+        FROM system_locks
+        WHERE lock_name='interest_recovery'
         `,
-        (err, investments) => {
+        (lockErr, lockResult) => {
 
-            if (err) {
-                return res.status(500).json(err);
+
+            if (lockErr) {
+                console.log("LOCK CHECK ERROR:", lockErr);
+                return res.status(500).json(lockErr);
             }
 
 
-            const today = new Date();
+            if (lockResult.length > 0) {
 
-            const start = new Date(startDate);
+                return res.json({
+                    message: "Recovery already completed. No duplicate credit allowed."
+                });
 
-            const daysMissed =
-                Math.floor(
-                    (today - start) /
-                    (1000 * 60 * 60 * 24)
-                ) + 1;
+            }
 
 
 
-            let completed = 0;
+            // CREATE RECOVERY LOCK
+            db.query(
+                `
+                INSERT INTO system_locks
+                (lock_name, locked_at)
+                VALUES ('interest_recovery', NOW())
+                `,
+                (insertErr)=>{
 
 
-            investments.forEach((inv)=>{
+                    if(insertErr){
 
+                        console.log(
+                            "LOCK INSERT ERROR:",
+                            insertErr
+                        );
 
-                const dailyInterest =
-                    Number(inv.amount) * 0.10;
-
-
-                const totalMissed =
-                    dailyInterest * daysMissed;
-
-
-
-                db.query(
-                    `
-                    UPDATE users
-                    SET total_returns = total_returns + ?
-                    WHERE phone=?
-                    `,
-                    [
-                        totalMissed,
-                        inv.phone
-                    ]
-                );
+                        return res.status(500).json(insertErr);
+                    }
 
 
 
-                db.query(
-                    `
-                    INSERT INTO interest_history
-                    (
-                     phone,
-                     amount,
-                     interest,
-                     created_at
-                    )
-                    VALUES (?,?,?,NOW())
-                    `,
-                    [
-                        inv.phone,
-                        inv.amount,
-                        totalMissed
-                    ]
-                );
+                    const startDate = new Date("2026-07-25");
+
+                    const today = new Date();
 
 
-                completed++;
-
-            });
+                    const daysMissed =
+                        Math.floor(
+                            (today - startDate) /
+                            (1000 * 60 * 60 * 24)
+                        ) + 1;
 
 
 
-            res.json({
-                message:"Recovery completed",
-                daysCredited:daysMissed,
-                investmentsProcessed:completed
-            });
+                    // GET ACTIVE INVESTMENTS
+                    db.query(
+                        `
+                        SELECT id, phone, amount
+                        FROM investments
+                        WHERE status='active'
+                        AND end_date > NOW()
+                        `,
+                        (err, investments)=>{
+
+
+                            if(err){
+
+                                console.log(
+                                    "INVESTMENT FETCH ERROR:",
+                                    err
+                                );
+
+                                return res.status(500).json(err);
+                            }
+
+
+
+                            let completed = 0;
+
+
+
+                            investments.forEach((inv)=>{
+
+
+                                const dailyInterest =
+                                    Number(inv.amount) * 0.10;
+
+
+                                const totalMissed =
+                                    dailyInterest * daysMissed;
+
+
+
+                                // CREDIT USER ONCE
+                                db.query(
+                                    `
+                                    UPDATE users
+                                    SET total_returns =
+                                    total_returns + ?
+                                    WHERE phone=?
+                                    `,
+                                    [
+                                        totalMissed,
+                                        inv.phone
+                                    ]
+                                );
+
+
+
+                                // SAVE HISTORY
+                                db.query(
+                                    `
+                                    INSERT INTO interest_history
+                                    (
+                                        phone,
+                                        amount,
+                                        interest,
+                                        created_at
+                                    )
+                                    VALUES (?,?,?,NOW())
+                                    `,
+                                    [
+                                        inv.phone,
+                                        inv.amount,
+                                        totalMissed
+                                    ]
+                                );
+
+
+                                completed++;
+
+
+                            });
+
+
+
+                            res.json({
+
+                                message:
+                                "Missed interest recovery completed",
+
+                                daysCredited:
+                                daysMissed,
+
+                                investmentsProcessed:
+                                completed
+
+                            });
+
+
+
+                        }
+                    );
+
+
+
+                }
+            );
+
 
 
         }
