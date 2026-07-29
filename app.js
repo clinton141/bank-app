@@ -202,73 +202,202 @@ cron.schedule("0 0 * * *", () => {
                  AND end_date >NOW()`,
                 (err, results) => {
 
-                    if (err) {
-                        console.log("Interest fetch error:", err);
-                        return;
-                    }
+// ================= DAILY INVESTMENT INTEREST SYSTEM =================
+// Runs every 12AM Africa/Lagos
+cron.schedule("0 0 * * *", () => {
 
-                    results.forEach(row => {
+    console.log("🔥 DAILY INTEREST STARTED:", new Date().toString());
 
-                        const today = new Date();
-                        today.setHours(0,0,0,0);
 
-                        const last = row.last_interest_time
-                            ? new Date(row.last_interest_time)
-                            : null;
+    // GET ACTIVE INVESTMENTS
+    db.query(
+        `
+        SELECT id, phone, amount, last_interest_time, end_date
+        FROM investments
+        WHERE status='active'
+        AND end_date > NOW()
+        `,
+        (err, investments) => {
 
-                        // ❌ SKIP IF ALREADY TODAY
-                        if (last && last >= today) return;
+            if (err) {
+                console.log("❌ FETCH INVESTMENTS ERROR:", err);
+                return;
+            }
 
-                        const interest = Number(row.amount) * 0.10;
 
-                        // STEP 4: ATOMIC UPDATE (SECOND SAFETY LAYER)
+            console.log("📌 ACTIVE INVESTMENTS FOUND:", investments.length);
+
+
+            if (investments.length === 0) {
+                console.log("⚠️ No active investments found");
+                return;
+            }
+
+
+            investments.forEach((investment) => {
+
+
+                const lastInterest = investment.last_interest_time
+                    ? new Date(investment.last_interest_time)
+                    : null;
+
+
+                const today = new Date();
+                today.setHours(0,0,0,0);
+
+
+                // PREVENT DOUBLE INTEREST SAME DAY
+                if (lastInterest && lastInterest >= today) {
+
+                    console.log(
+                        "⏭️ Already received today:",
+                        investment.phone
+                    );
+
+                    return;
+                }
+
+
+
+                const interest =
+                    Number(investment.amount) * 0.10;
+
+
+
+                // UPDATE INVESTMENT FIRST
+                db.query(
+                    `
+                    UPDATE investments
+                    SET last_interest_time = NOW()
+                    WHERE id=?
+                    AND status='active'
+                    AND end_date > NOW()
+                    AND (
+                        last_interest_time IS NULL
+                        OR DATE(last_interest_time) < CURDATE()
+                    )
+                    `,
+                    [investment.id],
+
+                    (updateErr, updateResult) => {
+
+
+                        if (updateErr) {
+
+                            console.log(
+                                "❌ UPDATE INVESTMENT ERROR:",
+                                investment.id,
+                                updateErr
+                            );
+
+                            return;
+                        }
+
+
+
+                        if (updateResult.affectedRows === 0) {
+
+                            console.log(
+                                "⚠️ SKIPPED (already processed):",
+                                investment.phone
+                            );
+
+                            return;
+                        }
+
+
+
+                        // CREDIT USER RETURNS
                         db.query(
-                            `UPDATE investments 
-                             SET last_interest_time = NOW() 
-                             WHERE id=? 
-                             AND status='active'
-                             AND end_date > NOW()
-                             AND (last_interest_time IS NULL OR DATE(last_interest_time) < CURDATE())`,
-                            [row.id],
-                            (err2, result) => {
+                            `
+                            UPDATE users
+                            SET total_returns = total_returns + ?
+                            WHERE phone=?
+                            `,
+                            [
+                                interest,
+                                investment.phone
+                            ],
 
-                                if (result.affectedRows === 0) return;
+                            (userErr)=>{
 
-                                // CREDIT USER
+
+                                if(userErr){
+
+                                    console.log(
+                                        "❌ USER CREDIT ERROR:",
+                                        investment.phone,
+                                        userErr
+                                    );
+
+                                    return;
+                                }
+
+
+
+                                // SAVE HISTORY
                                 db.query(
-                                    `UPDATE users 
-                                     SET total_returns = total_returns + ? 
-                                     WHERE phone=?`,
-                                    [interest, row.phone]
+                                    `
+                                    INSERT INTO interest_history
+                                    (
+                                      phone,
+                                      amount,
+                                      interest,
+                                      created_at
+                                    )
+                                    VALUES (?,?,?,NOW())
+                                    `,
+                                    [
+                                        investment.phone,
+                                        investment.amount,
+                                        interest
+                                    ],
+
+                                    (historyErr)=>{
+
+
+                                        if(historyErr){
+
+                                            console.log(
+                                                "❌ HISTORY INSERT ERROR:",
+                                                investment.phone,
+                                                historyErr
+                                            );
+
+                                            return;
+                                        }
+
+
+                                        console.log(
+                                            "✅ INTEREST PAID:",
+                                            investment.phone,
+                                            "Amount:",
+                                            interest
+                                        );
+
+                                    }
                                 );
 
-                                // HISTORY
-                                db.query(
-                                    `INSERT INTO interest_history 
-                                     (phone, amount, interest)
-                                     VALUES (?, ?, ?)`,
-                                    [row.phone, row.amount, interest]
-                                );
                             }
                         );
-                    });
 
-                    // STEP 5: RELEASE LOCK (OPTIONAL SAFETY RESET)
-                    setTimeout(() => {
-                        db.query(`
-                            DELETE FROM system_locks WHERE lock_name='daily_interest'
-                        `);
-                    }, 1000 * 60); // 1 min later
-                }
-            );
+
+                    }
+                );
+
+
+            });
+
+
         }
     );
+
 
 }, {
     timezone: "Africa/Lagos"
 });
-// ================= SIGNUP =================
-app.post("/signup", (req, res) => {
+                    
+                    ", (req, res) => {
 
     const { phone, password, referredBy } = req.body;
 
