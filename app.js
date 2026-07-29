@@ -153,54 +153,6 @@ function checkUserStatus(phone, cb) {
     );
 }
 
-// ================= DAILY INVESTMENT SYSTEM =================
-// runs every 12AM
-cron.schedule("0 0 * * *", () => {
-
-    console.log("🔥 DAILY INTEREST STARTED:", new Date().toString());
-
-    // STEP 1: TRY GLOBAL LOCK (ONLY ONE SERVER CAN WIN)
-    db.query(
-        `INSERT INTO system_locks (lock_name, locked_at)
-         VALUES ('daily_interest', NOW())
-         ON DUPLICATE KEY UPDATE locked_at = locked_at`,
-        (lockErr, lockRes) => {
-
-            if (lockErr) {
-                console.log("Lock error:", lockErr);
-                return;
-            }
-
-            // ❌ IF LOCK ALREADY EXISTS → STOP EVERYTHING
-            if (lockRes.affectedRows === 0) {
-                console.log("⚠️ Job already running on another server. SKIPPED.");
-                return;
-            }
-
-            // STEP 2: EXPIRE INVESTMENTS
-            db.query(
-    `UPDATE investments 
-     SET status='expired' 
-     WHERE status='active'
-     AND end_date <= DATE_SUB(NOW(), INTERVAL 15 DAY)`,
-    (err, result) => {
-
-        if (err) {
-            console.log("❌ Expiry error:", err);
-            return;
-        }
-
-        console.log("✅ Expired investments:", result.affectedRows);
-    }
-);
-
-            // STEP 3: GET INVESTMENTS (PHONE BASED)
-            db.query(
-                `SELECT id, phone, amount, last_interest_time,end_date 
-                 FROM investments 
-                 WHERE status='active'
-                 AND end_date >NOW()`,
-                (err, results) => {
 
 // ================= DAILY INVESTMENT INTEREST SYSTEM =================
 // Runs every 12AM Africa/Lagos
@@ -396,8 +348,8 @@ cron.schedule("0 0 * * *", () => {
 }, {
     timezone: "Africa/Lagos"
 });
-                    
-                    ", (req, res) => {
+
+app.post("/signup", (req, res) => {
 
     const { phone, password, referredBy } = req.body;
 
@@ -477,60 +429,6 @@ cron.schedule("0 0 * * *", () => {
     );
 });
 
-// =================user LOGIN =================
-app.post("/login", (req, res) => {
-
-    const { phone, password } = req.body;
-
-    // VALIDATION
-    if (!phone || !password) {
-        return res.status(400).json({ message: "Phone and password required" });
-    }
-
-    if (!/^\d{11}$/.test(phone)) {
-        return res.status(400).json({ message: "Phone must be 11 digits" });
-    }
-
-    db.query(
-        "SELECT * FROM users WHERE phone=?",
-        [phone],
-        (err, result) => {
-
-            if (err) {
-                return res.status(500).json({ message: "DB error" });
-            }
-
-            if (!result || result.length === 0) {
-                return res.status(401).json({ message: "Invalid login" });
-            }
-
-            const user = result[0];
-
-            if (user.status === "locked") {
-                return res.status(403).json({ message: "Your account has been locked,for inactive investment,please contact the company,or sent message to the whatsapp team. thank you" });
-            }
-
-            if (user.password !== password) {
-                return res.status(401).json({ message: "Invalid login" });
-            }
-
-            const token = jwt.sign(
-                {
-                    id: user.id,
-                    phone: user.phone,
-                    role: user.role
-                },
-                JWT_SECRET,
-                { expiresIn: "7d" }
-            );
-
-            return res.json({
-                token,
-                user
-            });
-        }
-    );
-});
 // ================= RESET PASSWORD =================
 app.post("/reset-password", (req, res) => {
 
