@@ -156,15 +156,9 @@ function checkUserStatus(phone, cb) {
 
 
 // ================= RECOVER MISSED INTEREST =================
-app.get("/admin/recover-interest", (req,res)=>{
+app.get("/admin/recover-interest", (req, res) => {
 
-    const startDate = new Date("2026-07-25");
-    const today = new Date();
-
-    const daysMissed = Math.floor(
-        (today - startDate) / (1000 * 60 * 60 * 24)
-    ) + 1;
-
+    const startDate = "2026-07-25";
 
     db.query(
         `
@@ -173,30 +167,40 @@ app.get("/admin/recover-interest", (req,res)=>{
         WHERE status='active'
         AND end_date > NOW()
         `,
-        (err, investments)=>{
+        (err, investments) => {
 
-
-            if(err){
-                return res.json(err);
+            if (err) {
+                return res.status(500).json(err);
             }
+
+
+            const today = new Date();
+
+            const start = new Date(startDate);
+
+            const daysMissed =
+                Math.floor(
+                    (today - start) /
+                    (1000 * 60 * 60 * 24)
+                ) + 1;
+
 
 
             let completed = 0;
 
 
-            investments.forEach(inv=>{
+            investments.forEach((inv)=>{
 
 
                 const dailyInterest =
                     Number(inv.amount) * 0.10;
 
 
-                const totalInterest =
+                const totalMissed =
                     dailyInterest * daysMissed;
 
 
 
-                // CREDIT USER
                 db.query(
                     `
                     UPDATE users
@@ -204,31 +208,33 @@ app.get("/admin/recover-interest", (req,res)=>{
                     WHERE phone=?
                     `,
                     [
-                        totalInterest,
+                        totalMissed,
                         inv.phone
                     ]
                 );
 
 
 
-                // SAVE HISTORY
                 db.query(
                     `
                     INSERT INTO interest_history
-                    (phone, amount, interest, created_at)
+                    (
+                     phone,
+                     amount,
+                     interest,
+                     created_at
+                    )
                     VALUES (?,?,?,NOW())
                     `,
                     [
                         inv.phone,
                         inv.amount,
-                        totalInterest
+                        totalMissed
                     ]
                 );
 
 
-
                 completed++;
-
 
             });
 
@@ -236,14 +242,13 @@ app.get("/admin/recover-interest", (req,res)=>{
 
             res.json({
                 message:"Recovery completed",
-                usersCredited:completed,
-                days:daysMissed
+                daysCredited:daysMissed,
+                investmentsProcessed:completed
             });
 
 
         }
     );
-
 
 });
 
