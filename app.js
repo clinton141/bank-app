@@ -153,6 +153,104 @@ function checkUserStatus(phone, cb) {
     );
 }
 
+
+
+// ================= RECOVER MISSED INTEREST =================
+app.get("/admin/recover-interest", (req,res)=>{
+
+    const startDate = new Date("2026-07-25");
+    const today = new Date();
+
+    const daysMissed = Math.floor(
+        (today - startDate) / (1000 * 60 * 60 * 24)
+    ) + 1;
+
+
+    db.query(
+        `
+        SELECT id, phone, amount
+        FROM investments
+        WHERE status='active'
+        AND end_date > NOW()
+        `,
+        (err, investments)=>{
+
+
+            if(err){
+                return res.json(err);
+            }
+
+
+            let completed = 0;
+
+
+            investments.forEach(inv=>{
+
+
+                const dailyInterest =
+                    Number(inv.amount) * 0.10;
+
+
+                const totalInterest =
+                    dailyInterest * daysMissed;
+
+
+
+                // CREDIT USER
+                db.query(
+                    `
+                    UPDATE users
+                    SET total_returns = total_returns + ?
+                    WHERE phone=?
+                    `,
+                    [
+                        totalInterest,
+                        inv.phone
+                    ]
+                );
+
+
+
+                // SAVE HISTORY
+                db.query(
+                    `
+                    INSERT INTO interest_history
+                    (phone, amount, interest, created_at)
+                    VALUES (?,?,?,NOW())
+                    `,
+                    [
+                        inv.phone,
+                        inv.amount,
+                        totalInterest
+                    ]
+                );
+
+
+
+                completed++;
+
+
+            });
+
+
+
+            res.json({
+                message:"Recovery completed",
+                usersCredited:completed,
+                days:daysMissed
+            });
+
+
+        }
+    );
+
+
+});
+
+
+
+
+
 // ================= LOGIN ROUTE =================
 app.post("/login", (req, res) => {
 
