@@ -208,7 +208,7 @@ app.get("/admin/recover-interest", (req, res) => {
 
 
 
-                    const startDate = new Date("2026-07-25");
+                    const startDate = new Date("2026-07-30");
 
                     const today = new Date();
 
