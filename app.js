@@ -383,110 +383,78 @@ app.post("/login", (req, res) => {
 
 // ================= DAILY INVESTMENT INTEREST SYSTEM =================
 // Runs every 12AM Africa/Lagos
+
 cron.schedule("0 0 * * *", () => {
 
     console.log("🔥 DAILY INTEREST STARTED:", new Date().toString());
 
 
-    // GET ACTIVE INVESTMENTS
+    // STEP 1: GLOBAL LOCK
     db.query(
         `
-        SELECT id, phone, amount, last_interest_time, end_date
-        FROM investments
-        WHERE status='active'
-        AND end_date > NOW()
+        INSERT INTO system_locks (lock_name, locked_at)
+        VALUES ('daily_interest', NOW())
+        ON DUPLICATE KEY UPDATE locked_at = locked_at
         `,
-        (err, investments) => {
+        (lockErr, lockResult) => {
 
-            if (err) {
-                console.log("❌ FETCH INVESTMENTS ERROR:", err);
+
+            if (lockErr) {
+                console.log("❌ LOCK ERROR:", lockErr);
                 return;
             }
 
 
-            console.log("📌 ACTIVE INVESTMENTS FOUND:", investments.length);
-
-
-            if (investments.length === 0) {
-                console.log("⚠️ No active investments found");
+            if (lockResult.affectedRows === 0) {
+                console.log("⚠️ Interest already running. Skipping.");
                 return;
             }
 
 
-            investments.forEach((investment) => {
+
+            // STEP 2: GET INVESTMENTS THAT HAVE NOT RECEIVED TODAY'S INTEREST
+            db.query(
+                `
+                SELECT id, phone, amount
+                FROM investments
+                WHERE status='active'
+                AND end_date > NOW()
+                AND (
+                    last_interest_time IS NULL
+                    OR DATE(last_interest_time) < CURDATE()
+                )
+                `,
+                (err, investments) => {
 
 
-                const lastInterest = investment.last_interest_time
-                    ? new Date(investment.last_interest_time)
-                    : null;
+                    if (err) {
+                        console.log("❌ FETCH ERROR:", err);
+                        return;
+                    }
 
-
-                const today = new Date();
-                today.setHours(0,0,0,0);
-
-
-                // PREVENT DOUBLE INTEREST SAME DAY
-                if (lastInterest && lastInterest >= today) {
 
                     console.log(
-                        "⏭️ Already received today:",
-                        investment.phone
+                        "📌 INVESTMENTS TO PROCESS:",
+                        investments.length
                     );
 
-                    return;
-                }
+
+                    if (investments.length === 0) {
+                        console.log("⚠️ No interest to pay");
+                        return;
+                    }
 
 
 
-                const interest =
-                    Number(investment.amount) * 0.10;
+                    investments.forEach((inv) => {
+
+
+                        const interest =
+                            Number(inv.amount) * 0.10;
 
 
 
-                // UPDATE INVESTMENT FIRST
-                db.query(
-                    `
-                    UPDATE investments
-                    SET last_interest_time = NOW()
-                    WHERE id=?
-                    AND status='active'
-                    AND end_date > NOW()
-                    AND (
-                        last_interest_time IS NULL
-                        OR DATE(last_interest_time) < CURDATE()
-                    )
-                    `,
-                    [investment.id],
-
-                    (updateErr, updateResult) => {
-
-
-                        if (updateErr) {
-
-                            console.log(
-                                "❌ UPDATE INVESTMENT ERROR:",
-                                investment.id,
-                                updateErr
-                            );
-
-                            return;
-                        }
-
-
-
-                        if (updateResult.affectedRows === 0) {
-
-                            console.log(
-                                "⚠️ SKIPPED (already processed):",
-                                investment.phone
-                            );
-
-                            return;
-                        }
-
-
-
-                        // CREDIT USER RETURNS
+                        // STEP 3: CREDIT USER
                         db.query(
                             `
                             UPDATE users
@@ -495,26 +463,23 @@ cron.schedule("0 0 * * *", () => {
                             `,
                             [
                                 interest,
-                                investment.phone
+                                inv.phone
                             ],
+                            (userErr) => {
 
-                            (userErr)=>{
 
-
-                                if(userErr){
-
+                                if (userErr) {
                                     console.log(
                                         "❌ USER CREDIT ERROR:",
-                                        investment.phone,
+                                        inv.phone,
                                         userErr
                                     );
-
                                     return;
                                 }
 
 
 
-                                // SAVE HISTORY
+                                // STEP 4: SAVE HISTORY
                                 db.query(
                                     `
                                     INSERT INTO interest_history
@@ -527,48 +492,62 @@ cron.schedule("0 0 * * *", () => {
                                     VALUES (?,?,?,NOW())
                                     `,
                                     [
-                                        investment.phone,
-                                        investment.amount,
+                                        inv.phone,
+                                        inv.amount,
                                         interest
                                     ],
-
-                                    (historyErr)=>{
+                                    (historyErr) => {
 
 
                                         if(historyErr){
-
                                             console.log(
-                                                "❌ HISTORY INSERT ERROR:",
-                                                investment.phone,
+                                                "❌ HISTORY ERROR:",
+                                                inv.phone,
                                                 historyErr
                                             );
-
                                             return;
                                         }
 
 
+
+                                        // STEP 5: MARK INVESTMENT PAID
+                                        db.query(
+                                            `
+                                            UPDATE investments
+                                            SET last_interest_time = NOW()
+                                            WHERE id=?
+                                            `,
+                                            [
+                                                inv.id
+                                            ]
+                                        );
+
+
+
                                         console.log(
                                             "✅ INTEREST PAID:",
-                                            investment.phone,
-                                            "Amount:",
+                                            inv.phone,
                                             interest
                                         );
 
                                     }
                                 );
 
+
                             }
                         );
 
 
-                    }
-                );
+                    });
 
 
-            });
+                }
+            );
 
 
         }
+
+
     );
 
 
