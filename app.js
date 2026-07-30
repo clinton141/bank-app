@@ -157,21 +157,22 @@ function checkUserStatus(phone, cb) {
 
 // ================= RECOVER MISSED INTEREST (ONE TIME) =================
 
-app.get("/admin/recover-interest", (req, res) => {
+// ================= MANUAL CREDIT MISSED INTEREST =================
+
+app.get("/admin/credit-missed-interest", (req, res) => {
 
 
-    // CHECK IF RECOVERY HAS ALREADY RUN
+    // CHECK IF ALREADY RUN
     db.query(
         `
         SELECT * 
         FROM system_locks
-        WHERE lock_name='interest_recovery'
+        WHERE lock_name='manual_interest_credit'
         `,
         (lockErr, lockResult) => {
 
 
             if (lockErr) {
-                console.log("LOCK CHECK ERROR:", lockErr);
                 return res.status(500).json(lockErr);
             }
 
@@ -179,154 +180,121 @@ app.get("/admin/recover-interest", (req, res) => {
             if (lockResult.length > 0) {
 
                 return res.json({
-                    message: "Recovery already completed. No duplicate credit allowed."
+                    message: "Interest already credited. Duplicate blocked."
                 });
 
             }
 
 
 
-            // CREATE RECOVERY LOCK
+            // CREATE LOCK FIRST
             db.query(
                 `
                 INSERT INTO system_locks
                 (lock_name, locked_at)
-                VALUES ('interest_recovery', NOW())
+                VALUES ('manual_interest_credit', NOW())
+                `
+            );
+
+
+
+            const startDate = new Date("2026-07-30");
+
+            const today = new Date();
+
+
+            const daysMissed =
+                Math.floor(
+                    (today - startDate) /
+                    (1000 * 60 * 60 * 24)
+                ) + 1;
+
+
+
+            db.query(
+                `
+                SELECT id, phone, amount
+                FROM investments
+                WHERE status='active'
+                AND end_date > NOW()
                 `,
-                (insertErr)=>{
+                (err, investments) => {
 
 
-                    if(insertErr){
-
-                        console.log(
-                            "LOCK INSERT ERROR:",
-                            insertErr
-                        );
-
-                        return res.status(500).json(insertErr);
+                    if(err){
+                        return res.status(500).json(err);
                     }
 
 
-
-                    const startDate = new Date("2026-07-30");
-
-                    const today = new Date();
+                    let count = 0;
 
 
-                    const daysMissed =
-                        Math.floor(
-                            (today - startDate) /
-                            (1000 * 60 * 60 * 24)
-                        ) + 1;
+                    investments.forEach((inv)=>{
 
 
-
-                    // GET ACTIVE INVESTMENTS
-                    db.query(
-                        `
-                        SELECT id, phone, amount
-                        FROM investments
-                        WHERE status='active'
-                        AND end_date > NOW()
-                        `,
-                        (err, investments)=>{
+                        const dailyInterest =
+                            Number(inv.amount) * 0.10;
 
 
-                            if(err){
-
-                                console.log(
-                                    "INVESTMENT FETCH ERROR:",
-                                    err
-                                );
-
-                                return res.status(500).json(err);
-                            }
+                        const totalInterest =
+                            dailyInterest * daysMissed;
 
 
 
-                            let completed = 0;
+                        db.query(
+                            `
+                            UPDATE users
+                            SET total_returns = total_returns + ?
+                            WHERE phone=?
+                            `,
+                            [
+                                totalInterest,
+                                inv.phone
+                            ]
+                        );
 
 
 
-                            investments.forEach((inv)=>{
+                        db.query(
+                            `
+                            INSERT INTO interest_history
+                            (phone, amount, interest, created_at)
+                            VALUES (?,?,?,NOW())
+                            `,
+                            [
+                                inv.phone,
+                                inv.amount,
+                                totalInterest
+                            ]
+                        );
 
 
-                                const dailyInterest =
-                                    Number(inv.amount) * 0.10;
+                        db.query(
+                            `
+                            UPDATE investments
+                            SET last_interest_time=NOW()
+                            WHERE id=?
+                            `,
+                            [inv.id]
+                        );
 
 
-                                const totalMissed =
-                                    dailyInterest * daysMissed;
+                        count++;
 
 
-
-                                // CREDIT USER ONCE
-                                db.query(
-                                    `
-                                    UPDATE users
-                                    SET total_returns =
-                                    total_returns + ?
-                                    WHERE phone=?
-                                    `,
-                                    [
-                                        totalMissed,
-                                        inv.phone
-                                    ]
-                                );
-
-
-
-                                // SAVE HISTORY
-                                db.query(
-                                    `
-                                    INSERT INTO interest_history
-                                    (
-                                        phone,
-                                        amount,
-                                        interest,
-                                        created_at
-                                    )
-                                    VALUES (?,?,?,NOW())
-                                    `,
-                                    [
-                                        inv.phone,
-                                        inv.amount,
-                                        totalMissed
-                                    ]
-                                );
-
-
-                                completed++;
-
-
-                            });
+                    });
 
 
 
-                            res.json({
-
-                                message:
-                                "Missed interest recovery completed",
-
-                                daysCredited:
-                                daysMissed,
-
-                                investmentsProcessed:
-                                completed
-
-                            });
-
-
-
-                        }
-                    );
-
+                    res.json({
+                        message:"Manual interest credit completed",
+                        daysCredited:daysMissed,
+                        investmentsProcessed:count
+                    });
 
 
                 }
             );
-
-
 
         }
     );
